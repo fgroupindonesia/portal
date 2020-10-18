@@ -9,7 +9,7 @@ package helper;
  *
  * @author ASUS
  */
-public class HardReference {
+public class SReference {
  
     public static String SystemName = "Portal";
     

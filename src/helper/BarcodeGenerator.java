@@ -16,7 +16,7 @@ public class BarcodeGenerator {
 
     JLabel refElement;
     String filename = "\\demo.png";
-    String dirname = System.getenv("LOCALAPPDATA") + "\\" + HardReference.SystemName;
+    String dirname = System.getenv("LOCALAPPDATA") + "\\" + SReference.SystemName;
     String path = dirname + filename;
 
     // Function to create the QR code
@@ -43,8 +43,10 @@ public class BarcodeGenerator {
     // Driver code
     public void create(String data, JLabel element) {
 
+        // the JLabel for showing the image
         refElement = element;
         refElement.setText("");
+        
         // The path where the image will get saved
 
         File file = new File(dirname);
