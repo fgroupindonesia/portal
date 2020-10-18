@@ -1,0 +1,1 @@
+bin\java.exe -jar dist\Portal.jar

@@ -1,0 +1,15 @@
+check the lib using jdeps
+
+1. go to C:\Program Files\Java\jdk-11.0.8\bin
+
+jdeps --list-deps Portal.jar lib/*
+
+2. run jlink_create.bat
+3. copy 2 files to jdk-with-swing folder inside no.1:
+a. dist folder
+b. launcher.bat
+c. lib
+4. pack jdk-with-swing into your Installer
+
+ done! all with 37.7Mb minimal size
+ with RAR compression become 24.2Mb

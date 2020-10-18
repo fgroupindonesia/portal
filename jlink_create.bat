@@ -1,0 +1,1 @@
+jlink --no-header-files --no-man-pages --compress=2 --strip-debug --output jdk-with-swing --add-modules java.desktop,java.base,java.xml
