@@ -6,10 +6,10 @@
 package frames;
 
 import helper.BarcodeGenerator;
+import helper.UIDragger;
 import helper.UIEffect;
 import java.awt.CardLayout;
 import java.awt.Point;
-import java.awt.geom.RoundRectangle2D;
 
 /**
  *
@@ -22,11 +22,14 @@ public class LoginFrame extends javax.swing.JFrame {
      */
     Point initialClick;
     CardLayout cardLayouter;
-
+    
+    
     public LoginFrame() {
         initComponents();
 //        this.setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
-
+        UIDragger.setFrame(this);
+        
+        labelSpacing.setText("");
         cardLayouter = (CardLayout) (panelBase.getLayout());
     }
 
@@ -44,13 +47,14 @@ public class LoginFrame extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         textfieldUsername = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        buttonLogin = new javax.swing.JButton();
         labelLinkLoginPhone = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
+        panelHeader = new javax.swing.JPanel();
         labelClose = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         textfieldPass = new javax.swing.JPasswordField();
+        labelSpacing = new javax.swing.JLabel();
         panelPhoneLogin = new javax.swing.JPanel();
         labelBarcode = new javax.swing.JLabel();
         labelLinkNormalLogin = new javax.swing.JLabel();
@@ -86,13 +90,18 @@ public class LoginFrame extends javax.swing.JFrame {
                 textfieldUsernameFocusLost(evt);
             }
         });
-        panelLogin.add(textfieldUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, 210, -1));
+        panelLogin.add(textfieldUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, 250, -1));
 
         jLabel2.setText("Password:");
         panelLogin.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 130, 150, -1));
 
-        jButton1.setText("Login");
-        panelLogin.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 200, 80, 40));
+        buttonLogin.setText("Login");
+        buttonLogin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonLoginActionPerformed(evt);
+            }
+        });
+        panelLogin.add(buttonLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 200, 80, 30));
 
         labelLinkLoginPhone.setForeground(new java.awt.Color(0, 102, 255));
         labelLinkLoginPhone.setText("<html><u>Logging By Phone</u></html>");
@@ -102,9 +111,9 @@ public class LoginFrame extends javax.swing.JFrame {
                 labelLinkLoginPhoneMouseClicked(evt);
             }
         });
-        panelLogin.add(labelLinkLoginPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 210, 100, 20));
+        panelLogin.add(labelLinkLoginPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 200, 100, 30));
 
-        jPanel1.setBackground(new java.awt.Color(255, 0, 0));
+        panelHeader.setBackground(new java.awt.Color(255, 0, 0));
 
         labelClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close.png"))); // NOI18N
         labelClose.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -118,28 +127,28 @@ public class LoginFrame extends javax.swing.JFrame {
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Portal Access");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelHeaderLayout = new javax.swing.GroupLayout(panelHeader);
+        panelHeader.setLayout(panelHeaderLayout);
+        panelHeaderLayout.setHorizontalGroup(
+            panelHeaderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelHeaderLayout.createSequentialGroup()
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 129, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 98, Short.MAX_VALUE)
                 .addComponent(labelClose)
-                .addGap(21, 21, 21))
+                .addGap(52, 52, 52))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        panelHeaderLayout.setVerticalGroup(
+            panelHeaderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelHeaderLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelHeaderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(labelClose, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        panelLogin.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 400, 50));
+        panelLogin.add(panelHeader, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 400, 50));
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock64.png"))); // NOI18N
@@ -153,7 +162,10 @@ public class LoginFrame extends javax.swing.JFrame {
                 textfieldPassFocusLost(evt);
             }
         });
-        panelLogin.add(textfieldPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, 210, -1));
+        panelLogin.add(textfieldPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, 250, -1));
+
+        labelSpacing.setText("empty space");
+        panelLogin.add(labelSpacing, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 230, 270, 30));
 
         panelBase.add(panelLogin, "panelLogin");
 
@@ -181,32 +193,22 @@ public class LoginFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void panelBaseMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelBaseMousePressed
-
-        initialClick = evt.getPoint();
-        getComponentAt(initialClick);
+        
+        UIDragger.mousePressed(evt);
+        
 
     }//GEN-LAST:event_panelBaseMousePressed
 
     private void panelBaseMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelBaseMouseDragged
-
-        int thisX = this.getLocation().x;
-        int thisY = this.getLocation().y;
-
-        // Determine how much the mouse moved since the initial click
-        int xMoved = evt.getX() - initialClick.x;
-        int yMoved = evt.getY() - initialClick.y;
-
-        // Move window to this position
-        int X = thisX + xMoved;
-        int Y = thisY + yMoved;
-        this.setLocation(X, Y);
+        
+      UIDragger.mouseDragged(evt);
 
     }//GEN-LAST:event_panelBaseMouseDragged
 
     private void labelLinkLoginPhoneMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkLoginPhoneMouseClicked
         BarcodeGenerator qr = new BarcodeGenerator();
         qr.create("sample", labelBarcode);
-
+        
         cardLayouter.show(panelBase, "panelPhoneLogin");
     }//GEN-LAST:event_labelLinkLoginPhoneMouseClicked
 
@@ -233,6 +235,14 @@ public class LoginFrame extends javax.swing.JFrame {
     private void textfieldPassFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldPassFocusLost
         UIEffect.focusLost(textfieldPass);
     }//GEN-LAST:event_textfieldPassFocusLost
+
+    private void buttonLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLoginActionPerformed
+        
+        MainFrame f = new MainFrame(this);
+        f.setVisible(true);
+        this.hide();
+        
+    }//GEN-LAST:event_buttonLoginActionPerformed
 
     /**
      * @param args the command line arguments
@@ -263,17 +273,18 @@ public class LoginFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton buttonLogin;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel labelBarcode;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelLinkLoginPhone;
     private javax.swing.JLabel labelLinkNormalLogin;
+    private javax.swing.JLabel labelSpacing;
     private javax.swing.JPanel panelBase;
+    private javax.swing.JPanel panelHeader;
     private javax.swing.JPanel panelLogin;
     private javax.swing.JPanel panelPhoneLogin;
     private javax.swing.JPasswordField textfieldPass;
