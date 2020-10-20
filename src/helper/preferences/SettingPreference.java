@@ -24,7 +24,7 @@ public class SettingPreference {
 
         }
 
-        System.out.println("Node exist " + nodeExist);
+        //System.out.println("Node exist " + nodeExist);
 
         if (!nodeExist) {
 

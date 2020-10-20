@@ -5,6 +5,11 @@
  */
 package frames;
 
+import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.BrowserContext;
+import com.teamdev.jxbrowser.chromium.BrowserContextParams;
+import com.teamdev.jxbrowser.chromium.BrowserType;
+import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import helper.CMDExecutor;
 import helper.ChartGenerator;
 import helper.FileCopier;
@@ -12,7 +17,11 @@ import helper.PathReference;
 import helper.preferences.SettingPreference;
 import helper.UIDragger;
 import helper.UIEffect;
+import helper.jxbrowser.JxBrowserHackUtil;
+import helper.jxbrowser.JxVersion;
+import helper.jxbrowser.ConfigureSysOut;
 import helper.preferences.Keys;
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Frame;
@@ -22,6 +31,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
@@ -69,6 +79,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         // for setting ui
         loadConfiguration();
+        
+        // smoothly 
+        prepareBrowser();
     }
 
     private void showAttendanceStat(boolean stat) {
@@ -216,6 +229,7 @@ public class MainFrame extends javax.swing.JFrame {
         panelControllerDocument = new javax.swing.JPanel();
         labelDocumentOpen = new javax.swing.JLabel();
         labelDocumentDownload = new javax.swing.JLabel();
+        panelVideo = new javax.swing.JPanel();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
         labelNavHome = new javax.swing.JLabel();
@@ -881,6 +895,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         panelContentCenter.add(panelDocument, "panelDocument");
 
+        panelVideo.setLayout(new java.awt.BorderLayout());
+        panelContentCenter.add(panelVideo, "panelVideo");
+
         panelCenter.add(panelContentCenter, java.awt.BorderLayout.CENTER);
 
         panelHeaderCenter.setPreferredSize(new java.awt.Dimension(574, 50));
@@ -1002,15 +1019,15 @@ public class MainFrame extends javax.swing.JFrame {
             // copy the image to Local AppData path
             // use it to Jlabel Propic
             File source = fileChooser.getSelectedFile();
-            
+
             //System.out.println(source.getName());
             PathReference.setPropicFileName(source.getName());
             File dest = new File(PathReference.UserPropicPath);
-            
+
             try {
                 FileCopier.copyTo(source, dest);
                 UIEffect.iconChanger(labelPropicUser, dest.getAbsolutePath());
-                
+
                 // store the settings for next time usage
                 configuration.setValue(Keys.USER_PROPIC, dest.getAbsolutePath());
                 System.out.println("now is " + dest.getAbsolutePath());
@@ -1126,9 +1143,37 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_labelDocumentOpenMouseExited
 
     private void labelDocumentDownloadMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseClicked
-        // TODO add your handling code here:
+
+        
+
+        cardLayouterMain.show(panelContentCenter, "panelVideo");
     }//GEN-LAST:event_labelDocumentDownloadMouseClicked
 
+    private void prepareBrowser(){
+        // disabling textout
+        ConfigureSysOut.disableSysout();
+        // hacking the JXBrowser applicants
+        // with the difference context (cache) everytimes run
+        JxBrowserHackUtil.hack(JxVersion.V6_22);
+        
+        String identity = UUID.randomUUID().toString();
+        File folder = new File(PathReference.JXBrowserDirName+"\\"+identity);
+        
+        if(!folder.exists()){
+            folder.mkdir();
+        }
+        
+        BrowserContextParams params = new BrowserContextParams(folder.getAbsolutePath());
+        BrowserContext context1 = new BrowserContext(params);
+        Browser browser = new Browser(BrowserType.LIGHTWEIGHT, context1);
+        BrowserView browserView = new BrowserView(browser);
+        
+        panelVideo.add(browserView, BorderLayout.CENTER);
+        browser.loadURL("http://youtube.com/fgroupindonesia");
+        // activate back textout
+        ConfigureSysOut.enableSysout();
+    }
+    
     private void labelDocumentDownloadMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseEntered
         // TODO add your handling code here:
     }//GEN-LAST:event_labelDocumentDownloadMouseEntered
@@ -1152,12 +1197,12 @@ public class MainFrame extends javax.swing.JFrame {
     // for settings ui
     private void loadConfiguration() {
         String propic = configuration.getStringValue(Keys.USER_PROPIC);
-        if(!propic.equalsIgnoreCase("default")){
+        if (!propic.equalsIgnoreCase("default")) {
             // set the propic
             UIEffect.iconChanger(labelPropicUser, new File(propic).getAbsolutePath());
         }
-        System.out.println(propic);
-        
+        //System.out.println(propic);
+
         checkboxAutoupdateToolsSetting.setSelected(configuration.getBooleanValue(Keys.AUTO_UPDATE_TOOLS));
         comboboxSystemLanguage.setSelectedItem(configuration.getStringValue(Keys.SYSTEM_LANGUAGE));
 
@@ -1325,6 +1370,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel panelSchedule;
     private javax.swing.JPanel panelSettings;
     private javax.swing.JPanel panelTools;
+    private javax.swing.JPanel panelVideo;
     private javax.swing.JProgressBar progressBarTotalSession;
     private javax.swing.ButtonGroup radioButtonGroupNotifClass;
     private javax.swing.ButtonGroup radioButtonGroupNotifSessionLimit;

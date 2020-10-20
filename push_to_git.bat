@@ -1,5 +1,5 @@
 git add .
-git commit -m "adding Preference for user updating propic."
+git commit -m "adding JxBrowser within the PanelContent."
 git push origin main
 git gc --prune
 pause
