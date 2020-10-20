@@ -19,6 +19,7 @@ public class Keys {
     
     public static final String AUTO_UPDATE_TOOLS = "auto_update_tools";
     
+    public static final String USER_PROPIC = "user_propic";
     public static final String SYSTEM_LANGUAGE = "system_language";
     public static final String DEFAULT_SYSTEM_LANGUAGE = "English (default)";
 

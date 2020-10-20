@@ -28,6 +28,7 @@ public class LoginFrame extends javax.swing.JFrame {
         initComponents();
 //        this.setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
         UIDragger.setFrame(this);
+        UIEffect.iconChanger(this);
         
         labelSpacing.setText("");
         cardLayouter = (CardLayout) (panelBase.getLayout());
@@ -115,7 +116,7 @@ public class LoginFrame extends javax.swing.JFrame {
 
         panelHeader.setBackground(new java.awt.Color(255, 0, 0));
 
-        labelClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close.png"))); // NOI18N
+        labelClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close24.png"))); // NOI18N
         labelClose.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         labelClose.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -134,9 +135,9 @@ public class LoginFrame extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelHeaderLayout.createSequentialGroup()
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 98, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 117, Short.MAX_VALUE)
                 .addComponent(labelClose)
-                .addGap(52, 52, 52))
+                .addGap(33, 33, 33))
         );
         panelHeaderLayout.setVerticalGroup(
             panelHeaderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

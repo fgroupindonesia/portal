@@ -7,21 +7,30 @@ package frames;
 
 import helper.CMDExecutor;
 import helper.ChartGenerator;
+import helper.FileCopier;
+import helper.PathReference;
 import helper.preferences.SettingPreference;
 import helper.UIDragger;
+import helper.UIEffect;
 import helper.preferences.Keys;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.JFileChooser;
 import javax.swing.Timer;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.xy.XYDataset;
 
 /**
  *
@@ -50,10 +59,14 @@ public class MainFrame extends javax.swing.JFrame {
         addingTimer();
 
         UIDragger.setFrame(this);
+        UIEffect.iconChanger(this);
 
         labelPanelViewName.setText("Home");
         cardLayouterMain = (CardLayout) panelContentCenter.getLayout();
         cardLayouterAttendance = (CardLayout) panelAttandanceContent.getLayout();
+
+        showPaymentForm(false);
+
         // for setting ui
         loadConfiguration();
     }
@@ -100,11 +113,13 @@ public class MainFrame extends javax.swing.JFrame {
 
         radioButtonGroupNotifClass = new javax.swing.ButtonGroup();
         radioButtonGroupNotifSessionLimit = new javax.swing.ButtonGroup();
+        fileChooser = new javax.swing.JFileChooser();
         panelBase = new javax.swing.JPanel();
         panelHeader = new javax.swing.JPanel();
         labelClose = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         labelTime = new javax.swing.JLabel();
+        labelMinimize = new javax.swing.JLabel();
         panelContent = new javax.swing.JPanel();
         panelMenu = new javax.swing.JPanel();
         labelPropicUser = new javax.swing.JLabel();
@@ -117,6 +132,23 @@ public class MainFrame extends javax.swing.JFrame {
         buttonLogout = new javax.swing.JButton();
         panelCenter = new javax.swing.JPanel();
         panelContentCenter = new javax.swing.JPanel();
+        panelHome = new javax.swing.JPanel();
+        panelSchedule = new javax.swing.JPanel();
+        labelScheduleDay1 = new javax.swing.JLabel();
+        labelScheduleDay2 = new javax.swing.JLabel();
+        labelScheduleDay3 = new javax.swing.JLabel();
+        progressBarTotalSession = new javax.swing.JProgressBar();
+        jLabel20 = new javax.swing.JLabel();
+        labelReportBugs = new javax.swing.JLabel();
+        labelTotalSessionCompleted = new javax.swing.JLabel();
+        labelClassRegistered = new javax.swing.JLabel();
+        labelLastPayment = new javax.swing.JLabel();
+        panelHistory = new javax.swing.JPanel();
+        labelHistoryLast1 = new javax.swing.JLabel();
+        labelHistoryLast2 = new javax.swing.JLabel();
+        labelHistoryLast3 = new javax.swing.JLabel();
+        labelHistoryLast4 = new javax.swing.JLabel();
+        labelHistoryLast5 = new javax.swing.JLabel();
         panelProfile = new javax.swing.JPanel();
         textfieldUsernameProfile = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
@@ -143,7 +175,6 @@ public class MainFrame extends javax.swing.JFrame {
         buttonSaveSettings = new javax.swing.JButton();
         comboboxSystemLanguage = new javax.swing.JComboBox<>();
         jLabel9 = new javax.swing.JLabel();
-        panelHome = new javax.swing.JPanel();
         panelTools = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         buttonTerminateTmv = new javax.swing.JButton();
@@ -169,7 +200,6 @@ public class MainFrame extends javax.swing.JFrame {
         labelEditPayment = new javax.swing.JLabel();
         panelAttendance = new javax.swing.JPanel();
         panelAttendanceData = new javax.swing.JPanel();
-        panelAttendanceTable = new javax.swing.JPanel();
         panelAttandanceContent = new javax.swing.JPanel();
         panelAttandanceAll = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -178,6 +208,14 @@ public class MainFrame extends javax.swing.JFrame {
         panelControllerAttendance = new javax.swing.JPanel();
         labelShowAttendanceData = new javax.swing.JLabel();
         labelShowAttendanceStatistic = new javax.swing.JLabel();
+        panelDocument = new javax.swing.JPanel();
+        panelDocumentData = new javax.swing.JPanel();
+        panelDocumentContent = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        jTable3 = new javax.swing.JTable();
+        panelControllerDocument = new javax.swing.JPanel();
+        labelDocumentOpen = new javax.swing.JLabel();
+        labelDocumentDownload = new javax.swing.JLabel();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
         labelNavHome = new javax.swing.JLabel();
@@ -204,14 +242,14 @@ public class MainFrame extends javax.swing.JFrame {
         panelHeader.setPreferredSize(new java.awt.Dimension(653, 50));
         panelHeader.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        labelClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close.png"))); // NOI18N
+        labelClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close24.png"))); // NOI18N
         labelClose.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         labelClose.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 labelCloseMouseClicked(evt);
             }
         });
-        panelHeader.add(labelClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 10, -1, 28));
+        panelHeader.add(labelClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 10, -1, 28));
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
@@ -222,6 +260,15 @@ public class MainFrame extends javax.swing.JFrame {
         labelTime.setForeground(new java.awt.Color(255, 255, 255));
         labelTime.setText("time is here");
         panelHeader.add(labelTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 20, 166, -1));
+
+        labelMinimize.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/minimize.png"))); // NOI18N
+        labelMinimize.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelMinimize.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelMinimizeMouseClicked(evt);
+            }
+        });
+        panelHeader.add(labelMinimize, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 10, -1, 28));
 
         panelBase.add(panelHeader, java.awt.BorderLayout.PAGE_START);
 
@@ -324,6 +371,79 @@ public class MainFrame extends javax.swing.JFrame {
 
         panelContentCenter.setLayout(new java.awt.CardLayout());
 
+        panelHome.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        panelSchedule.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule"));
+        panelSchedule.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
+
+        labelScheduleDay1.setText("jLabel15");
+        panelSchedule.add(labelScheduleDay1);
+
+        labelScheduleDay2.setText("jLabel15");
+        panelSchedule.add(labelScheduleDay2);
+
+        labelScheduleDay3.setText("jLabel15");
+        panelSchedule.add(labelScheduleDay3);
+
+        panelHome.add(panelSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 110, 190, 100));
+        panelSchedule.getAccessibleContext().setAccessibleName("History");
+
+        panelHome.add(progressBarTotalSession, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 260, 190, -1));
+
+        jLabel20.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/info.png"))); // NOI18N
+        jLabel20.setText("Welcome, USERNAME");
+        panelHome.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, -1, -1));
+
+        labelReportBugs.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelReportBugs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bug32.png"))); // NOI18N
+        labelReportBugs.setText("Report Bugs");
+        labelReportBugs.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelReportBugs.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        labelReportBugs.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        labelReportBugs.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelReportBugsMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelReportBugsMouseExited(evt);
+            }
+        });
+        panelHome.add(labelReportBugs, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 40, 60, 60));
+
+        labelTotalSessionCompleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/note16.png"))); // NOI18N
+        labelTotalSessionCompleted.setText("Total Session Completed: x of y");
+        panelHome.add(labelTotalSessionCompleted, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 240, 190, -1));
+
+        labelClassRegistered.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/class.png"))); // NOI18N
+        labelClassRegistered.setText("Class Registered :");
+        panelHome.add(labelClassRegistered, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 290, 280, -1));
+
+        labelLastPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/coin.png"))); // NOI18N
+        labelLastPayment.setText("Last Payment : ");
+        panelHome.add(labelLastPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 240, 230, -1));
+
+        panelHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("History"));
+        panelHistory.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
+
+        labelHistoryLast1.setText("jLabel15");
+        panelHistory.add(labelHistoryLast1);
+
+        labelHistoryLast2.setText("jLabel15");
+        panelHistory.add(labelHistoryLast2);
+
+        labelHistoryLast3.setText("jLabel15");
+        panelHistory.add(labelHistoryLast3);
+
+        labelHistoryLast4.setText("jLabel15");
+        panelHistory.add(labelHistoryLast4);
+
+        labelHistoryLast5.setText("jLabel15");
+        panelHistory.add(labelHistoryLast5);
+
+        panelHome.add(panelHistory, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 330, 170));
+
+        panelContentCenter.add(panelHome, "panelHome");
+
         panelProfile.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         panelProfile.add(textfieldUsernameProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 40, 220, -1));
 
@@ -376,19 +496,19 @@ public class MainFrame extends javax.swing.JFrame {
 
         radioButtonGroupNotifClass.add(radioNotifClass1DaySetting);
         radioNotifClass1DaySetting.setText("1 Day before");
-        panelSettings.add(radioNotifClass1DaySetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 100, -1, -1));
+        panelSettings.add(radioNotifClass1DaySetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 100, -1, -1));
 
         radioButtonGroupNotifClass.add(radioNotifClass1HourSetting);
         radioNotifClass1HourSetting.setText("1 Hour before");
-        panelSettings.add(radioNotifClass1HourSetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 80, -1, -1));
+        panelSettings.add(radioNotifClass1HourSetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, -1, -1));
 
         radioButtonGroupNotifSessionLimit.add(radioNotifSessionAtLeast1Setting);
         radioNotifSessionAtLeast1Setting.setText("At least 1");
-        panelSettings.add(radioNotifSessionAtLeast1Setting, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 80, -1, -1));
+        panelSettings.add(radioNotifSessionAtLeast1Setting, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 80, -1, -1));
 
         radioButtonGroupNotifSessionLimit.add(radioNotifSessionLessThan3Setting);
         radioNotifSessionLessThan3Setting.setText("Less than 3");
-        panelSettings.add(radioNotifSessionLessThan3Setting, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 100, -1, -1));
+        panelSettings.add(radioNotifSessionLessThan3Setting, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 100, -1, -1));
 
         jLabel10.setText("Notify when sessions limit reach?");
         panelSettings.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 60, 160, -1));
@@ -412,19 +532,6 @@ public class MainFrame extends javax.swing.JFrame {
         panelSettings.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 160, -1, -1));
 
         panelContentCenter.add(panelSettings, "panelSettings");
-
-        javax.swing.GroupLayout panelHomeLayout = new javax.swing.GroupLayout(panelHome);
-        panelHome.setLayout(panelHomeLayout);
-        panelHomeLayout.setHorizontalGroup(
-            panelHomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1561, Short.MAX_VALUE)
-        );
-        panelHomeLayout.setVerticalGroup(
-            panelHomeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 416, Short.MAX_VALUE)
-        );
-
-        panelContentCenter.add(panelHome, "panelHome");
 
         panelTools.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -518,10 +625,36 @@ public class MainFrame extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "[ x ]", "Date Created", "Amount", "Method"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                true, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         jScrollPane2.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setResizable(false);
+            jTable1.getColumnModel().getColumn(0).setPreferredWidth(35);
+            jTable1.getColumnModel().getColumn(1).setMinWidth(120);
+            jTable1.getColumnModel().getColumn(1).setPreferredWidth(120);
+            jTable1.getColumnModel().getColumn(2).setMinWidth(120);
+            jTable1.getColumnModel().getColumn(2).setPreferredWidth(120);
+            jTable1.getColumnModel().getColumn(3).setMinWidth(120);
+            jTable1.getColumnModel().getColumn(3).setPreferredWidth(120);
+        }
 
         panelPaymentTable.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
@@ -564,8 +697,6 @@ public class MainFrame extends javax.swing.JFrame {
 
         panelAttendanceData.setLayout(new java.awt.BorderLayout());
 
-        panelAttendanceTable.setLayout(new java.awt.BorderLayout());
-
         panelAttandanceContent.setLayout(new java.awt.CardLayout());
 
         panelAttandanceAll.setLayout(new java.awt.BorderLayout());
@@ -578,10 +709,36 @@ public class MainFrame extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "[ x ]", "Class", "Status", "Date Created"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                true, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable2.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         jScrollPane3.setViewportView(jTable2);
+        if (jTable2.getColumnModel().getColumnCount() > 0) {
+            jTable2.getColumnModel().getColumn(0).setResizable(false);
+            jTable2.getColumnModel().getColumn(0).setPreferredWidth(35);
+            jTable2.getColumnModel().getColumn(1).setMinWidth(100);
+            jTable2.getColumnModel().getColumn(1).setPreferredWidth(100);
+            jTable2.getColumnModel().getColumn(2).setMinWidth(75);
+            jTable2.getColumnModel().getColumn(2).setPreferredWidth(75);
+            jTable2.getColumnModel().getColumn(3).setMinWidth(125);
+            jTable2.getColumnModel().getColumn(3).setPreferredWidth(125);
+        }
 
         panelAttandanceAll.add(jScrollPane3, java.awt.BorderLayout.CENTER);
 
@@ -590,9 +747,7 @@ public class MainFrame extends javax.swing.JFrame {
         panelAttandanceStatistic.setLayout(new java.awt.BorderLayout());
         panelAttandanceContent.add(panelAttandanceStatistic, "panelAttendanceStatistic");
 
-        panelAttendanceTable.add(panelAttandanceContent, java.awt.BorderLayout.CENTER);
-
-        panelAttendanceData.add(panelAttendanceTable, java.awt.BorderLayout.CENTER);
+        panelAttendanceData.add(panelAttandanceContent, java.awt.BorderLayout.CENTER);
 
         panelControllerAttendance.setPreferredSize(new java.awt.Dimension(869, 75));
         panelControllerAttendance.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -635,6 +790,96 @@ public class MainFrame extends javax.swing.JFrame {
         panelAttendance.add(panelAttendanceData, java.awt.BorderLayout.CENTER);
 
         panelContentCenter.add(panelAttendance, "panelAttendance");
+
+        panelDocument.setLayout(new java.awt.BorderLayout());
+
+        panelDocumentData.setLayout(new java.awt.BorderLayout());
+
+        panelDocumentContent.setLayout(new java.awt.BorderLayout());
+
+        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "[ x ]", "Title", "Description", "URL"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                true, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable3.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        jScrollPane4.setViewportView(jTable3);
+        if (jTable3.getColumnModel().getColumnCount() > 0) {
+            jTable3.getColumnModel().getColumn(0).setResizable(false);
+            jTable3.getColumnModel().getColumn(0).setPreferredWidth(35);
+            jTable3.getColumnModel().getColumn(1).setPreferredWidth(400);
+            jTable3.getColumnModel().getColumn(2).setPreferredWidth(500);
+            jTable3.getColumnModel().getColumn(3).setMinWidth(0);
+            jTable3.getColumnModel().getColumn(3).setPreferredWidth(0);
+            jTable3.getColumnModel().getColumn(3).setMaxWidth(0);
+        }
+
+        panelDocumentContent.add(jScrollPane4, java.awt.BorderLayout.CENTER);
+
+        panelDocumentData.add(panelDocumentContent, java.awt.BorderLayout.CENTER);
+
+        panelControllerDocument.setPreferredSize(new java.awt.Dimension(869, 75));
+        panelControllerDocument.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        labelDocumentOpen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/open.png"))); // NOI18N
+        labelDocumentOpen.setText("Open");
+        labelDocumentOpen.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelDocumentOpen.setEnabled(false);
+        labelDocumentOpen.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelDocumentOpenMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelDocumentOpenMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelDocumentOpenMouseExited(evt);
+            }
+        });
+        panelControllerDocument.add(labelDocumentOpen, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 30, 80, 30));
+
+        labelDocumentDownload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/download.png"))); // NOI18N
+        labelDocumentDownload.setText("Download");
+        labelDocumentDownload.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelDocumentDownload.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelDocumentDownloadMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelDocumentDownloadMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelDocumentDownloadMouseExited(evt);
+            }
+        });
+        panelControllerDocument.add(labelDocumentDownload, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 80, 30));
+
+        panelDocumentData.add(panelControllerDocument, java.awt.BorderLayout.PAGE_START);
+
+        panelDocument.add(panelDocumentData, java.awt.BorderLayout.CENTER);
+
+        panelContentCenter.add(panelDocument, "panelDocument");
 
         panelCenter.add(panelContentCenter, java.awt.BorderLayout.CENTER);
 
@@ -710,6 +955,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void buttonDocumentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDocumentActionPerformed
         labelPanelViewName.setText("<< Document");
+        cardLayouterMain.show(panelContentCenter, "panelDocument");
     }//GEN-LAST:event_buttonDocumentActionPerformed
 
     private void buttonAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAttendanceActionPerformed
@@ -746,6 +992,33 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void labelPropicUserMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelPropicUserMouseClicked
         // browse the picture...
+        FileFilter imageFilter = new FileNameExtensionFilter(
+                "Image files", ImageIO.getReaderFileSuffixes());
+
+        fileChooser.setFileFilter(imageFilter);
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            // change accordingly
+            // copy the image to Local AppData path
+            // use it to Jlabel Propic
+            File source = fileChooser.getSelectedFile();
+            
+            //System.out.println(source.getName());
+            PathReference.setPropicFileName(source.getName());
+            File dest = new File(PathReference.UserPropicPath);
+            
+            try {
+                FileCopier.copyTo(source, dest);
+                UIEffect.iconChanger(labelPropicUser, dest.getAbsolutePath());
+                
+                // store the settings for next time usage
+                configuration.setValue(Keys.USER_PROPIC, dest.getAbsolutePath());
+                System.out.println("now is " + dest.getAbsolutePath());
+            } catch (Exception ex) {
+
+            }
+
+        }
     }//GEN-LAST:event_labelPropicUserMouseClicked
 
     private void labelNavHomeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelNavHomeMouseClicked
@@ -840,8 +1113,51 @@ public class MainFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_labelShowAttendanceStatisticMouseExited
 
+    private void labelDocumentOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentOpenMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelDocumentOpenMouseClicked
+
+    private void labelDocumentOpenMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentOpenMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelDocumentOpenMouseEntered
+
+    private void labelDocumentOpenMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentOpenMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelDocumentOpenMouseExited
+
+    private void labelDocumentDownloadMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelDocumentDownloadMouseClicked
+
+    private void labelDocumentDownloadMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelDocumentDownloadMouseEntered
+
+    private void labelDocumentDownloadMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelDocumentDownloadMouseExited
+
+    private void labelReportBugsMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugsMouseEntered
+        UIEffect.focusGained(labelReportBugs);
+    }//GEN-LAST:event_labelReportBugsMouseEntered
+
+    private void labelReportBugsMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugsMouseExited
+        UIEffect.focusLost(labelReportBugs);
+    }//GEN-LAST:event_labelReportBugsMouseExited
+
+    private void labelMinimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelMinimizeMouseClicked
+        this.setState(Frame.ICONIFIED);
+    }//GEN-LAST:event_labelMinimizeMouseClicked
+
     // for settings ui
     private void loadConfiguration() {
+        String propic = configuration.getStringValue(Keys.USER_PROPIC);
+        if(!propic.equalsIgnoreCase("default")){
+            // set the propic
+            UIEffect.iconChanger(labelPropicUser, new File(propic).getAbsolutePath());
+        }
+        System.out.println(propic);
+        
         checkboxAutoupdateToolsSetting.setSelected(configuration.getBooleanValue(Keys.AUTO_UPDATE_TOOLS));
         comboboxSystemLanguage.setSelectedItem(configuration.getStringValue(Keys.SYSTEM_LANGUAGE));
 
@@ -929,6 +1245,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox checkboxAutoupdateToolsSetting;
     private javax.swing.JComboBox<String> combobocMethodPayment;
     private javax.swing.JComboBox<String> comboboxSystemLanguage;
+    private javax.swing.JFileChooser fileChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -938,6 +1255,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -948,34 +1266,55 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
+    private javax.swing.JTable jTable3;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JLabel labelAddPayment;
+    private javax.swing.JLabel labelClassRegistered;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelDeletePayment;
+    private javax.swing.JLabel labelDocumentDownload;
+    private javax.swing.JLabel labelDocumentOpen;
     private javax.swing.JLabel labelEditPayment;
     private javax.swing.JLabel labelHidePaymentForm;
+    private javax.swing.JLabel labelHistoryLast1;
+    private javax.swing.JLabel labelHistoryLast2;
+    private javax.swing.JLabel labelHistoryLast3;
+    private javax.swing.JLabel labelHistoryLast4;
+    private javax.swing.JLabel labelHistoryLast5;
+    private javax.swing.JLabel labelLastPayment;
+    private javax.swing.JLabel labelMinimize;
     private javax.swing.JLabel labelNavHome;
     private javax.swing.JLabel labelPanelViewName;
     private javax.swing.JLabel labelPropicUser;
+    private javax.swing.JLabel labelReportBugs;
+    private javax.swing.JLabel labelScheduleDay1;
+    private javax.swing.JLabel labelScheduleDay2;
+    private javax.swing.JLabel labelScheduleDay3;
     private javax.swing.JLabel labelShowAttendanceData;
     private javax.swing.JLabel labelShowAttendanceStatistic;
     private javax.swing.JLabel labelTime;
+    private javax.swing.JLabel labelTotalSessionCompleted;
     private javax.swing.JPanel panelAttandanceAll;
     private javax.swing.JPanel panelAttandanceContent;
     private javax.swing.JPanel panelAttandanceStatistic;
     private javax.swing.JPanel panelAttendance;
     private javax.swing.JPanel panelAttendanceData;
-    private javax.swing.JPanel panelAttendanceTable;
     private javax.swing.JPanel panelBase;
     private javax.swing.JPanel panelCenter;
     private javax.swing.JPanel panelContent;
     private javax.swing.JPanel panelContentCenter;
     private javax.swing.JPanel panelControllerAttendance;
+    private javax.swing.JPanel panelControllerDocument;
     private javax.swing.JPanel panelControllerPayment;
+    private javax.swing.JPanel panelDocument;
+    private javax.swing.JPanel panelDocumentContent;
+    private javax.swing.JPanel panelDocumentData;
     private javax.swing.JPanel panelHeader;
     private javax.swing.JPanel panelHeaderCenter;
+    private javax.swing.JPanel panelHistory;
     private javax.swing.JPanel panelHome;
     private javax.swing.JPanel panelMenu;
     private javax.swing.JPanel panelPayment;
@@ -983,8 +1322,10 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel panelPaymentForm;
     private javax.swing.JPanel panelPaymentTable;
     private javax.swing.JPanel panelProfile;
+    private javax.swing.JPanel panelSchedule;
     private javax.swing.JPanel panelSettings;
     private javax.swing.JPanel panelTools;
+    private javax.swing.JProgressBar progressBarTotalSession;
     private javax.swing.ButtonGroup radioButtonGroupNotifClass;
     private javax.swing.ButtonGroup radioButtonGroupNotifSessionLimit;
     private javax.swing.JRadioButton radioNotifClass1DaySetting;
