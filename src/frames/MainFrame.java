@@ -54,6 +54,7 @@ public class MainFrame extends javax.swing.JFrame {
     LoginFrame loginFrame;
     CardLayout cardLayouterMain, cardLayouterAttendance;
     SettingPreference configuration = new SettingPreference();
+    Browser browser = null;
 
     public MainFrame(LoginFrame logRef) {
         loginFrame = logRef;
@@ -79,7 +80,7 @@ public class MainFrame extends javax.swing.JFrame {
 
         // for setting ui
         loadConfiguration();
-        
+
         // smoothly 
         prepareBrowser();
     }
@@ -192,6 +193,8 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         buttonTerminateTmv = new javax.swing.JButton();
         buttonRunTmv = new javax.swing.JButton();
+        jLabel15 = new javax.swing.JLabel();
+        buttonVisitChrome = new javax.swing.JButton();
         panelPayment = new javax.swing.JPanel();
         panelPaymentForm = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
@@ -229,7 +232,7 @@ public class MainFrame extends javax.swing.JFrame {
         panelControllerDocument = new javax.swing.JPanel();
         labelDocumentOpen = new javax.swing.JLabel();
         labelDocumentDownload = new javax.swing.JLabel();
-        panelVideo = new javax.swing.JPanel();
+        panelInnerBrowser = new javax.swing.JPanel();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
         labelNavHome = new javax.swing.JLabel();
@@ -577,6 +580,23 @@ public class MainFrame extends javax.swing.JFrame {
         });
         panelTools.add(buttonRunTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 70, 110, -1));
 
+        jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/chrome.png"))); // NOI18N
+        jLabel15.setText("Chrome Version :");
+        jLabel15.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel15.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        panelTools.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 200, 160, 100));
+
+        buttonVisitChrome.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/play.png"))); // NOI18N
+        buttonVisitChrome.setText("Open Now");
+        buttonVisitChrome.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        buttonVisitChrome.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonVisitChromeActionPerformed(evt);
+            }
+        });
+        panelTools.add(buttonVisitChrome, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 210, 110, -1));
+
         panelContentCenter.add(panelTools, "panelTools");
 
         panelPayment.setLayout(new java.awt.BorderLayout());
@@ -895,8 +915,8 @@ public class MainFrame extends javax.swing.JFrame {
 
         panelContentCenter.add(panelDocument, "panelDocument");
 
-        panelVideo.setLayout(new java.awt.BorderLayout());
-        panelContentCenter.add(panelVideo, "panelVideo");
+        panelInnerBrowser.setLayout(new java.awt.BorderLayout());
+        panelContentCenter.add(panelInnerBrowser, "panelInnerBrowser");
 
         panelCenter.add(panelContentCenter, java.awt.BorderLayout.CENTER);
 
@@ -1144,36 +1164,34 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void labelDocumentDownloadMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseClicked
 
-        
-
-        cardLayouterMain.show(panelContentCenter, "panelVideo");
+        cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
     }//GEN-LAST:event_labelDocumentDownloadMouseClicked
 
-    private void prepareBrowser(){
+    private void prepareBrowser() {
         // disabling textout
         ConfigureSysOut.disableSysout();
         // hacking the JXBrowser applicants
         // with the difference context (cache) everytimes run
         JxBrowserHackUtil.hack(JxVersion.V6_22);
-        
+
         String identity = UUID.randomUUID().toString();
-        File folder = new File(PathReference.JXBrowserDirName+"\\"+identity);
-        
-        if(!folder.exists()){
+        File folder = new File(PathReference.JXBrowserDirName + "\\" + identity);
+
+        if (!folder.exists()) {
             folder.mkdir();
         }
-        
+
         BrowserContextParams params = new BrowserContextParams(folder.getAbsolutePath());
         BrowserContext context1 = new BrowserContext(params);
-        Browser browser = new Browser(BrowserType.LIGHTWEIGHT, context1);
+        browser = new Browser(BrowserType.LIGHTWEIGHT, context1);
         BrowserView browserView = new BrowserView(browser);
-        
-        panelVideo.add(browserView, BorderLayout.CENTER);
+
+        panelInnerBrowser.add(browserView, BorderLayout.CENTER);
         browser.loadURL("http://youtube.com/fgroupindonesia");
         // activate back textout
         ConfigureSysOut.enableSysout();
     }
-    
+
     private void labelDocumentDownloadMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseEntered
         // TODO add your handling code here:
     }//GEN-LAST:event_labelDocumentDownloadMouseEntered
@@ -1193,6 +1211,11 @@ public class MainFrame extends javax.swing.JFrame {
     private void labelMinimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelMinimizeMouseClicked
         this.setState(Frame.ICONIFIED);
     }//GEN-LAST:event_labelMinimizeMouseClicked
+
+    private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
+        browser.loadURL("http://bing.com");
+        cardLayouterMain.show(panelContentCenter, "pannelInnerBrowser");
+    }//GEN-LAST:event_buttonVisitChromeActionPerformed
 
     // for settings ui
     private void loadConfiguration() {
@@ -1287,6 +1310,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton buttonSettings;
     private javax.swing.JButton buttonTerminateTmv;
     private javax.swing.JButton buttonTools;
+    private javax.swing.JButton buttonVisitChrome;
     private javax.swing.JCheckBox checkboxAutoupdateToolsSetting;
     private javax.swing.JComboBox<String> combobocMethodPayment;
     private javax.swing.JComboBox<String> comboboxSystemLanguage;
@@ -1297,6 +1321,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel2;
@@ -1361,6 +1386,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel panelHeaderCenter;
     private javax.swing.JPanel panelHistory;
     private javax.swing.JPanel panelHome;
+    private javax.swing.JPanel panelInnerBrowser;
     private javax.swing.JPanel panelMenu;
     private javax.swing.JPanel panelPayment;
     private javax.swing.JPanel panelPaymentData;
@@ -1370,7 +1396,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel panelSchedule;
     private javax.swing.JPanel panelSettings;
     private javax.swing.JPanel panelTools;
-    private javax.swing.JPanel panelVideo;
     private javax.swing.JProgressBar progressBarTotalSession;
     private javax.swing.ButtonGroup radioButtonGroupNotifClass;
     private javax.swing.ButtonGroup radioButtonGroupNotifSessionLimit;
