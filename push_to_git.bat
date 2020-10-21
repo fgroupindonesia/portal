@@ -1,5 +1,5 @@
 git add .
-git commit -m "Adding HttpCall capabilities of sending GET/POST request."
+git commit -m "Adding refreshDocument() refreshAttendance() and refreshPayment() calls."
 git push origin main
 git gc --prune
 pause

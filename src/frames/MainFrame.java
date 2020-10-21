@@ -5,6 +5,9 @@
  */
 package frames;
 
+import beans.Attendance;
+import beans.Document;
+import beans.Payment;
 import com.google.gson.Gson;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.BrowserContext;
@@ -16,7 +19,10 @@ import helper.CMDExecutor;
 import helper.ChartGenerator;
 import helper.FileCopier;
 import helper.HttpCall;
+import helper.JSONChecker;
 import helper.PathReference;
+import helper.RupiahGenerator;
+import helper.TableRenderer;
 import helper.preferences.SettingPreference;
 import helper.UIDragger;
 import helper.UIEffect;
@@ -32,16 +38,17 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
@@ -59,8 +66,8 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     CardLayout cardLayouterMain, cardLayouterAttendance;
     SettingPreference configuration = new SettingPreference();
     Browser browser = null;
-    HttpCall urlExecutor ;
-    
+    TableRenderer tabRender = new TableRenderer();
+    RupiahGenerator rpGen = new RupiahGenerator();
 
     public MainFrame(LoginFrame logRef) {
         loginFrame = logRef;
@@ -71,15 +78,42 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         processNicely();
     }
 
-    
-    private void postHttpCall(){
-        
-        urlExecutor = new HttpCall(this);
-        urlExecutor.addData("username", "admin");
-        urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
-        
+    private void refreshPaymentData() {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                HttpCall urlExecutor = new HttpCall(MainFrame.this);
+                urlExecutor.addData("username", "asd");
+                urlExecutor.start(WebReference.ALL_PAYMENT, HttpCall.METHOD_POST);
+            }
+        });
+
     }
-    
+
+    private void refreshDocumentData() {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                HttpCall urlExecutor = new HttpCall(MainFrame.this);
+                urlExecutor.addData("username", "asd");
+                urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
+            }
+        });
+
+    }
+
+    private void refreshAttendanceData() {
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                HttpCall urlExecutor = new HttpCall(MainFrame.this);
+                urlExecutor.addData("username", "asd");
+                urlExecutor.start(WebReference.ALL_ATTENDANCE, HttpCall.METHOD_POST);
+            }
+        });
+
+    }
+
     private void processNicely() {
         initComponents();
         addingTimer();
@@ -96,11 +130,17 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         // for setting ui
         loadConfiguration();
 
-        // prepare the browser tool
-        prepareBrowser();
-        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                // prepare the browser tool
+                prepareBrowser();
+            }
+        });
+
         // try to access api once again
-        postHttpCall();
+        refreshDocumentData();
+        refreshAttendanceData();
+        refreshPaymentData();
     }
 
     private void showAttendanceStat(boolean stat) {
@@ -219,27 +259,25 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         panelPaymentForm = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        textfieldAmountPayment = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
         combobocMethodPayment = new javax.swing.JComboBox<>();
         labelHidePaymentForm = new javax.swing.JLabel();
-        jLabel16 = new javax.swing.JLabel();
+        labelScreenshotPayment = new javax.swing.JLabel();
         buttonSavePayment = new javax.swing.JButton();
         jLabel17 = new javax.swing.JLabel();
         panelPaymentData = new javax.swing.JPanel();
         panelPaymentTable = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tablePaymentData = new javax.swing.JTable();
         panelControllerPayment = new javax.swing.JPanel();
-        labelDeletePayment = new javax.swing.JLabel();
         labelAddPayment = new javax.swing.JLabel();
-        labelEditPayment = new javax.swing.JLabel();
         panelAttendance = new javax.swing.JPanel();
         panelAttendanceData = new javax.swing.JPanel();
         panelAttandanceContent = new javax.swing.JPanel();
         panelAttandanceAll = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        tableAttendanceData = new javax.swing.JTable();
         panelAttandanceStatistic = new javax.swing.JPanel();
         panelControllerAttendance = new javax.swing.JPanel();
         labelShowAttendanceData = new javax.swing.JLabel();
@@ -248,7 +286,7 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         panelDocumentData = new javax.swing.JPanel();
         panelDocumentContent = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
-        jTable3 = new javax.swing.JTable();
+        tableDocumentData = new javax.swing.JTable();
         panelControllerDocument = new javax.swing.JPanel();
         labelDocumentOpen = new javax.swing.JLabel();
         labelDocumentDownload = new javax.swing.JLabel();
@@ -648,7 +686,16 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/calc.png"))); // NOI18N
         jLabel13.setText("Method:");
         panelPaymentForm.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 130, 120, -1));
-        panelPaymentForm.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 160, -1));
+
+        textfieldAmountPayment.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                textfieldAmountPaymentFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textfieldAmountPaymentFocusLost(evt);
+            }
+        });
+        panelPaymentForm.add(textfieldAmountPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 160, -1));
 
         jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/monitor.png"))); // NOI18N
         jLabel14.setText("Screenshot:");
@@ -666,9 +713,9 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         });
         panelPaymentForm.add(labelHidePaymentForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 40, 30, -1));
 
-        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/file.png"))); // NOI18N
-        panelPaymentForm.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 140, 100));
+        labelScreenshotPayment.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelScreenshotPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/file.png"))); // NOI18N
+        panelPaymentForm.add(labelScreenshotPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 140, 100));
 
         buttonSavePayment.setText("Save");
         buttonSavePayment.addActionListener(new java.awt.event.ActionListener() {
@@ -688,12 +735,9 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
         panelPaymentTable.setLayout(new java.awt.BorderLayout());
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tablePaymentData.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
                 "[ x ]", "Date Created", "Amount", "Method"
@@ -714,17 +758,17 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
                 return canEdit [columnIndex];
             }
         });
-        jTable1.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        jScrollPane2.setViewportView(jTable1);
-        if (jTable1.getColumnModel().getColumnCount() > 0) {
-            jTable1.getColumnModel().getColumn(0).setResizable(false);
-            jTable1.getColumnModel().getColumn(0).setPreferredWidth(35);
-            jTable1.getColumnModel().getColumn(1).setMinWidth(120);
-            jTable1.getColumnModel().getColumn(1).setPreferredWidth(120);
-            jTable1.getColumnModel().getColumn(2).setMinWidth(120);
-            jTable1.getColumnModel().getColumn(2).setPreferredWidth(120);
-            jTable1.getColumnModel().getColumn(3).setMinWidth(120);
-            jTable1.getColumnModel().getColumn(3).setPreferredWidth(120);
+        tablePaymentData.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        jScrollPane2.setViewportView(tablePaymentData);
+        if (tablePaymentData.getColumnModel().getColumnCount() > 0) {
+            tablePaymentData.getColumnModel().getColumn(0).setResizable(false);
+            tablePaymentData.getColumnModel().getColumn(0).setPreferredWidth(35);
+            tablePaymentData.getColumnModel().getColumn(1).setMinWidth(120);
+            tablePaymentData.getColumnModel().getColumn(1).setPreferredWidth(120);
+            tablePaymentData.getColumnModel().getColumn(2).setMinWidth(120);
+            tablePaymentData.getColumnModel().getColumn(2).setPreferredWidth(120);
+            tablePaymentData.getColumnModel().getColumn(3).setMinWidth(120);
+            tablePaymentData.getColumnModel().getColumn(3).setPreferredWidth(120);
         }
 
         panelPaymentTable.add(jScrollPane2, java.awt.BorderLayout.CENTER);
@@ -733,10 +777,6 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
         panelControllerPayment.setPreferredSize(new java.awt.Dimension(869, 75));
         panelControllerPayment.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        labelDeletePayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/delete24.png"))); // NOI18N
-        labelDeletePayment.setText("Delete");
-        panelControllerPayment.add(labelDeletePayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 30, 70, 30));
 
         labelAddPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/add24.png"))); // NOI18N
         labelAddPayment.setText("Add");
@@ -754,10 +794,6 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         });
         panelControllerPayment.add(labelAddPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 70, 30));
 
-        labelEditPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/edit24.png"))); // NOI18N
-        labelEditPayment.setText("Edit");
-        panelControllerPayment.add(labelEditPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 30, 60, 30));
-
         panelPaymentData.add(panelControllerPayment, java.awt.BorderLayout.PAGE_START);
 
         panelPayment.add(panelPaymentData, java.awt.BorderLayout.CENTER);
@@ -772,12 +808,9 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
         panelAttandanceAll.setLayout(new java.awt.BorderLayout());
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        tableAttendanceData.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
                 "[ x ]", "Class", "Status", "Date Created"
@@ -798,17 +831,17 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
                 return canEdit [columnIndex];
             }
         });
-        jTable2.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        jScrollPane3.setViewportView(jTable2);
-        if (jTable2.getColumnModel().getColumnCount() > 0) {
-            jTable2.getColumnModel().getColumn(0).setResizable(false);
-            jTable2.getColumnModel().getColumn(0).setPreferredWidth(35);
-            jTable2.getColumnModel().getColumn(1).setMinWidth(100);
-            jTable2.getColumnModel().getColumn(1).setPreferredWidth(100);
-            jTable2.getColumnModel().getColumn(2).setMinWidth(75);
-            jTable2.getColumnModel().getColumn(2).setPreferredWidth(75);
-            jTable2.getColumnModel().getColumn(3).setMinWidth(125);
-            jTable2.getColumnModel().getColumn(3).setPreferredWidth(125);
+        tableAttendanceData.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        jScrollPane3.setViewportView(tableAttendanceData);
+        if (tableAttendanceData.getColumnModel().getColumnCount() > 0) {
+            tableAttendanceData.getColumnModel().getColumn(0).setResizable(false);
+            tableAttendanceData.getColumnModel().getColumn(0).setPreferredWidth(35);
+            tableAttendanceData.getColumnModel().getColumn(1).setMinWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(1).setPreferredWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(2).setMinWidth(75);
+            tableAttendanceData.getColumnModel().getColumn(2).setPreferredWidth(75);
+            tableAttendanceData.getColumnModel().getColumn(3).setMinWidth(125);
+            tableAttendanceData.getColumnModel().getColumn(3).setPreferredWidth(125);
         }
 
         panelAttandanceAll.add(jScrollPane3, java.awt.BorderLayout.CENTER);
@@ -868,12 +901,9 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
         panelDocumentContent.setLayout(new java.awt.BorderLayout());
 
-        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+        tableDocumentData.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
                 "[ x ]", "Title", "Description", "URL"
@@ -894,16 +924,16 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
                 return canEdit [columnIndex];
             }
         });
-        jTable3.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        jScrollPane4.setViewportView(jTable3);
-        if (jTable3.getColumnModel().getColumnCount() > 0) {
-            jTable3.getColumnModel().getColumn(0).setResizable(false);
-            jTable3.getColumnModel().getColumn(0).setPreferredWidth(35);
-            jTable3.getColumnModel().getColumn(1).setPreferredWidth(400);
-            jTable3.getColumnModel().getColumn(2).setPreferredWidth(500);
-            jTable3.getColumnModel().getColumn(3).setMinWidth(0);
-            jTable3.getColumnModel().getColumn(3).setPreferredWidth(0);
-            jTable3.getColumnModel().getColumn(3).setMaxWidth(0);
+        tableDocumentData.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        jScrollPane4.setViewportView(tableDocumentData);
+        if (tableDocumentData.getColumnModel().getColumnCount() > 0) {
+            tableDocumentData.getColumnModel().getColumn(0).setResizable(false);
+            tableDocumentData.getColumnModel().getColumn(0).setPreferredWidth(35);
+            tableDocumentData.getColumnModel().getColumn(1).setPreferredWidth(400);
+            tableDocumentData.getColumnModel().getColumn(2).setPreferredWidth(500);
+            tableDocumentData.getColumnModel().getColumn(3).setMinWidth(0);
+            tableDocumentData.getColumnModel().getColumn(3).setPreferredWidth(0);
+            tableDocumentData.getColumnModel().getColumn(3).setMaxWidth(0);
         }
 
         panelDocumentContent.add(jScrollPane4, java.awt.BorderLayout.CENTER);
@@ -1155,6 +1185,9 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
     private void buttonSavePaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSavePaymentActionPerformed
         showPaymentForm(false);
+
+        postDataPayment();
+
     }//GEN-LAST:event_buttonSavePaymentActionPerformed
 
     private void labelHidePaymentFormMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelHidePaymentFormMouseClicked
@@ -1204,6 +1237,15 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
     }//GEN-LAST:event_labelDocumentDownloadMouseClicked
 
+    private void postDataPayment() {
+
+        RupiahGenerator rp = new RupiahGenerator();
+
+        Payment data = new Payment();
+        data.setAmount(ABORT);
+
+    }
+
     private void prepareBrowser() {
         // disabling textout
         ConfigureSysOut.disableSysout();
@@ -1217,14 +1259,14 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         if (!folder.exists()) {
             folder.mkdir();
         }
-        
+
         BrowserPreferences.setChromiumSwitches(
                 "--disable-gpu",
                 "--disable-gpu-compositing",
                 "--enable-begin-frame-scheduling",
                 "--software-rendering-fps=60"
         );
-        
+
         BrowserContextParams params = new BrowserContextParams(folder.getAbsolutePath());
         BrowserContext context1 = new BrowserContext(params);
         browser = new Browser(BrowserType.LIGHTWEIGHT, context1);
@@ -1267,6 +1309,21 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
         cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
     }//GEN-LAST:event_buttonVisitWhatsappActionPerformed
+
+    private void textfieldAmountPaymentFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPaymentFocusLost
+
+        if (!UIEffect.isEmpty(textfieldAmountPayment)) {
+            double d = Double.parseDouble(textfieldAmountPayment.getText());
+            textfieldAmountPayment.setText(rpGen.getText(d));
+        }
+
+    }//GEN-LAST:event_textfieldAmountPaymentFocusLost
+
+    private void textfieldAmountPaymentFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPaymentFocusGained
+        if(!UIEffect.isEmpty(textfieldAmountPayment)){
+           textfieldAmountPayment.setText(""+rpGen.getNumber(textfieldAmountPayment.getText()));
+        }
+    }//GEN-LAST:event_textfieldAmountPaymentFocusGained
 
     // for settings ui
     private void loadConfiguration() {
@@ -1374,7 +1431,6 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
@@ -1390,17 +1446,11 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
-    private javax.swing.JTable jTable3;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JLabel labelAddPayment;
     private javax.swing.JLabel labelClassRegistered;
     private javax.swing.JLabel labelClose;
-    private javax.swing.JLabel labelDeletePayment;
     private javax.swing.JLabel labelDocumentDownload;
     private javax.swing.JLabel labelDocumentOpen;
-    private javax.swing.JLabel labelEditPayment;
     private javax.swing.JLabel labelHidePaymentForm;
     private javax.swing.JLabel labelHistoryLast1;
     private javax.swing.JLabel labelHistoryLast2;
@@ -1416,6 +1466,7 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     private javax.swing.JLabel labelScheduleDay1;
     private javax.swing.JLabel labelScheduleDay2;
     private javax.swing.JLabel labelScheduleDay3;
+    private javax.swing.JLabel labelScreenshotPayment;
     private javax.swing.JLabel labelShowAttendanceData;
     private javax.swing.JLabel labelShowAttendanceStatistic;
     private javax.swing.JLabel labelTime;
@@ -1456,7 +1507,11 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     private javax.swing.JRadioButton radioNotifClass1HourSetting;
     private javax.swing.JRadioButton radioNotifSessionAtLeast1Setting;
     private javax.swing.JRadioButton radioNotifSessionLessThan3Setting;
+    private javax.swing.JTable tableAttendanceData;
+    private javax.swing.JTable tableDocumentData;
+    private javax.swing.JTable tablePaymentData;
     private javax.swing.JTextArea textareaAddressProfile;
+    private javax.swing.JTextField textfieldAmountPayment;
     private javax.swing.JTextField textfieldEmailProfile;
     private javax.swing.JTextField textfieldHomePhoneProfile;
     private javax.swing.JPasswordField textfieldPasswordProfile;
@@ -1465,9 +1520,29 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void checkResponse(String resp) {
-       Gson objectG = new Gson();
-        System.out.println("didapat "+ resp);
-       
+    public void checkResponse(String resp, String callingFromURL) {
+        Gson objectG = new Gson();
+
+        System.out.println("we have " + resp);
+        JSONChecker jchecker = new JSONChecker();
+
+        if (jchecker.isValid(resp)) {
+
+            String innerData = jchecker.getValueAsString("multi_data");
+
+            if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
+                Document[] dataIn = objectG.fromJson(innerData, Document[].class);
+                tabRender.render(tableDocumentData, dataIn);
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
+                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
+                tabRender.render(tableAttendanceData, dataIn);
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
+                Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
+                tabRender.render(tablePaymentData, dataIn);
+            }
+
+        }
+
     }
+
 }

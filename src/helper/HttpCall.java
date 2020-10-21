@@ -80,7 +80,7 @@ public class HttpCall {
 
     public interface HttpProcess {
 
-        void checkResponse(String resp);
+        void checkResponse(String resp, String urlTarget);
     }
 
     public void start(String urlTarget, int modeCall) {
@@ -132,7 +132,7 @@ public class HttpCall {
         }
 
         if (endResult != null && errorMessage == null) {
-            listener.checkResponse(endResult);
+            listener.checkResponse(endResult, urlTarget);
         }
 
     }

@@ -1127,7 +1127,11 @@
                                 </Constraint>
                               </Constraints>
                             </Component>
-                            <Component class="javax.swing.JTextField" name="jTextField1">
+                            <Component class="javax.swing.JTextField" name="textfieldAmountPayment">
+                              <Events>
+                                <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textfieldAmountPaymentFocusGained"/>
+                                <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="textfieldAmountPaymentFocusLost"/>
+                              </Events>
                               <Constraints>
                                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
                                   <AbsoluteConstraints x="10" y="100" width="160" height="-1"/>
@@ -1185,7 +1189,7 @@
                                 </Constraint>
                               </Constraints>
                             </Component>
-                            <Component class="javax.swing.JLabel" name="jLabel16">
+                            <Component class="javax.swing.JLabel" name="labelScreenshotPayment">
                               <Properties>
                                 <Property name="horizontalAlignment" type="int" value="0"/>
                                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
@@ -1256,10 +1260,10 @@
 
                                   <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
                                   <SubComponents>
-                                    <Component class="javax.swing.JTable" name="jTable1">
+                                    <Component class="javax.swing.JTable" name="tablePaymentData">
                                       <Properties>
                                         <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                                          <Table columnCount="4" rowCount="4">
+                                          <Table columnCount="4" rowCount="0">
                                             <Column editable="true" title="[ x ]" type="java.lang.Boolean"/>
                                             <Column editable="false" title="Date Created" type="java.lang.String"/>
                                             <Column editable="false" title="Amount" type="java.lang.String"/>
@@ -1316,19 +1320,6 @@
                                 <Property name="useNullLayout" type="boolean" value="false"/>
                               </Layout>
                               <SubComponents>
-                                <Component class="javax.swing.JLabel" name="labelDeletePayment">
-                                  <Properties>
-                                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                                      <Image iconType="3" name="/images/delete24.png"/>
-                                    </Property>
-                                    <Property name="text" type="java.lang.String" value="Delete"/>
-                                  </Properties>
-                                  <Constraints>
-                                    <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                                      <AbsoluteConstraints x="160" y="30" width="70" height="30"/>
-                                    </Constraint>
-                                  </Constraints>
-                                </Component>
                                 <Component class="javax.swing.JLabel" name="labelAddPayment">
                                   <Properties>
                                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
@@ -1347,19 +1338,6 @@
                                   <Constraints>
                                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
                                       <AbsoluteConstraints x="20" y="30" width="70" height="30"/>
-                                    </Constraint>
-                                  </Constraints>
-                                </Component>
-                                <Component class="javax.swing.JLabel" name="labelEditPayment">
-                                  <Properties>
-                                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                                      <Image iconType="3" name="/images/edit24.png"/>
-                                    </Property>
-                                    <Property name="text" type="java.lang.String" value="Edit"/>
-                                  </Properties>
-                                  <Constraints>
-                                    <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                                      <AbsoluteConstraints x="90" y="30" width="60" height="30"/>
                                     </Constraint>
                                   </Constraints>
                                 </Component>
@@ -1417,10 +1395,10 @@
 
                                       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
                                       <SubComponents>
-                                        <Component class="javax.swing.JTable" name="jTable2">
+                                        <Component class="javax.swing.JTable" name="tableAttendanceData">
                                           <Properties>
                                             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                                              <Table columnCount="4" rowCount="4">
+                                              <Table columnCount="4" rowCount="0">
                                                 <Column editable="true" title="[ x ]" type="java.lang.Boolean"/>
                                                 <Column editable="false" title="Class" type="java.lang.String"/>
                                                 <Column editable="false" title="Status" type="java.lang.String"/>
@@ -1576,10 +1554,10 @@
 
                                   <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
                                   <SubComponents>
-                                    <Component class="javax.swing.JTable" name="jTable3">
+                                    <Component class="javax.swing.JTable" name="tableDocumentData">
                                       <Properties>
                                         <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                                          <Table columnCount="4" rowCount="4">
+                                          <Table columnCount="4" rowCount="0">
                                             <Column editable="true" title="[ x ]" type="java.lang.Boolean"/>
                                             <Column editable="false" title="Title" type="java.lang.String"/>
                                             <Column editable="false" title="Description" type="java.lang.String"/>

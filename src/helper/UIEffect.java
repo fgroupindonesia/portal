@@ -21,6 +21,12 @@ import javax.swing.JTextField;
  */
 public class UIEffect {
 
+    public static boolean isEmpty(JTextField el){
+        
+        return (el.getText().trim().length()==0) ;
+            
+    }
+    
     public static void iconChanger(JFrame frame) {
         ImageIcon img = new ImageIcon(PathReference.LogoPath);
         frame.setIconImage(img.getImage());
