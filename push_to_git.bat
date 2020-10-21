@@ -1,5 +1,5 @@
 git add .
-git commit -m "moving the JxBrowser cache to APPDATA, adding inner Browser inside Tools."
+git commit -m "Adding HttpCall capabilities of sending GET/POST request."
 git push origin main
 git gc --prune
 pause

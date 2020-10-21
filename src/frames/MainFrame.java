@@ -5,18 +5,22 @@
  */
 package frames;
 
+import com.google.gson.Gson;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.BrowserContext;
 import com.teamdev.jxbrowser.chromium.BrowserContextParams;
+import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import helper.CMDExecutor;
 import helper.ChartGenerator;
 import helper.FileCopier;
+import helper.HttpCall;
 import helper.PathReference;
 import helper.preferences.SettingPreference;
 import helper.UIDragger;
 import helper.UIEffect;
+import helper.WebReference;
 import helper.jxbrowser.JxBrowserHackUtil;
 import helper.jxbrowser.JxVersion;
 import helper.jxbrowser.ConfigureSysOut;
@@ -46,7 +50,7 @@ import org.jfree.data.category.CategoryDataset;
  *
  * @author ASUS
  */
-public class MainFrame extends javax.swing.JFrame {
+public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProcess {
 
     /**
      * Creates new form MainFrame
@@ -55,6 +59,8 @@ public class MainFrame extends javax.swing.JFrame {
     CardLayout cardLayouterMain, cardLayouterAttendance;
     SettingPreference configuration = new SettingPreference();
     Browser browser = null;
+    HttpCall urlExecutor ;
+    
 
     public MainFrame(LoginFrame logRef) {
         loginFrame = logRef;
@@ -65,6 +71,15 @@ public class MainFrame extends javax.swing.JFrame {
         processNicely();
     }
 
+    
+    private void postHttpCall(){
+        
+        urlExecutor = new HttpCall(this);
+        urlExecutor.addData("username", "admin");
+        urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
+        
+    }
+    
     private void processNicely() {
         initComponents();
         addingTimer();
@@ -81,8 +96,11 @@ public class MainFrame extends javax.swing.JFrame {
         // for setting ui
         loadConfiguration();
 
-        // smoothly 
+        // prepare the browser tool
         prepareBrowser();
+        
+        // try to access api once again
+        postHttpCall();
     }
 
     private void showAttendanceStat(boolean stat) {
@@ -195,6 +213,8 @@ public class MainFrame extends javax.swing.JFrame {
         buttonRunTmv = new javax.swing.JButton();
         jLabel15 = new javax.swing.JLabel();
         buttonVisitChrome = new javax.swing.JButton();
+        jLabel18 = new javax.swing.JLabel();
+        buttonVisitWhatsapp = new javax.swing.JButton();
         panelPayment = new javax.swing.JPanel();
         panelPaymentForm = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
@@ -554,10 +574,10 @@ public class MainFrame extends javax.swing.JFrame {
 
         jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/teamviewer64.png"))); // NOI18N
-        jLabel11.setText("Teamviewer Version : ");
+        jLabel11.setText("TeamViewer");
         jLabel11.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jLabel11.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        panelTools.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 60, 160, 100));
+        panelTools.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 60, 90, 100));
 
         buttonTerminateTmv.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/terminate.png"))); // NOI18N
         buttonTerminateTmv.setText("Terminate");
@@ -568,7 +588,7 @@ public class MainFrame extends javax.swing.JFrame {
                 buttonTerminateTmvActionPerformed(evt);
             }
         });
-        panelTools.add(buttonTerminateTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 110, 110, -1));
+        panelTools.add(buttonTerminateTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 110, 110, -1));
 
         buttonRunTmv.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/play.png"))); // NOI18N
         buttonRunTmv.setText("Run Now");
@@ -578,14 +598,14 @@ public class MainFrame extends javax.swing.JFrame {
                 buttonRunTmvActionPerformed(evt);
             }
         });
-        panelTools.add(buttonRunTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 70, 110, -1));
+        panelTools.add(buttonRunTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 70, 110, -1));
 
         jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/chrome.png"))); // NOI18N
-        jLabel15.setText("Chrome Version :");
+        jLabel15.setText("Chrome");
         jLabel15.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jLabel15.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        panelTools.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 200, 160, 100));
+        panelTools.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 200, 90, 100));
 
         buttonVisitChrome.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/play.png"))); // NOI18N
         buttonVisitChrome.setText("Open Now");
@@ -595,7 +615,24 @@ public class MainFrame extends javax.swing.JFrame {
                 buttonVisitChromeActionPerformed(evt);
             }
         });
-        panelTools.add(buttonVisitChrome, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 210, 110, -1));
+        panelTools.add(buttonVisitChrome, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 210, 110, -1));
+
+        jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/whatsapp64.png"))); // NOI18N
+        jLabel18.setText("Whatsapp");
+        jLabel18.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel18.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        panelTools.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 60, 90, 100));
+
+        buttonVisitWhatsapp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/play.png"))); // NOI18N
+        buttonVisitWhatsapp.setText("Open Now");
+        buttonVisitWhatsapp.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        buttonVisitWhatsapp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonVisitWhatsappActionPerformed(evt);
+            }
+        });
+        panelTools.add(buttonVisitWhatsapp, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 70, 110, -1));
 
         panelContentCenter.add(panelTools, "panelTools");
 
@@ -1180,7 +1217,14 @@ public class MainFrame extends javax.swing.JFrame {
         if (!folder.exists()) {
             folder.mkdir();
         }
-
+        
+        BrowserPreferences.setChromiumSwitches(
+                "--disable-gpu",
+                "--disable-gpu-compositing",
+                "--enable-begin-frame-scheduling",
+                "--software-rendering-fps=60"
+        );
+        
         BrowserContextParams params = new BrowserContextParams(folder.getAbsolutePath());
         BrowserContext context1 = new BrowserContext(params);
         browser = new Browser(BrowserType.LIGHTWEIGHT, context1);
@@ -1214,8 +1258,15 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
         browser.loadURL("http://bing.com");
-        cardLayouterMain.show(panelContentCenter, "pannelInnerBrowser");
+
+        cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
     }//GEN-LAST:event_buttonVisitChromeActionPerformed
+
+    private void buttonVisitWhatsappActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitWhatsappActionPerformed
+        browser.loadURL("http://web.whatsapp.com");
+
+        cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+    }//GEN-LAST:event_buttonVisitWhatsappActionPerformed
 
     // for settings ui
     private void loadConfiguration() {
@@ -1311,6 +1362,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JButton buttonTerminateTmv;
     private javax.swing.JButton buttonTools;
     private javax.swing.JButton buttonVisitChrome;
+    private javax.swing.JButton buttonVisitWhatsapp;
     private javax.swing.JCheckBox checkboxAutoupdateToolsSetting;
     private javax.swing.JComboBox<String> combobocMethodPayment;
     private javax.swing.JComboBox<String> comboboxSystemLanguage;
@@ -1324,6 +1376,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
@@ -1410,4 +1463,11 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JTextField textfieldUsernameProfile;
     private javax.swing.JTextField textfieldWhatsappProfile;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void checkResponse(String resp) {
+       Gson objectG = new Gson();
+        System.out.println("didapat "+ resp);
+       
+    }
 }

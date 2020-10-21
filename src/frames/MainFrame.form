@@ -963,13 +963,13 @@
                             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                               <Image iconType="3" name="/images/teamviewer64.png"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Teamviewer Version : "/>
+                            <Property name="text" type="java.lang.String" value="TeamViewer"/>
                             <Property name="horizontalTextPosition" type="int" value="0"/>
                             <Property name="verticalTextPosition" type="int" value="3"/>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="50" y="60" width="160" height="100"/>
+                              <AbsoluteConstraints x="50" y="60" width="90" height="100"/>
                             </Constraint>
                           </Constraints>
                         </Component>
@@ -987,7 +987,7 @@
                           </Events>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="240" y="110" width="110" height="-1"/>
+                              <AbsoluteConstraints x="150" y="110" width="110" height="-1"/>
                             </Constraint>
                           </Constraints>
                         </Component>
@@ -1004,7 +1004,7 @@
                           </Events>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="240" y="70" width="110" height="-1"/>
+                              <AbsoluteConstraints x="150" y="70" width="110" height="-1"/>
                             </Constraint>
                           </Constraints>
                         </Component>
@@ -1014,13 +1014,13 @@
                             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                               <Image iconType="3" name="/images/chrome.png"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Chrome Version :"/>
+                            <Property name="text" type="java.lang.String" value="Chrome"/>
                             <Property name="horizontalTextPosition" type="int" value="0"/>
                             <Property name="verticalTextPosition" type="int" value="3"/>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="50" y="200" width="160" height="100"/>
+                              <AbsoluteConstraints x="50" y="200" width="90" height="100"/>
                             </Constraint>
                           </Constraints>
                         </Component>
@@ -1037,7 +1037,40 @@
                           </Events>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="240" y="210" width="110" height="-1"/>
+                              <AbsoluteConstraints x="150" y="210" width="110" height="-1"/>
+                            </Constraint>
+                          </Constraints>
+                        </Component>
+                        <Component class="javax.swing.JLabel" name="jLabel18">
+                          <Properties>
+                            <Property name="horizontalAlignment" type="int" value="0"/>
+                            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/images/whatsapp64.png"/>
+                            </Property>
+                            <Property name="text" type="java.lang.String" value="Whatsapp"/>
+                            <Property name="horizontalTextPosition" type="int" value="0"/>
+                            <Property name="verticalTextPosition" type="int" value="3"/>
+                          </Properties>
+                          <Constraints>
+                            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
+                              <AbsoluteConstraints x="290" y="60" width="90" height="100"/>
+                            </Constraint>
+                          </Constraints>
+                        </Component>
+                        <Component class="javax.swing.JButton" name="buttonVisitWhatsapp">
+                          <Properties>
+                            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/images/play.png"/>
+                            </Property>
+                            <Property name="text" type="java.lang.String" value="Open Now"/>
+                            <Property name="horizontalAlignment" type="int" value="2"/>
+                          </Properties>
+                          <Events>
+                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonVisitWhatsappActionPerformed"/>
+                          </Events>
+                          <Constraints>
+                            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
+                              <AbsoluteConstraints x="390" y="70" width="110" height="-1"/>
                             </Constraint>
                           </Constraints>
                         </Component>
