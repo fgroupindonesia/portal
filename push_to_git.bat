@@ -1,5 +1,5 @@
 git add .
-git commit -m "Adding refreshDocument() refreshAttendance() and refreshPayment() calls."
+git commit -m "Still fixing bugs when downloading user picture profile to local from API Server..."
 git push origin main
 git gc --prune
 pause

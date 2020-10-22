@@ -6,7 +6,11 @@
 package helper;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -21,32 +25,32 @@ import java.util.Scanner;
  * @author ASUS
  */
 public class HttpCall {
-
-    public HttpCall(HttpProcess hpro){
+    
+    public HttpCall(HttpProcess hpro) {
         listener = hpro;
     }
-    
+
     /**
      * @return the mainData
      */
     public String getMainData() {
-
+        
         StringBuilder postData = new StringBuilder();
-
+        
         for (FormData object : mainData) {
-
+            
             if (postData.length() != 0) {
                 postData.append("&");
             }
-
+            
             postData.append(object.getKey());
             postData.append("=");
             postData.append(object.getValue());
-
+            
         }
-
+        
         return postData.toString();
-
+        
     }
 
     /**
@@ -55,97 +59,143 @@ public class HttpCall {
     public void setMainData(ArrayList<FormData> mainData) {
         this.mainData = mainData;
     }
-
+    
     private ArrayList<FormData> mainData = new ArrayList<FormData>();
     public static final int METHOD_POST = 1;
     public static final int METHOD_GET = 2;
     private final String USER_AGENT = "Mozilla/5.0";
-
+    
     private String endResult, errorMessage;
-
+    private boolean writeDisk = false;
+    
+    public void writeToDisk(boolean b) {
+        writeDisk = b;
+    }
+    
+    public boolean isWriteToDisk() {
+        return writeDisk;
+    }
+    
     public void addData(String aKey, String aVal) {
         try {
             FormData entry = new FormData(aKey, aVal);
             mainData.add(entry);
         } catch (Exception error) {
-
+            
         }
     }
-
+    
     private HttpProcess listener;
-
+    
     public void setProcess(HttpProcess el) {
         listener = el;
     }
-
+    
+    private String getData(String key) {
+        String val = null;
+        for (FormData f : mainData) {
+            if (f.getKey().equalsIgnoreCase(key)) {
+                val = f.getValue();
+                break;
+            }
+        }
+        
+        return val;
+        
+    }
+    
     public interface HttpProcess {
-
+        
         void checkResponse(String resp, String urlTarget);
     }
-
+    
     public void start(String urlTarget, int modeCall) {
-
+        
         try {
-
+            
             byte[] postDataBytes = this.getMainData().getBytes("UTF-8");
-
+            
             URL url = new URL(urlTarget);
-
+            BufferedReader in = null;
+            
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-           
-
+            
             if (modeCall == METHOD_POST) {
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
                 conn.setDoOutput(true);
                 conn.getOutputStream().write(postDataBytes);
-
+                
             } else {
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("User-Agent", USER_AGENT);
                 int responseCode = conn.getResponseCode();
-
+                
             }
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream()));
+            // is this want to be writable?
+            if (isWriteToDisk()) {
+                System.out.println("We got propic " + getData("propic"));
+                //writeData(getEndResult(), getData("propic"));
 
-            String line;
-            StringBuilder response = new StringBuilder();
+                ByteArrayOutputStream responseBodyBaos = new ByteArrayOutputStream();
+                Scanner httpResponseBodyScanner = new Scanner(conn.getInputStream());
 
-            while ((line = in.readLine()) != null) {
-                response.append(line);
+                // Use a ByteArrayOutputStream to store the contents of the HTTP response body
+                while (httpResponseBodyScanner.hasNextLine()) {
+                    responseBodyBaos.write(httpResponseBodyScanner.nextLine().getBytes());
+                }
+                
+                // set the complete path locally
+                PathReference.setPropicFileName(getData("propic"));
+                
+                FileOutputStream fos = new FileOutputStream(new File(PathReference.UserPropicPath));                
+                responseBodyBaos.writeTo(fos);
+                responseBodyBaos.close();
+                httpResponseBodyScanner.close();
+                
+            } else {
+                in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                
+                String line;
+                StringBuilder response = new StringBuilder();
+                
+                while ((line = in.readLine()) != null) {
+                    response.append(line);
+                }
+                
+                setEndResult(response.toString());
+                in.close();
             }
-
-            setEndResult(response.toString());
-
+            
+            conn.disconnect();
+            
         } catch (Exception e) {
             setEndResult(urlTarget + " error " + e.getMessage());
-
+            
             Writer writer = new StringWriter();
             e.printStackTrace(new PrintWriter(writer));
             setErrorMessage(writer.toString());
             
             e.printStackTrace();
         }
-
+        
         if (endResult != null && errorMessage == null) {
             listener.checkResponse(endResult, urlTarget);
         }
-
+        
     }
-
+    
     public void start(String url) {
-
+        
         ByteArrayOutputStream responseBodyBaos = null;
         Scanner httpResponseBodyScanner = null;
         try {
             // Define server endpoint
             URL robotsUrl = new URL("http://www.techcoil.com/robots.txt");
             HttpURLConnection urlConnection = (HttpURLConnection) robotsUrl.openConnection();
-
+            
             httpResponseBodyScanner = new Scanner(urlConnection.getInputStream());
 
             // Use a ByteArrayOutputStream to store the contents of the HTTP response body
@@ -163,7 +213,7 @@ public class HttpCall {
             } else {
                 System.out.println("Not able to retrive robots.txt from server.");
             }
-
+            
         } catch (Exception ioException) {
             System.out.println("IOException occurred while contacting server.");
         } finally {
@@ -178,7 +228,7 @@ public class HttpCall {
                 httpResponseBodyScanner.close();
             }
         }
-
+        
     }
 
     /**
@@ -208,5 +258,5 @@ public class HttpCall {
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
-
+    
 }

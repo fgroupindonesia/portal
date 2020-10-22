@@ -21,12 +21,12 @@ import javax.swing.JTextField;
  */
 public class UIEffect {
 
-    public static boolean isEmpty(JTextField el){
-        
-        return (el.getText().trim().length()==0) ;
-            
+    public static boolean isEmpty(JTextField el) {
+
+        return (el.getText().trim().length() == 0);
+
     }
-    
+
     public static void iconChanger(JFrame frame) {
         ImageIcon img = new ImageIcon(PathReference.LogoPath);
         frame.setIconImage(img.getImage());
@@ -37,13 +37,21 @@ public class UIEffect {
         try {
             img = ImageIO.read(new File(aPath));
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            //set the default image
+            PathReference.setPropicFileName("default.png");
+            String newPath = PathReference.UserPropicPath;
+            try {
+                img = ImageIO.read(new File(newPath));
+            } catch (Exception ex) {
+
+            }
         }
-        
+
         // set the picture fitting 
         Image dimg = img.getScaledInstance(el.getWidth(), el.getHeight(),
                 Image.SCALE_SMOOTH);
-        
+
         el.setIcon(new ImageIcon(dimg));
     }
 

@@ -31,7 +31,7 @@ public class JSONChecker {
         if(jsonObject.get(keyName).isJsonArray()){
             val = jsonObject.get(keyName).getAsJsonArray().toString();
         }else{
-            val = jsonObject.get(keyName).getAsString();
+            val = jsonObject.get(keyName).getAsJsonObject().toString();
         }
         
         return val;
