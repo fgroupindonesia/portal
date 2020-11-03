@@ -1,5 +1,6 @@
 git add .
-git commit -m "Downloading user profile fixed bugs."
+git commit -m "updating token api call."
 git push origin main
 git gc --prune
+git pull
 pause

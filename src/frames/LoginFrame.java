@@ -15,6 +15,8 @@ import helper.SWTKey;
 import helper.SWThreadWorker;
 import helper.UIDragger;
 import helper.UIEffect;
+import helper.preferences.Keys;
+import helper.preferences.SettingPreference;
 import java.awt.CardLayout;
 import java.awt.Point;
 import java.util.concurrent.Executors;
@@ -122,14 +124,14 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         panelLogin.add(buttonLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 200, 80, 30));
 
         labelLinkLoginPhone.setForeground(new java.awt.Color(0, 102, 255));
-        labelLinkLoginPhone.setText("<html><u>Logging By Phone</u></html>");
+        labelLinkLoginPhone.setText("<html><u>Logging in By Phone</u></html>");
         labelLinkLoginPhone.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         labelLinkLoginPhone.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 labelLinkLoginPhoneMouseClicked(evt);
             }
         });
-        panelLogin.add(labelLinkLoginPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 200, 100, 30));
+        panelLogin.add(labelLinkLoginPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 200, 120, 30));
 
         panelHeader.setBackground(new java.awt.Color(255, 0, 0));
 
@@ -355,6 +357,8 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JTextField textfieldUsername;
     // End of variables declaration//GEN-END:variables
 
+    SettingPreference configuration = new SettingPreference();
+    
     @Override
     public void checkResponse(String resp, String callingFromURL) {
 
@@ -371,9 +375,17 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             AccessToken dataIn = objectG.fromJson(innerData, AccessToken.class);
             
             MainFrame nextFrame = new MainFrame(this);
+            nextFrame.setUsername(textfieldUsername.getText());
             nextFrame.setVisible(true);
             
+            // update for this token
+            configuration.setValue(Keys.TOKEN_API, dataIn.getToken());
+            configuration.setValue(Keys.DATE_EXPIRED_TOKEN, dataIn.getExpired_date());
             
+        }else{
+            // empty value for this token
+            configuration.setValue(Keys.TOKEN_API, "");
+            configuration.setValue(Keys.DATE_EXPIRED_TOKEN, "");
         }
 
     }

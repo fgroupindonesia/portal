@@ -71,6 +71,10 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     //   ExecutorService executorService = Executors.newFixedThreadPool(28);
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(28);
 
+    public void setUsername(String username){
+        labelWelcomeUser.setText("Hello " +username + "!");
+    }
+    
     public MainFrame(LoginFrame logRef) {
         loginFrame = logRef;
         processNicely();
@@ -271,7 +275,7 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         labelScheduleDay2 = new javax.swing.JLabel();
         labelScheduleDay3 = new javax.swing.JLabel();
         progressBarTotalSession = new javax.swing.JProgressBar();
-        jLabel20 = new javax.swing.JLabel();
+        labelWelcomeUser = new javax.swing.JLabel();
         labelReportBugs = new javax.swing.JLabel();
         labelTotalSessionCompleted = new javax.swing.JLabel();
         labelClassRegistered = new javax.swing.JLabel();
@@ -529,9 +533,9 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
         panelHome.add(progressBarTotalSession, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 260, 190, -1));
 
-        jLabel20.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/info.png"))); // NOI18N
-        jLabel20.setText("Welcome, USERNAME");
-        panelHome.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, -1, -1));
+        labelWelcomeUser.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/info.png"))); // NOI18N
+        labelWelcomeUser.setText("Welcome, USERNAME");
+        panelHome.add(labelWelcomeUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, -1, -1));
 
         labelReportBugs.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelReportBugs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bug32.png"))); // NOI18N
@@ -1489,7 +1493,6 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1526,6 +1529,7 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
     private javax.swing.JLabel labelShowAttendanceStatistic;
     private javax.swing.JLabel labelTime;
     private javax.swing.JLabel labelTotalSessionCompleted;
+    private javax.swing.JLabel labelWelcomeUser;
     private javax.swing.JPanel panelAttandanceAll;
     private javax.swing.JPanel panelAttandanceContent;
     private javax.swing.JPanel panelAttandanceStatistic;
@@ -1587,7 +1591,7 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         labelHistoryLast4.setVisible(false);
         labelHistoryLast5.setVisible(false);
     }
-
+    
     @Override
     public void checkResponse(String resp, String callingFromURL) {
         Gson objectG = new Gson();
