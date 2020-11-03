@@ -44,11 +44,9 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableModel;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
@@ -57,11 +55,13 @@ import org.jfree.data.category.CategoryDataset;
  *
  * @author ASUS
  */
+
 public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProcess {
 
     /**
      * Creates new form MainFrame
      */
+    
     LoginFrame loginFrame;
     CardLayout cardLayouterMain, cardLayouterAttendance;
     SettingPreference configuration = new SettingPreference();
@@ -154,7 +154,6 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         workPicture.setWork(SWTKey.WORK_REFRESH_PICTURE);
         workPicture.writeMode(true);
         workPicture.addData("propic", filename);
-        workPicture.addData("username", "asd");
 
         // executorService.submit(workSched);
         executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
@@ -548,7 +547,7 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
                 labelReportBugsMouseExited(evt);
             }
         });
-        panelHome.add(labelReportBugs, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 40, 60, 60));
+        panelHome.add(labelReportBugs, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 40, 80, 60));
 
         labelTotalSessionCompleted.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/note16.png"))); // NOI18N
         labelTotalSessionCompleted.setText("Total Session Completed: loading...");
@@ -1380,7 +1379,7 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
         
         if (!propic.contains("default")) {
             // set the propic
-            UIEffect.iconChanger(labelPropicUser, new File(propic).getAbsolutePath());
+            UIEffect.iconChanger(labelPropicUser, (propic));
         }
         
     }
@@ -1598,10 +1597,15 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
         if (jchecker.isValid(resp)) {
 
+            
+            boolean b = callingFromURL.contains(WebReference.PICTURE_USER);
+            
             ImageIcon okIcon = new ImageIcon(getClass().getResource("/images/ok16.png"));
             ImageIcon coinIcon = new ImageIcon(getClass().getResource("/images/coin.png"));
 
             String innerData = jchecker.getValueAsString("multi_data");
+            
+            //System.out.println(callingFromURL + " is valid " + b);
 
             if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
                 Document[] dataIn = objectG.fromJson(innerData, Document[].class);
@@ -1609,8 +1613,9 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
                 Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
                 tabRender.render(tableAttendanceData, dataIn);
-            } else if (callingFromURL.equalsIgnoreCase(WebReference.PICTURE_USER)) {
+            } else if (callingFromURL.contains(WebReference.PICTURE_USER)) {
                 
+                System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
                 loadUserPictureLocally();
 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
@@ -1629,12 +1634,12 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
                 textareaAddressProfile.setText(dataIn.getAddress());
 
                 // this is additional for obtaining the picture
-                if (!dataIn.getPropic().equalsIgnoreCase("default.jpg")) {
+                if (!dataIn.getPropic().equalsIgnoreCase("default.png")) {
                     System.out.println("calling the inside picture");
                     refreshUserPicture(dataIn.getPropic());
                 }
 
-                System.out.println("User PRofile is obtained!");
+                System.out.println("Complete User Profile data was obtained!");
                 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
                 History[] dataIn = objectG.fromJson(innerData, History[].class);
@@ -1695,6 +1700,8 @@ public class MainFrame extends javax.swing.JFrame implements HttpCall.HttpProces
 
             }
 
+        }else{
+            System.out.println(callingFromURL + " catched");
         }
 
     }

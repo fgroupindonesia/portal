@@ -14,9 +14,9 @@ import com.google.gson.JsonParser;
  */
 public class JSONChecker {
 
-    private  JsonObject jsonObject;
+    private JsonObject jsonObject;
 
-    public  boolean isValid(String resp) {
+    public boolean isValid(String resp) {
 
         jsonObject = new JsonParser().parse(resp).getAsJsonObject();
         //System.out.println("val " + jsonObject.get("status").getAsString());
@@ -25,23 +25,27 @@ public class JSONChecker {
 
     }
 
-    public  String getValueAsString(String keyName) {
+    public String getValueAsString(String keyName) {
         String val = null;
-        
-        if(jsonObject.get(keyName).isJsonArray()){
-            val = jsonObject.get(keyName).getAsJsonArray().toString();
-        }else{
-            val = jsonObject.get(keyName).getAsJsonObject().toString();
+
+        if (jsonObject.has(keyName)) {
+
+            if (jsonObject.get(keyName).isJsonArray()) {
+                val = jsonObject.get(keyName).getAsJsonArray().toString();
+            } else {
+                val = jsonObject.get(keyName).getAsJsonObject().toString();
+            }
+
         }
-        
+
         return val;
     }
 
-    public  boolean getValueAsBoolean(String keyName) {
+    public boolean getValueAsBoolean(String keyName) {
         return jsonObject.get(keyName).getAsBoolean();
     }
 
-    public  JsonObject getJSON() {
+    public JsonObject getJSON() {
         return jsonObject;
     }
 

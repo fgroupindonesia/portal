@@ -24,4 +24,6 @@ public class SWTKey {
     public static final int WORK_REFRESH_DASHBOARD = 8;
     public static final int WORK_REFRESH_HISTORY = 9;
     
+    public static final int WORK_LOGIN = 10;
+    
 }

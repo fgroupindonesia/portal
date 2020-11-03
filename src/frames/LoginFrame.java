@@ -5,32 +5,42 @@
  */
 package frames;
 
+import beans.AccessToken;
+
+import com.google.gson.Gson;
 import helper.BarcodeGenerator;
+import helper.HttpCall;
+import helper.JSONChecker;
+import helper.SWTKey;
+import helper.SWThreadWorker;
 import helper.UIDragger;
 import helper.UIEffect;
 import java.awt.CardLayout;
 import java.awt.Point;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author ASUS
  */
-public class LoginFrame extends javax.swing.JFrame {
+public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProcess {
 
     /**
      * Creates new form Login
      */
     Point initialClick;
     CardLayout cardLayouter;
-    
-    
+
     public LoginFrame() {
         initComponents();
 //        this.setShape(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 50, 50));
         UIDragger.setFrame(this);
         UIEffect.iconChanger(this);
-        
+
         labelSpacing.setText("");
+        labelLoading.setVisible(false);
         cardLayouter = (CardLayout) (panelBase.getLayout());
     }
 
@@ -56,6 +66,7 @@ public class LoginFrame extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         textfieldPass = new javax.swing.JPasswordField();
         labelSpacing = new javax.swing.JLabel();
+        labelLoading = new javax.swing.JLabel();
         panelPhoneLogin = new javax.swing.JPanel();
         labelBarcode = new javax.swing.JLabel();
         labelLinkNormalLogin = new javax.swing.JLabel();
@@ -83,12 +94,18 @@ public class LoginFrame extends javax.swing.JFrame {
         jLabel1.setText("Username:");
         panelLogin.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 70, 150, -1));
 
+        textfieldUsername.setText("asd");
         textfieldUsername.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 textfieldUsernameFocusGained(evt);
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
                 textfieldUsernameFocusLost(evt);
+            }
+        });
+        textfieldUsername.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textfieldUsernameActionPerformed(evt);
             }
         });
         panelLogin.add(textfieldUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, 250, -1));
@@ -155,6 +172,7 @@ public class LoginFrame extends javax.swing.JFrame {
         jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock64.png"))); // NOI18N
         panelLogin.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 80, 110));
 
+        textfieldPass.setText("asd");
         textfieldPass.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 textfieldPassFocusGained(evt);
@@ -163,10 +181,20 @@ public class LoginFrame extends javax.swing.JFrame {
                 textfieldPassFocusLost(evt);
             }
         });
+        textfieldPass.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textfieldPassActionPerformed(evt);
+            }
+        });
         panelLogin.add(textfieldPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, 250, -1));
 
         labelSpacing.setText("empty space");
-        panelLogin.add(labelSpacing, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 230, 270, 30));
+        panelLogin.add(labelSpacing, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 230, 130, 30));
+
+        labelLoading.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        labelLoading.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
+        labelLoading.setText("Loading...");
+        panelLogin.add(labelLoading, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 230, 150, 30));
 
         panelBase.add(panelLogin, "panelLogin");
 
@@ -194,22 +222,22 @@ public class LoginFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void panelBaseMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelBaseMousePressed
-        
+
         UIDragger.mousePressed(evt);
-        
+
 
     }//GEN-LAST:event_panelBaseMousePressed
 
     private void panelBaseMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelBaseMouseDragged
-        
-      UIDragger.mouseDragged(evt);
+
+        UIDragger.mouseDragged(evt);
 
     }//GEN-LAST:event_panelBaseMouseDragged
 
     private void labelLinkLoginPhoneMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkLoginPhoneMouseClicked
         BarcodeGenerator qr = new BarcodeGenerator();
         qr.create("sample", labelBarcode);
-        
+
         cardLayouter.show(panelBase, "panelPhoneLogin");
     }//GEN-LAST:event_labelLinkLoginPhoneMouseClicked
 
@@ -238,12 +266,46 @@ public class LoginFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_textfieldPassFocusLost
 
     private void buttonLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLoginActionPerformed
-        
-        MainFrame f = new MainFrame(this);
-        f.setVisible(true);
-        this.hide();
-        
+
+        processLogging();
+
     }//GEN-LAST:event_buttonLoginActionPerformed
+
+    ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
+    SWThreadWorker workLogging = new SWThreadWorker(this);
+
+    private void apiLogging() {
+
+        workLogging.setWork(SWTKey.WORK_LOGIN);
+        workLogging.addData("username", textfieldUsername.getText());
+        workLogging.addData("password", textfieldPass.getText());
+
+        executorService.schedule(workLogging, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void processLogging() {
+
+        if (!UIEffect.isEmpty(textfieldUsername) && !UIEffect.isEmpty(textfieldPass)) {
+
+            labelLoading.setVisible(true);
+
+            apiLogging();
+
+        } else {
+            labelLoading.setVisible(false);
+            UIEffect.popup("Please input your username & password!", this);
+        }
+
+    }
+
+    private void textfieldPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfieldPassActionPerformed
+        processLogging();
+    }//GEN-LAST:event_textfieldPassActionPerformed
+
+    private void textfieldUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfieldUsernameActionPerformed
+        processLogging();
+    }//GEN-LAST:event_textfieldUsernameActionPerformed
 
     /**
      * @param args the command line arguments
@@ -283,6 +345,7 @@ public class LoginFrame extends javax.swing.JFrame {
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelLinkLoginPhone;
     private javax.swing.JLabel labelLinkNormalLogin;
+    private javax.swing.JLabel labelLoading;
     private javax.swing.JLabel labelSpacing;
     private javax.swing.JPanel panelBase;
     private javax.swing.JPanel panelHeader;
@@ -291,4 +354,27 @@ public class LoginFrame extends javax.swing.JFrame {
     private javax.swing.JPasswordField textfieldPass;
     private javax.swing.JTextField textfieldUsername;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void checkResponse(String resp, String callingFromURL) {
+
+        labelLoading.setVisible(false);
+
+        Gson objectG = new Gson();
+
+        System.out.println(callingFromURL + " have " + resp);
+        JSONChecker jchecker = new JSONChecker();
+
+        if (jchecker.isValid(resp)) {
+
+            String innerData = jchecker.getValueAsString("multi_data");
+            AccessToken dataIn = objectG.fromJson(innerData, AccessToken.class);
+            
+            MainFrame nextFrame = new MainFrame(this);
+            nextFrame.setVisible(true);
+            
+            
+        }
+
+    }
 }

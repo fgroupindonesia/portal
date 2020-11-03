@@ -11,6 +11,7 @@ import com.teamdev.jxbrowser.chromium.BrowserContextParams;
 import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
+import frames.LoginFrame;
 import frames.MainFrame;
 import helper.jxbrowser.ConfigureSysOut;
 import helper.jxbrowser.JxBrowserHackUtil;
@@ -36,11 +37,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     public int whatWork() {
         return work;
     }
-    
-    public String whatWorkAsString(){
-    
+
+    public String whatWorkAsString() {
+
         String name = null;
-        
+
         switch (whatWork()) {
             case SWTKey.WORK_BROWSER_PREPARE:
                 name = "refresh_browser";
@@ -64,21 +65,23 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 name = "refresh_profile";
                 break;
             case SWTKey.WORK_REFRESH_PICTURE:
-               name = "refresh_picture";
+                name = "refresh_picture";
+                break;
+            case SWTKey.WORK_LOGIN:
+                name = "login";
                 break;
 
         }
-        
+
         return name;
-        
+
     }
 
     @Override
     protected Object doInBackground() throws Exception {
 
-         System.out.println("I am working on " + whatWorkAsString());
+        System.out.println("I am working on " + whatWorkAsString());
 
-        
         switch (whatWork()) {
             case SWTKey.WORK_BROWSER_PREPARE:
                 prepareBrowser();
@@ -104,10 +107,12 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_PICTURE:
                 refreshPictureData();
                 break;
+            case SWTKey.WORK_LOGIN:
+                userLogin();
+                break;
 
         }
 
-       
         return null;
     }
 
@@ -121,22 +126,34 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
         }
 
-        System.out.println("SWTHreadWorker is done! " + whatWorkAsString());
+        System.out.println("SWThreadWorker is done! " + whatWorkAsString());
     }
 
     Browser browser;
     JPanel panelInnerBrowser;
     private MainFrame mainFrame;
+    private LoginFrame  loginFrame;
     HttpCall urlExecutor;
 
     public SWThreadWorker(MainFrame mfx) {
         setMainFrame(mfx);
         urlExecutor = new HttpCall(mainFrame);
     }
+    
+    public SWThreadWorker(LoginFrame mfx){
+        setLoginFrame(mfx);
+        urlExecutor = new HttpCall(loginFrame);
+    }
 
     public void setMainFrame(MainFrame mf) {
         mainFrame = mf;
     }
+    
+    public void setLoginFrame(LoginFrame mf) {
+        loginFrame = mf;
+    }
+    
+    
 
     public void setBrowser(Browser br) {
         browser = br;
@@ -149,35 +166,38 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     public void addData(String k, String v) {
         urlExecutor.addData(k, v);
     }
-    
-    public void writeMode(boolean b){
+
+    public void writeMode(boolean b) {
         urlExecutor.writeToDisk(b);
+    }
+    
+    private void userLogin(){
+        urlExecutor.start(WebReference.LOGIN_USER, HttpCall.METHOD_POST);
     }
 
     private void refreshHistoryData() {
 
-       
         urlExecutor.start(WebReference.LAST_HISTORY, HttpCall.METHOD_POST);
     }
 
     private void refreshProfileData() {
         urlExecutor.start(WebReference.PROFILE_USER, HttpCall.METHOD_POST);
     }
-    
+
     private void refreshPictureData() {
-        
-        urlExecutor.start(WebReference.PICTURE_USER, HttpCall.METHOD_POST);
+
+        // the url is manually defined here
+        String urlManual = WebReference.PICTURE_USER + "?propic=" + urlExecutor.getData("propic");
+        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
 
     private void refreshDocumentData() {
 
-       
         urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
     }
 
     private void refreshScheduleData() {
 
-       
         urlExecutor.start(WebReference.ALL_SCHEDULE, HttpCall.METHOD_POST);
     }
 
@@ -189,7 +209,6 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     private void refreshPaymentData() {
 
-        
         urlExecutor.start(WebReference.ALL_PAYMENT, HttpCall.METHOD_POST);
     }
 

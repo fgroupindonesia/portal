@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 /**
@@ -20,6 +21,12 @@ import javax.swing.JTextField;
  * @author ASUS
  */
 public class UIEffect {
+
+    public static void popup(String message, JFrame ref) {
+
+        JOptionPane.showMessageDialog(ref, message);
+        
+    }
 
     public static boolean isEmpty(JTextField el) {
 
@@ -35,12 +42,16 @@ public class UIEffect {
     public static void iconChanger(JLabel el, String aPath) {
         BufferedImage img = null;
         try {
+            System.out.println("The new data stored is " + aPath);
             img = ImageIO.read(new File(aPath));
+            //System.out.println("complete ");
         } catch (Exception e) {
             //e.printStackTrace();
             //set the default image
+            //System.out.println("what ");
             PathReference.setPropicFileName("default.png");
             String newPath = PathReference.UserPropicPath;
+
             try {
                 img = ImageIO.read(new File(newPath));
             } catch (Exception ex) {
@@ -52,7 +63,7 @@ public class UIEffect {
         Image dimg = img.getScaledInstance(el.getWidth(), el.getHeight(),
                 Image.SCALE_SMOOTH);
 
-        el.setIcon(new ImageIcon(dimg));
+        el.setIcon(new ImageIcon(img));
     }
 
     public static void focusGained(JLabel el) {
