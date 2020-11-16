@@ -19,9 +19,11 @@ import helper.preferences.Keys;
 import helper.preferences.SettingPreference;
 import java.awt.CardLayout;
 import java.awt.Point;
+import java.awt.event.KeyEvent;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.swing.ImageIcon;
 
 /**
  *
@@ -34,6 +36,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
      */
     Point initialClick;
     CardLayout cardLayouter;
+    boolean internetExist, formCompleted;
 
     public LoginFrame() {
         initComponents();
@@ -108,6 +111,17 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         textfieldUsername.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 textfieldUsernameActionPerformed(evt);
+            }
+        });
+        textfieldUsername.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                textfieldUsernameKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textfieldUsernameKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textfieldUsernameKeyTyped(evt);
             }
         });
         panelLogin.add(textfieldUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, 250, -1));
@@ -188,15 +202,26 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 textfieldPassActionPerformed(evt);
             }
         });
+        textfieldPass.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                textfieldPassKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textfieldPassKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textfieldPassKeyTyped(evt);
+            }
+        });
         panelLogin.add(textfieldPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 150, 250, -1));
 
         labelSpacing.setText("empty space");
-        panelLogin.add(labelSpacing, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 230, 130, 30));
+        panelLogin.add(labelSpacing, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 230, 130, 30));
 
         labelLoading.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         labelLoading.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
         labelLoading.setText("Loading...");
-        panelLogin.add(labelLoading, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 230, 150, 30));
+        panelLogin.add(labelLoading, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 230, 220, 30));
 
         panelBase.add(panelLogin, "panelLogin");
 
@@ -269,45 +294,119 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void buttonLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLoginActionPerformed
 
-        processLogging();
+        proceedTestLoggingIn();
 
     }//GEN-LAST:event_buttonLoginActionPerformed
 
+    private void proceedTestLoggingIn() {
+
+        showMessageLoading(true, "loading...");
+        buttonLogin.setEnabled(false);
+
+        if (!internetExist) {
+            testInternet();
+        } else {
+            apiLogging();
+        }
+
+    }
+
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
-    SWThreadWorker workLogging = new SWThreadWorker(this);
+
+    private void testInternet() {
+        SWThreadWorker workTestInternet = new SWThreadWorker(this);
+        workTestInternet.setWork(SWTKey.WORK_TEST_INTERNET);
+        executorService.schedule(workTestInternet, 4, TimeUnit.SECONDS);
+
+        labelLoading.setVisible(true);
+    }
 
     private void apiLogging() {
+        SWThreadWorker workLogging = new SWThreadWorker(this);
 
         workLogging.setWork(SWTKey.WORK_LOGIN);
         workLogging.addData("username", textfieldUsername.getText());
         workLogging.addData("password", textfieldPass.getText());
 
-        executorService.schedule(workLogging, 2, TimeUnit.SECONDS);
-
+        executorService.schedule(workLogging, 3, TimeUnit.SECONDS);
+        labelLoading.setVisible(true);
     }
 
-    private void processLogging() {
+    private void checkFormFilled() {
 
         if (!UIEffect.isEmpty(textfieldUsername) && !UIEffect.isEmpty(textfieldPass)) {
-
-            labelLoading.setVisible(true);
-
-            apiLogging();
-
+            buttonLogin.setEnabled(true);
+            showErrorLoading(false, null);
+            formCompleted = true;
         } else {
-            labelLoading.setVisible(false);
-            UIEffect.popup("Please input your username & password!", this);
+            buttonLogin.setEnabled(false);
+            showErrorLoading(true, "Invalid username & password!");
+            formCompleted = false;
         }
 
     }
 
+    private void showMessageLoading(boolean b, String mess) {
+        ImageIcon err = new ImageIcon(getClass().getResource("/images/loadingprel.gif"));
+        labelLoading.setVisible(b);
+        labelLoading.setIcon(err);
+        labelLoading.setText(mess);
+    }
+
+    private void showErrorLoading(boolean b, String mess) {
+        if (b) {
+            // show
+            ImageIcon err = new ImageIcon(getClass().getResource("/images/terminate.png"));
+
+            labelLoading.setIcon(err);
+            labelLoading.setText(mess);
+        }
+
+        labelLoading.setVisible(b);
+    }
+
+
     private void textfieldPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfieldPassActionPerformed
-        processLogging();
+        if (formCompleted) {
+            proceedTestLoggingIn();
+        }
     }//GEN-LAST:event_textfieldPassActionPerformed
 
     private void textfieldUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfieldUsernameActionPerformed
-        processLogging();
+        if (formCompleted) {
+            proceedTestLoggingIn();
+        }
     }//GEN-LAST:event_textfieldUsernameActionPerformed
+
+    private void textfieldUsernameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldUsernameKeyReleased
+        if (!evt.isActionKey() && evt.getKeyCode() != KeyEvent.VK_ENTER) {
+            checkFormFilled();
+        }
+    }//GEN-LAST:event_textfieldUsernameKeyReleased
+
+    private void textfieldPassKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldPassKeyReleased
+        if (!evt.isActionKey() && evt.getKeyCode() != KeyEvent.VK_ENTER) {
+            checkFormFilled();
+        }
+    }//GEN-LAST:event_textfieldPassKeyReleased
+
+    private void textfieldUsernameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldUsernameKeyPressed
+
+
+    }//GEN-LAST:event_textfieldUsernameKeyPressed
+
+    private void textfieldPassKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldPassKeyPressed
+
+    }//GEN-LAST:event_textfieldPassKeyPressed
+
+    private void textfieldUsernameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldUsernameKeyTyped
+
+    }//GEN-LAST:event_textfieldUsernameKeyTyped
+
+    private void textfieldPassKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldPassKeyTyped
+
+
+    }//GEN-LAST:event_textfieldPassKeyTyped
 
     /**
      * @param args the command line arguments
@@ -337,6 +436,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         });
     }
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonLogin;
     private javax.swing.JLabel jLabel1;
@@ -358,11 +458,9 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     // End of variables declaration//GEN-END:variables
 
     SettingPreference configuration = new SettingPreference();
-    
+
     @Override
     public void checkResponse(String resp, String callingFromURL) {
-
-        labelLoading.setVisible(false);
 
         Gson objectG = new Gson();
 
@@ -371,18 +469,45 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         if (jchecker.isValid(resp)) {
 
-            String innerData = jchecker.getValueAsString("multi_data");
-            AccessToken dataIn = objectG.fromJson(innerData, AccessToken.class);
-            
-            MainFrame nextFrame = new MainFrame(this);
-            nextFrame.setUsername(textfieldUsername.getText());
-            nextFrame.setVisible(true);
-            
-            // update for this token
-            configuration.setValue(Keys.TOKEN_API, dataIn.getToken());
-            configuration.setValue(Keys.DATE_EXPIRED_TOKEN, dataIn.getExpired_date());
-            
-        }else{
+            labelLoading.setVisible(false);
+
+            // this is for testing internet availability only
+            if (callingFromURL == null) {
+
+                // continue executing
+                internetExist = true;
+                apiLogging();
+
+            } else {
+                // now this is the usual process of logging in
+
+                String innerData = jchecker.getValueAsString("multi_data");
+                AccessToken dataIn = objectG.fromJson(innerData, AccessToken.class);
+
+                if (textfieldUsername.getText().equalsIgnoreCase("admin")) {
+                    MainAdminFrame nextFrame = new MainAdminFrame(this);
+                    nextFrame.setVisible(true);
+                } else {
+                    MainClientFrame nextFrame = new MainClientFrame(this);
+                    nextFrame.setUsername(textfieldUsername.getText());
+                    nextFrame.setVisible(true);
+                }
+
+                // update for this token
+                configuration.setValue(Keys.TOKEN_API, dataIn.getToken());
+                configuration.setValue(Keys.DATE_EXPIRED_TOKEN, dataIn.getExpired_date());
+
+                // dont let the button leave alone
+                buttonLogin.setEnabled(true);
+                this.hide();
+
+            }
+
+        } else {
+            // set the error icon
+            internetExist = false;
+            showErrorLoading(true, "please check your internet!");
+
             // empty value for this token
             configuration.setValue(Keys.TOKEN_API, "");
             configuration.setValue(Keys.DATE_EXPIRED_TOKEN, "");

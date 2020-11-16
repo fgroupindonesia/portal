@@ -105,6 +105,30 @@ public class HttpCall {
         void checkResponse(String resp, String urlTarget);
     }
 
+    public boolean isInternetAlive() {
+        boolean stat = false;
+        
+        try {
+            URL url = new URL(WebReference.REMOTE);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.connect();
+            conn.getInputStream().close();
+
+            // set the url target as NULL
+            // manually defining success json
+            endResult = "{\"status\":\"valid\"}";
+
+            stat = true;
+        } catch (Exception e) {
+            endResult = "{\"status\":\"invalid\"}";
+            stat = false;
+        }
+
+        setEndResult(endResult);
+        listener.checkResponse(endResult, null);
+        return stat;
+    }
+
     public void start(String urlTarget, int modeCall) {
 
         try {
@@ -119,7 +143,7 @@ public class HttpCall {
             if (!isWriteToDisk()) {
 
                 conn = (HttpURLConnection) url.openConnection();
-                
+
                 if (modeCall == METHOD_POST) {
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -144,11 +168,11 @@ public class HttpCall {
                 String fileName = PathReference.UserPropicPath;
 
                 // download here
-               FileCopier.downloadFromURL(url, fileName);
+                FileCopier.downloadFromURL(url, fileName);
 
-               // manually defining success json
-               endResult = "{\"status\":\"valid\"}";
-               
+                // manually defining success json
+                endResult = "{\"status\":\"valid\"}";
+
             } else {
                 in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -162,10 +186,10 @@ public class HttpCall {
                 setEndResult(response.toString());
                 in.close();
             }
-            
-            if(conn!=null)
-            conn.disconnect();
-            
+
+            if (conn != null) {
+                conn.disconnect();
+            }
 
         } catch (Exception e) {
             setEndResult(urlTarget + " error " + e.getMessage());

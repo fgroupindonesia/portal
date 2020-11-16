@@ -12,7 +12,7 @@ import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import frames.LoginFrame;
-import frames.MainFrame;
+import frames.MainClientFrame;
 import helper.jxbrowser.ConfigureSysOut;
 import helper.jxbrowser.JxBrowserHackUtil;
 import helper.jxbrowser.JxVersion;
@@ -43,6 +43,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String name = null;
 
         switch (whatWork()) {
+            case SWTKey.WORK_TEST_INTERNET:
+                name = "test_internet";
+                break;
             case SWTKey.WORK_BROWSER_PREPARE:
                 name = "refresh_browser";
                 break;
@@ -83,6 +86,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         System.out.println("I am working on " + whatWorkAsString());
 
         switch (whatWork()) {
+             case SWTKey.WORK_TEST_INTERNET:
+                testInternet();
+                break;
             case SWTKey.WORK_BROWSER_PREPARE:
                 prepareBrowser();
                 break;
@@ -131,11 +137,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     Browser browser;
     JPanel panelInnerBrowser;
-    private MainFrame mainFrame;
+    private MainClientFrame mainFrame;
     private LoginFrame  loginFrame;
     HttpCall urlExecutor;
 
-    public SWThreadWorker(MainFrame mfx) {
+    public SWThreadWorker(MainClientFrame mfx) {
         setMainFrame(mfx);
         urlExecutor = new HttpCall(mainFrame);
     }
@@ -145,7 +151,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor = new HttpCall(loginFrame);
     }
 
-    public void setMainFrame(MainFrame mf) {
+    public void setMainFrame(MainClientFrame mf) {
         mainFrame = mf;
     }
     
@@ -169,6 +175,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     public void writeMode(boolean b) {
         urlExecutor.writeToDisk(b);
+    }
+    
+    private void testInternet(){
+         urlExecutor.isInternetAlive();
     }
     
     private void userLogin(){
@@ -203,7 +213,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     private void refreshAttendanceData() {
 
-        urlExecutor.addData("username", "asd");
+     
         urlExecutor.start(WebReference.ALL_ATTENDANCE, HttpCall.METHOD_POST);
     }
 
