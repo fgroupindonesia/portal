@@ -5,16 +5,44 @@
  */
 package frames;
 
+import beans.Document;
+import beans.User;
+import com.google.gson.Gson;
+import helper.HttpCall;
+import helper.JSONChecker;
+import helper.SWTKey;
+import helper.SWThreadWorker;
+import helper.TableRenderer;
+import helper.UIEffect;
+import helper.WebReference;
+import java.awt.CardLayout;
 import java.awt.Frame;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 
 /**
  *
  * @author ASUS
  */
-public class MainAdminFrame extends javax.swing.JFrame {
+public class MainAdminFrame extends javax.swing.JFrame implements HttpCall.HttpProcess {
 
-     LoginFrame loginFrame;
-    
+    File propicFile;
+    short idForm;
+    TableRenderer tabRender = new TableRenderer();
+    LoginFrame loginFrame;
+    CardLayout cardLayoutInnerCenter;
+    CardLayout cardLayoutEntity;
+    ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
+
+// for every entity form has this edit mode
+    boolean editMode;
+
     /**
      * Creates new form MainAdminFrame
      */
@@ -24,10 +52,35 @@ public class MainAdminFrame extends javax.swing.JFrame {
 
     public MainAdminFrame(LoginFrame lg) {
         initComponents();
-        
+
         loginFrame = lg;
+        cardLayoutInnerCenter = (CardLayout) panelInnerCenter.getLayout();
+
+        refreshUser();
+        // hide the home link
+        labelBackToHome.setVisible(false);
     }
-    
+
+    private void deleteUser(ArrayList<String> dataIn) {
+
+        for (String d : dataIn) {
+            SWThreadWorker workUser = new SWThreadWorker(this);
+            workUser.addData("username", d);
+            workUser.setWork(SWTKey.WORK_USER_DELETE);
+            executorService.schedule(workUser, 1, TimeUnit.SECONDS);
+        }
+
+    }
+
+    private void refreshUser() {
+
+        SWThreadWorker workUser = new SWThreadWorker(this);
+
+        workUser.setWork(SWTKey.WORK_REFRESH_USER);
+        executorService.schedule(workUser, 2, TimeUnit.SECONDS);
+
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -37,6 +90,7 @@ public class MainAdminFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        fileChooserPicture = new javax.swing.JFileChooser();
         panelHeader = new javax.swing.JPanel();
         labelClose = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -53,10 +107,34 @@ public class MainAdminFrame extends javax.swing.JFrame {
         buttonSettings = new javax.swing.JButton();
         buttonFuture2 = new javax.swing.JButton();
         buttonFuture3 = new javax.swing.JButton();
+        panelUser = new javax.swing.JPanel();
         panelUserManagement = new javax.swing.JPanel();
+        panelUserControl = new javax.swing.JPanel();
+        buttonAddUser = new javax.swing.JButton();
+        buttonEditUser = new javax.swing.JButton();
+        buttonDeleteUser = new javax.swing.JButton();
+        panelUserTable = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tableUserData = new javax.swing.JTable();
+        panelUserForm = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        buttonCancelUserForm = new javax.swing.JButton();
+        textfieldUsername = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        textfieldPass = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        textfieldEmail = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        textareaAddress = new javax.swing.JTextArea();
+        textfieldMobile = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        labelPreviewPicture = new javax.swing.JLabel();
+        labelLinkChangePicture = new javax.swing.JLabel();
+        buttonSaveUserForm = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        labelBackToHome = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -106,6 +184,11 @@ public class MainAdminFrame extends javax.swing.JFrame {
         buttonUserManagement.setText("Users");
         buttonUserManagement.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonUserManagement.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        buttonUserManagement.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonUserManagementActionPerformed(evt);
+            }
+        });
         panelHome.add(buttonUserManagement);
 
         buttonDocumentManagement.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/file.png"))); // NOI18N
@@ -150,20 +233,132 @@ public class MainAdminFrame extends javax.swing.JFrame {
         buttonFuture3.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         panelHome.add(buttonFuture3);
 
-        panelInnerCenter.add(panelHome, "card2");
+        panelInnerCenter.add(panelHome, "panelHome");
 
-        javax.swing.GroupLayout panelUserManagementLayout = new javax.swing.GroupLayout(panelUserManagement);
-        panelUserManagement.setLayout(panelUserManagementLayout);
-        panelUserManagementLayout.setHorizontalGroup(
-            panelUserManagementLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 658, Short.MAX_VALUE)
-        );
-        panelUserManagementLayout.setVerticalGroup(
-            panelUserManagementLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 297, Short.MAX_VALUE)
-        );
+        panelUser.setLayout(new java.awt.CardLayout());
 
-        panelInnerCenter.add(panelUserManagement, "card3");
+        panelUserManagement.setLayout(new java.awt.BorderLayout());
+
+        panelUserControl.setPreferredSize(new java.awt.Dimension(658, 40));
+        panelUserControl.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        buttonAddUser.setText("Add");
+        buttonAddUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonAddUserActionPerformed(evt);
+            }
+        });
+        panelUserControl.add(buttonAddUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 5, 60, -1));
+
+        buttonEditUser.setText("Edit");
+        panelUserControl.add(buttonEditUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(514, 5, 60, -1));
+
+        buttonDeleteUser.setText("Delete");
+        buttonDeleteUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonDeleteUserActionPerformed(evt);
+            }
+        });
+        panelUserControl.add(buttonDeleteUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(589, 5, -1, -1));
+
+        panelUserManagement.add(panelUserControl, java.awt.BorderLayout.PAGE_START);
+
+        panelUserTable.setLayout(new java.awt.BorderLayout());
+
+        tableUserData.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "[ x ]", "Id", "Username", "Pass", "Email", "Address", "Propic", "Mobile"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tableUserData);
+        if (tableUserData.getColumnModel().getColumnCount() > 0) {
+            tableUserData.getColumnModel().getColumn(0).setMinWidth(30);
+            tableUserData.getColumnModel().getColumn(0).setPreferredWidth(30);
+            tableUserData.getColumnModel().getColumn(0).setMaxWidth(30);
+            tableUserData.getColumnModel().getColumn(1).setMinWidth(0);
+            tableUserData.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tableUserData.getColumnModel().getColumn(1).setMaxWidth(0);
+        }
+
+        panelUserTable.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        panelUserManagement.add(panelUserTable, java.awt.BorderLayout.CENTER);
+
+        panelUser.add(panelUserManagement, "panelUserManagement");
+
+        panelUserForm.setBorder(javax.swing.BorderFactory.createTitledBorder("User Form"));
+        panelUserForm.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel4.setText("Username : ");
+        panelUserForm.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 150, -1));
+
+        buttonCancelUserForm.setText("Cancel");
+        buttonCancelUserForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonCancelUserFormActionPerformed(evt);
+            }
+        });
+        panelUserForm.add(buttonCancelUserForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
+        panelUserForm.add(textfieldUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 200, -1));
+
+        jLabel5.setText("Password :");
+        panelUserForm.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 150, -1));
+        panelUserForm.add(textfieldPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 200, -1));
+
+        jLabel6.setText("Email :");
+        panelUserForm.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 160, 150, -1));
+        panelUserForm.add(textfieldEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, 200, -1));
+
+        jLabel7.setText("Address :");
+        panelUserForm.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 40, 150, -1));
+
+        textareaAddress.setColumns(20);
+        textareaAddress.setRows(5);
+        jScrollPane2.setViewportView(textareaAddress);
+
+        panelUserForm.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, 100));
+        panelUserForm.add(textfieldMobile, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 240, 200, -1));
+
+        jLabel8.setText("Mobile :");
+        panelUserForm.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 220, 150, -1));
+
+        labelPreviewPicture.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelPreviewPicture.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user.png"))); // NOI18N
+        labelPreviewPicture.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        panelUserForm.add(labelPreviewPicture, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 170, 120, 110));
+
+        labelLinkChangePicture.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelLinkChangePicture.setForeground(new java.awt.Color(0, 0, 204));
+        labelLinkChangePicture.setText("<html><u>Change Picture</u></html>");
+        labelLinkChangePicture.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelLinkChangePictureMouseClicked(evt);
+            }
+        });
+        panelUserForm.add(labelLinkChangePicture, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 180, -1, -1));
+
+        buttonSaveUserForm.setText("Save");
+        buttonSaveUserForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSaveUserFormActionPerformed(evt);
+            }
+        });
+        panelUserForm.add(buttonSaveUserForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(555, 250, 60, -1));
+
+        panelUser.add(panelUserForm, "panelUserForm");
+
+        panelInnerCenter.add(panelUser, "panelUser");
 
         panelCenter.add(panelInnerCenter, new org.netbeans.lib.awtextra.AbsoluteConstraints(43, 48, 658, 297));
 
@@ -174,8 +369,15 @@ public class MainAdminFrame extends javax.swing.JFrame {
         jLabel2.setText("jLabel2");
         panelCenter.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 120, 60, 40));
 
-        jLabel4.setText("jLabel2");
-        panelCenter.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(111, 360, 500, 40));
+        labelBackToHome.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/home24.png"))); // NOI18N
+        labelBackToHome.setText("Back to Home");
+        labelBackToHome.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelBackToHome.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelBackToHomeMouseClicked(evt);
+            }
+        });
+        panelCenter.add(labelBackToHome, new org.netbeans.lib.awtextra.AbsoluteConstraints(51, 360, 560, 40));
 
         getContentPane().add(panelCenter, java.awt.BorderLayout.CENTER);
 
@@ -196,6 +398,97 @@ public class MainAdminFrame extends javax.swing.JFrame {
     private void labelMinimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelMinimizeMouseClicked
         this.setState(Frame.ICONIFIED);
     }//GEN-LAST:event_labelMinimizeMouseClicked
+
+    private void buttonUserManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUserManagementActionPerformed
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelUser");
+        cardLayoutEntity = (CardLayout) panelUser.getLayout();
+        cardLayoutEntity.show(panelUser, "panelUserManagement");
+
+        labelBackToHome.setVisible(true);
+        // set the picture as empty one
+        propicFile = null;
+    }//GEN-LAST:event_buttonUserManagementActionPerformed
+
+    private void buttonSaveUserFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveUserFormActionPerformed
+        cardLayoutEntity.show(panelUser, "panelUserManagement");
+        saveUser();
+    }//GEN-LAST:event_buttonSaveUserFormActionPerformed
+
+    private void saveUser() {
+
+        SWThreadWorker workUserEntity = new SWThreadWorker(this);
+
+        // check whether this is edit or new form?
+        if (editMode) {
+            // updating data
+            workUserEntity.setWork(SWTKey.WORK_USER_UPDATE);
+            workUserEntity.addData("id", idForm + "");
+        } else {
+            // saving new data
+            workUserEntity.setWork(SWTKey.WORK_USER_SAVE);
+        }
+
+        workUserEntity.addData("username", textfieldUsername.getText());
+        workUserEntity.addData("password", textfieldPass.getText());
+        workUserEntity.addData("email", textfieldEmail.getText());
+        workUserEntity.addData("address", textareaAddress.getText());
+        workUserEntity.addData("mobile", textfieldMobile.getText());
+
+        // for propic we will post the data here
+        if (propicFile != null) {
+            workUserEntity.addFile("propic", propicFile);
+        }
+
+        executorService.schedule(workUserEntity, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void buttonCancelUserFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelUserFormActionPerformed
+        cardLayoutEntity.show(panelUser, "panelUserManagement");
+        labelBackToHome.setVisible(true);
+    }//GEN-LAST:event_buttonCancelUserFormActionPerformed
+
+    private void labelLinkChangePictureMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkChangePictureMouseClicked
+
+        // browse file
+        int result = fileChooserPicture.showOpenDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            propicFile = fileChooserPicture.getSelectedFile();
+            try {
+                labelPreviewPicture.setIcon(new ImageIcon(ImageIO.read(propicFile)));
+            } catch (Exception e) {
+                e.printStackTrace();
+                UIEffect.popup("Error while browse picutre applied!", this);
+            }
+        } else {
+            // if no file was chosen
+            propicFile = null;
+        }
+
+    }//GEN-LAST:event_labelLinkChangePictureMouseClicked
+
+    private void buttonAddUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddUserActionPerformed
+        cardLayoutEntity.show(panelUser, "panelUserForm");
+        cleanUpUserForm();
+    }//GEN-LAST:event_buttonAddUserActionPerformed
+
+    private void labelBackToHomeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBackToHomeMouseClicked
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelHome");
+        labelBackToHome.setVisible(false);
+    }//GEN-LAST:event_labelBackToHomeMouseClicked
+
+    private void buttonDeleteUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteUserActionPerformed
+
+        ArrayList dataUser = tabRender.getCheckedRows(tableUserData, 2);
+
+        if (dataUser.size() == 0) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing username only
+            deleteUser(dataUser);
+        }
+
+    }//GEN-LAST:event_buttonDeleteUserActionPerformed
 
     /**
      * @param args the command line arguments
@@ -233,25 +526,89 @@ public class MainAdminFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonAddUser;
     private javax.swing.JButton buttonAttendance;
+    private javax.swing.JButton buttonCancelUserForm;
+    private javax.swing.JButton buttonDeleteUser;
     private javax.swing.JButton buttonDocumentManagement;
+    private javax.swing.JButton buttonEditUser;
     private javax.swing.JButton buttonFuture2;
     private javax.swing.JButton buttonFuture3;
     private javax.swing.JButton buttonPayment;
+    private javax.swing.JButton buttonSaveUserForm;
     private javax.swing.JButton buttonSettings;
     private javax.swing.JButton buttonUserManagement;
+    private javax.swing.JFileChooser fileChooserPicture;
     private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel labelBackToHome;
     private javax.swing.JLabel labelClose;
+    private javax.swing.JLabel labelLinkChangePicture;
     private javax.swing.JLabel labelMinimize;
+    private javax.swing.JLabel labelPreviewPicture;
     private javax.swing.JLabel labelTime;
     private javax.swing.JPanel panelCenter;
     private javax.swing.JPanel panelHeader;
     private javax.swing.JPanel panelHome;
     private javax.swing.JPanel panelInnerCenter;
+    private javax.swing.JPanel panelUser;
+    private javax.swing.JPanel panelUserControl;
+    private javax.swing.JPanel panelUserForm;
     private javax.swing.JPanel panelUserManagement;
+    private javax.swing.JPanel panelUserTable;
+    private javax.swing.JTable tableUserData;
+    private javax.swing.JTextArea textareaAddress;
+    private javax.swing.JTextField textfieldEmail;
+    private javax.swing.JTextField textfieldMobile;
+    private javax.swing.JTextField textfieldPass;
+    private javax.swing.JTextField textfieldUsername;
     // End of variables declaration//GEN-END:variables
+
+    private void cleanUpUserForm() {
+
+        ImageIcon defaultUser = new ImageIcon(getClass().getResource("/images/user.png"));
+
+        textfieldUsername.setText("");
+        textareaAddress.setText("");
+        textfieldEmail.setText("");
+        textfieldMobile.setText("");
+        textfieldPass.setText("");
+        
+        // this is default entry
+        labelPreviewPicture.setIcon(defaultUser);
+        propicFile = null;
+
+    }
+
+    @Override
+    public void checkResponse(String resp, String urlTarget) {
+        Gson objectG = new Gson();
+
+        System.out.println(urlTarget + " have " + resp);
+        JSONChecker jchecker = new JSONChecker();
+
+        if (jchecker.isValid(resp)) {
+            String innerData = jchecker.getValueAsString("multi_data");
+
+            if (urlTarget.equalsIgnoreCase(WebReference.ALL_USER)) {
+                User[] dataIn = objectG.fromJson(innerData, User[].class);
+                tabRender.render(tableUserData, dataIn);
+            } else if (urlTarget.equalsIgnoreCase(WebReference.REGISTER_USER)
+                    || urlTarget.equalsIgnoreCase(WebReference.DELETE_USER)) {
+                // once new user submitted
+                // thus we refresh the table
+                refreshUser();
+            }
+
+        }
+    }
 }

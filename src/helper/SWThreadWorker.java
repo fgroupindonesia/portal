@@ -12,6 +12,7 @@ import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import frames.LoginFrame;
+import frames.MainAdminFrame;
 import frames.MainClientFrame;
 import helper.jxbrowser.ConfigureSysOut;
 import helper.jxbrowser.JxBrowserHackUtil;
@@ -43,6 +44,15 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String name = null;
 
         switch (whatWork()) {
+            case SWTKey.WORK_REFRESH_USER:
+                name = "refresh_user";
+                break;
+            case SWTKey.WORK_USER_DELETE:
+                name = "user_delete";
+                break;
+            case SWTKey.WORK_USER_SAVE:
+                name = "user_save";
+                break;
             case SWTKey.WORK_TEST_INTERNET:
                 name = "test_internet";
                 break;
@@ -86,7 +96,16 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         System.out.println("I am working on " + whatWorkAsString());
 
         switch (whatWork()) {
-             case SWTKey.WORK_TEST_INTERNET:
+            case SWTKey.WORK_REFRESH_USER:
+                refreshUserData();
+                break;
+            case SWTKey.WORK_USER_DELETE:
+                userDelete();
+                break;
+            case SWTKey.WORK_USER_SAVE:
+                userSave();
+                break;
+            case SWTKey.WORK_TEST_INTERNET:
                 testInternet();
                 break;
             case SWTKey.WORK_BROWSER_PREPARE:
@@ -126,8 +145,8 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     protected void done() {
         switch (whatWork()) {
             case SWTKey.WORK_BROWSER_PREPARE:
-                mainFrame.setBrowserBack(browser);
-                mainFrame.setPanelInnerBrowserBack(panelInnerBrowser);
+                mainClientFrame.setBrowserBack(browser);
+                mainClientFrame.setPanelInnerBrowserBack(panelInnerBrowser);
                 break;
 
         }
@@ -137,29 +156,37 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     Browser browser;
     JPanel panelInnerBrowser;
-    private MainClientFrame mainFrame;
-    private LoginFrame  loginFrame;
+    private MainClientFrame mainClientFrame;
+    private MainAdminFrame mainAdminFrame;
+    private LoginFrame loginFrame;
     HttpCall urlExecutor;
 
     public SWThreadWorker(MainClientFrame mfx) {
         setMainFrame(mfx);
-        urlExecutor = new HttpCall(mainFrame);
+        urlExecutor = new HttpCall(mainClientFrame);
     }
-    
-    public SWThreadWorker(LoginFrame mfx){
+
+    public SWThreadWorker(MainAdminFrame mdx) {
+        setMainFrame(mdx);
+        urlExecutor = new HttpCall(mainAdminFrame);
+    }
+
+    public SWThreadWorker(LoginFrame mfx) {
         setLoginFrame(mfx);
         urlExecutor = new HttpCall(loginFrame);
     }
 
     public void setMainFrame(MainClientFrame mf) {
-        mainFrame = mf;
+        mainClientFrame = mf;
     }
-    
+
+    public void setMainFrame(MainAdminFrame mdf) {
+        mainAdminFrame = mdf;
+    }
+
     public void setLoginFrame(LoginFrame mf) {
         loginFrame = mf;
     }
-    
-    
 
     public void setBrowser(Browser br) {
         browser = br;
@@ -173,18 +200,30 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.addData(k, v);
     }
 
+    public void addFile(String k, File f) {
+        urlExecutor.addFile(k, f);
+    }
+
     public void writeMode(boolean b) {
         urlExecutor.writeToDisk(b);
     }
-    
-    private void testInternet(){
-         urlExecutor.isInternetAlive();
+
+    private void testInternet() {
+        urlExecutor.isInternetAlive();
     }
-    
-    private void userLogin(){
+
+    private void userLogin() {
         urlExecutor.start(WebReference.LOGIN_USER, HttpCall.METHOD_POST);
     }
 
+    private void userSave() {
+        urlExecutor.start(WebReference.REGISTER_USER, HttpCall.METHOD_POST_FILE);
+    }
+
+    private void userDelete() {
+        urlExecutor.start(WebReference.DELETE_USER, HttpCall.METHOD_POST);
+    }
+    
     private void refreshHistoryData() {
 
         urlExecutor.start(WebReference.LAST_HISTORY, HttpCall.METHOD_POST);
@@ -201,6 +240,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
 
+    private void refreshUserData() {
+
+        urlExecutor.start(WebReference.ALL_USER, HttpCall.METHOD_POST);
+    }
+
     private void refreshDocumentData() {
 
         urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
@@ -213,7 +257,6 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     private void refreshAttendanceData() {
 
-     
         urlExecutor.start(WebReference.ALL_ATTENDANCE, HttpCall.METHOD_POST);
     }
 

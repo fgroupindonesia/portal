@@ -7,12 +7,16 @@ package helper;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -57,8 +61,14 @@ public class HttpCall {
     }
 
     private ArrayList<FormData> mainData = new ArrayList<FormData>();
+    private ArrayList<FormFile> fileData = new ArrayList<FormFile>();
     public static final int METHOD_POST = 1;
     public static final int METHOD_GET = 2;
+    public static final int METHOD_POST_FILE = 3;
+    private static final String BOUNDARY = "*****";
+    private static final String CRLF = "\r\n";
+    private static final String TWO_HYPENS = "--";
+
     private final String USER_AGENT = "Mozilla/5.0";
 
     private String endResult, errorMessage;
@@ -70,6 +80,11 @@ public class HttpCall {
 
     public boolean isWriteToDisk() {
         return writeDisk;
+    }
+
+    public void addFile(String key, File objFile) {
+        FormFile fileEntry = new FormFile(key, objFile);
+        fileData.add(fileEntry);
     }
 
     public void addData(String aKey, String aVal) {
@@ -107,7 +122,7 @@ public class HttpCall {
 
     public boolean isInternetAlive() {
         boolean stat = false;
-        
+
         try {
             URL url = new URL(WebReference.REMOTE);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -151,7 +166,67 @@ public class HttpCall {
                     conn.setDoOutput(true);
                     conn.getOutputStream().write(postDataBytes);
 
-                } else {
+                } else if (modeCall == METHOD_POST_FILE) {
+
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Connection", "Keep-Alive");
+                    conn.setRequestProperty("Cache-Control", "no-cache");
+                    conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
+                    conn.addRequestProperty("Accept", "*/*");
+                    conn.setDoOutput(true);
+
+                    DataOutputStream request = new DataOutputStream(conn.getOutputStream());
+
+                    // does this has a form field ?
+                    if (mainData.size() > 0) {
+
+                        for (FormData fd : mainData) {
+
+                            request.writeBytes(TWO_HYPENS + BOUNDARY + CRLF);
+                            request.writeBytes("Content-Disposition: form-data; name=\"" + fd.getKey() + "\"" + CRLF);
+                            request.writeBytes("Content-Type: text/plain; charset=UTF-8" + CRLF);
+                            request.writeBytes(CRLF);
+                            request.writeBytes(fd.getValue() + CRLF);
+                            request.flush();
+
+                        }
+
+                    }
+
+                    // does this has file attachment?
+                    if (fileData.size() > 0) {
+
+                        for (FormFile ff : fileData) {
+                            String fileName = ff.getFileObject().getName();
+                            request.writeBytes(TWO_HYPENS + BOUNDARY + CRLF);
+                            request.writeBytes("Content-Disposition: form-data; name=\"" + ff.getKey() + "\"; filename=\"" + fileName + "\"" + CRLF);
+                            request.writeBytes("Content-Type: " + conn.guessContentTypeFromName(fileName) + CRLF);
+                            request.writeBytes("Content-Transfer-Encoding: binary" + CRLF);
+                            request.writeBytes(CRLF);
+                            request.flush();
+
+                            FileInputStream inputStream = new FileInputStream(ff.getFileObject());
+                            byte[] buffer = new byte[4096];
+                            int bytesRead = -1;
+                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                request.write(buffer, 0, bytesRead);
+                            }
+
+                            request.flush();
+
+
+                        }
+
+                    }
+
+                    // closing this POST + FORM + FILE request
+                    request.writeBytes(CRLF);
+                    request.writeBytes(TWO_HYPENS + BOUNDARY + TWO_HYPENS);
+
+                    request.flush();
+                    //request.close();
+
+                } else if (modeCall == METHOD_GET) {
                     conn.setRequestMethod("GET");
                     conn.setRequestProperty("User-Agent", USER_AGENT);
                     int responseCode = conn.getResponseCode();

@@ -1,5 +1,5 @@
 git add .
-git commit -m "Adding Admin Frame with different UI Layout."
+git commit -m "Adding Admin User Management, Add & Delete"
 git push origin main
 git gc --prune
 git pull

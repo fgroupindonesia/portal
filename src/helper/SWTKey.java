@@ -18,6 +18,7 @@ public class SWTKey {
     public static final int WORK_REFRESH_PAYMENT = 4;
     
     public static final int WORK_REFRESH_SCHEDULE = 5;
+    public static final int WORK_REFRESH_USER = 51;
     public static final int WORK_REFRESH_PROFILE = 6;
     public static final int WORK_REFRESH_PICTURE = 7;
     
@@ -26,5 +27,10 @@ public class SWTKey {
     
     public static final int WORK_LOGIN = 10;
     public static final int WORK_TEST_INTERNET = 11;
+    
+    public static final int WORK_USER_SAVE = 12;
+    public static final int WORK_USER_UPDATE = 13;
+    public static final int WORK_USER_DELETE = 14;
+    
     
 }
