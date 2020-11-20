@@ -27,4 +27,14 @@ public class WebReference {
     public static final String UPDATE_USER = REMOTE + "user/update";
     public static final String DELETE_USER = REMOTE + "user/delete";
     
+    public static final String DETAIL_DOCUMENT = REMOTE + "document/detail";
+    public static final String DELETE_DOCUMENT = REMOTE + "document/delete";
+    public static final String UPDATE_DOCUMENT = REMOTE + "document/update";
+    public static final String ADD_DOCUMENT = REMOTE + "document/add";
+    
+    public static final String DETAIL_SCHEDULE = REMOTE + "schedule/detail";
+    public static final String DELETE_SCHEDULE = REMOTE + "schedule/delete";
+    public static final String UPDATE_SCHEDULE = REMOTE + "schedule/update";
+    public static final String ADD_SCHEDULE = REMOTE + "schedule/add";
+    
 }

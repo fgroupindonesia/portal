@@ -32,5 +32,18 @@ public class SWTKey {
     public static final int WORK_USER_UPDATE = 13;
     public static final int WORK_USER_DELETE = 14;
     
+    // edit is actually obtaining the data
+    public static final int WORK_DOCUMENT_EDIT = 15;
+    public static final int WORK_DOCUMENT_DELETE = 16;
+    public static final int WORK_DOCUMENT_SAVE = 17;
+    public static final int WORK_DOCUMENT_UPDATE = 18;
+    
+    // edit is actually obtaining the data
+    public static final int WORK_SCHEDULE_EDIT = 19;
+    public static final int WORK_SCHEDULE_DELETE = 20;
+    public static final int WORK_SCHEDULE_SAVE = 21;
+    public static final int WORK_SCHEDULE_UPDATE = 22;
+    
+    
     
 }

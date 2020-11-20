@@ -484,18 +484,18 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 String innerData = jchecker.getValueAsString("multi_data");
                 AccessToken dataIn = objectG.fromJson(innerData, AccessToken.class);
 
-                if (textfieldUsername.getText().equalsIgnoreCase("admin")) {
-                    MainAdminFrame nextFrame = new MainAdminFrame(this);
-                    nextFrame.setVisible(true);
-                } else {
-                    MainClientFrame nextFrame = new MainClientFrame(this);
-                    nextFrame.setUsername(textfieldUsername.getText());
-                    nextFrame.setVisible(true);
-                }
-
                 // update for this token
                 configuration.setValue(Keys.TOKEN_API, dataIn.getToken());
                 configuration.setValue(Keys.DATE_EXPIRED_TOKEN, dataIn.getExpired_date());
+
+                if (textfieldUsername.getText().equalsIgnoreCase("admin")) {
+                    AdminFrame nextFrame = new AdminFrame(this);
+                    nextFrame.setVisible(true);
+                } else {
+                    ClientFrame nextFrame = new ClientFrame(this);
+                    nextFrame.setUsername(textfieldUsername.getText());
+                    nextFrame.setVisible(true);
+                }
 
                 // dont let the button leave alone
                 buttonLogin.setEnabled(true);
@@ -504,13 +504,23 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             }
 
         } else {
-            // set the error icon
-            internetExist = false;
-            showErrorLoading(true, "please check your internet!");
+            // this is when the call is invalid
 
+            if (callingFromURL == null) {
+                // set the error icon
+                internetExist = false;
+                showErrorLoading(true, "please check your internet!");
+
+                
+            } else {
+                // set the error icon for bad cridentials
+                showErrorLoading(true, "invalid username & password!");
+            }
+            
             // empty value for this token
-            configuration.setValue(Keys.TOKEN_API, "");
-            configuration.setValue(Keys.DATE_EXPIRED_TOKEN, "");
+                configuration.setValue(Keys.TOKEN_API, "");
+                configuration.setValue(Keys.DATE_EXPIRED_TOKEN, "");
+
         }
 
     }

@@ -12,8 +12,8 @@ import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import frames.LoginFrame;
-import frames.MainAdminFrame;
-import frames.MainClientFrame;
+import frames.AdminFrame;
+import frames.ClientFrame;
 import helper.jxbrowser.ConfigureSysOut;
 import helper.jxbrowser.JxBrowserHackUtil;
 import helper.jxbrowser.JxVersion;
@@ -44,6 +44,30 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String name = null;
 
         switch (whatWork()) {
+            case SWTKey.WORK_SCHEDULE_SAVE:
+                name = "schedule_save";
+                break;
+            case SWTKey.WORK_SCHEDULE_EDIT:
+                name = "schedule_edit";
+                break;
+            case SWTKey.WORK_SCHEDULE_UPDATE:
+                name = "schedule_update";
+                break;
+            case SWTKey.WORK_SCHEDULE_DELETE:
+                name = "schedule_delete";
+                break;
+            case SWTKey.WORK_DOCUMENT_SAVE:
+                name = "document_save";
+                break;
+            case SWTKey.WORK_DOCUMENT_EDIT:
+                name = "document_edit";
+                break;
+            case SWTKey.WORK_DOCUMENT_UPDATE:
+                name = "document_update";
+                break;
+            case SWTKey.WORK_DOCUMENT_DELETE:
+                name = "document_delete";
+                break;
             case SWTKey.WORK_REFRESH_USER:
                 name = "refresh_user";
                 break;
@@ -96,6 +120,30 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         System.out.println("I am working on " + whatWorkAsString());
 
         switch (whatWork()) {
+            case SWTKey.WORK_SCHEDULE_UPDATE:
+                scheduleUpdate();
+                break;
+            case SWTKey.WORK_SCHEDULE_EDIT:
+                scheduleEdit();
+                break;
+            case SWTKey.WORK_SCHEDULE_SAVE:
+                scheduleSave();
+                break;
+            case SWTKey.WORK_SCHEDULE_DELETE:
+                scheduleDelete();
+                break;
+            case SWTKey.WORK_DOCUMENT_UPDATE:
+                documentUpdate();
+                break;
+            case SWTKey.WORK_DOCUMENT_EDIT:
+                documentEdit();
+                break;
+            case SWTKey.WORK_DOCUMENT_SAVE:
+                documentSave();
+                break;
+            case SWTKey.WORK_DOCUMENT_DELETE:
+                documentDelete();
+                break;
             case SWTKey.WORK_REFRESH_USER:
                 refreshUserData();
                 break;
@@ -156,17 +204,17 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     Browser browser;
     JPanel panelInnerBrowser;
-    private MainClientFrame mainClientFrame;
-    private MainAdminFrame mainAdminFrame;
+    private ClientFrame mainClientFrame;
+    private AdminFrame mainAdminFrame;
     private LoginFrame loginFrame;
     HttpCall urlExecutor;
 
-    public SWThreadWorker(MainClientFrame mfx) {
+    public SWThreadWorker(ClientFrame mfx) {
         setMainFrame(mfx);
         urlExecutor = new HttpCall(mainClientFrame);
     }
 
-    public SWThreadWorker(MainAdminFrame mdx) {
+    public SWThreadWorker(AdminFrame mdx) {
         setMainFrame(mdx);
         urlExecutor = new HttpCall(mainAdminFrame);
     }
@@ -176,11 +224,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor = new HttpCall(loginFrame);
     }
 
-    public void setMainFrame(MainClientFrame mf) {
+    public void setMainFrame(ClientFrame mf) {
         mainClientFrame = mf;
     }
 
-    public void setMainFrame(MainAdminFrame mdf) {
+    public void setMainFrame(AdminFrame mdf) {
         mainAdminFrame = mdf;
     }
 
@@ -223,7 +271,39 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void userDelete() {
         urlExecutor.start(WebReference.DELETE_USER, HttpCall.METHOD_POST);
     }
+
+    private void documentDelete() {
+        urlExecutor.start(WebReference.DELETE_DOCUMENT, HttpCall.METHOD_POST);
+    }
+
+    private void documentSave() {
+        urlExecutor.start(WebReference.ADD_DOCUMENT, HttpCall.METHOD_POST_FILE);
+    }
+
+    private void documentEdit() {
+        urlExecutor.start(WebReference.DETAIL_DOCUMENT, HttpCall.METHOD_POST);
+    }
+
+    private void documentUpdate() {
+        urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST_FILE);
+    }
     
+     private void scheduleDelete() {
+        urlExecutor.start(WebReference.DELETE_SCHEDULE, HttpCall.METHOD_POST);
+    }
+
+    private void scheduleSave() {
+        urlExecutor.start(WebReference.ADD_SCHEDULE, HttpCall.METHOD_POST);
+    }
+
+    private void scheduleEdit() {
+        urlExecutor.start(WebReference.DETAIL_SCHEDULE, HttpCall.METHOD_POST);
+    }
+
+    private void scheduleUpdate() {
+        urlExecutor.start(WebReference.UPDATE_SCHEDULE, HttpCall.METHOD_POST);
+    }
+
     private void refreshHistoryData() {
 
         urlExecutor.start(WebReference.LAST_HISTORY, HttpCall.METHOD_POST);

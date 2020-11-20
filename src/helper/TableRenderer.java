@@ -8,6 +8,7 @@ package helper;
 import beans.Attendance;
 import beans.Document;
 import beans.Payment;
+import beans.Schedule;
 import beans.User;
 import java.util.ArrayList;
 import javax.swing.JTable;
@@ -39,7 +40,7 @@ public class TableRenderer {
             }
 
         }
-        
+
         return data;
     }
 
@@ -67,10 +68,18 @@ public class TableRenderer {
 
     public void render(JTable el, Document[] dataCome) {
 
+        // the table format is same between client & admin
         DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
         tableModel.setRowCount(0);
         for (Document d : dataCome) {
-            Object[] dataBaru = new Object[]{false, d.getTitle(), d.getDescription(), d.getUrl()};
+            Object[] dataBaru = new Object[]{false,
+                d.getId(),
+                d.getTitle(),
+                d.getDescription(),
+                d.getFilename(),
+                d.getUsername(),
+                d.getUrl(),
+                d.getDate_created()};
             tableModel.addRow(dataBaru);
         }
 
@@ -84,6 +93,24 @@ public class TableRenderer {
 
         for (Payment d : dataCome) {
             Object[] dataBaru = new Object[]{false, d.getDate_created(), rp.getText(d.getAmount()), d.getMethod()};
+            tableModel.addRow(dataBaru);
+        }
+
+    }
+
+    public void render(JTable el, Schedule[] dataCome) {
+
+        DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
+        tableModel.setRowCount(0);
+
+        for (Schedule d : dataCome) {
+            Object[] dataBaru = new Object[]{false,
+                d.getId(),
+                d.getDay_schedule(),
+                d.getTime_schedule(),
+                d.getClass_registered()
+            };
+            
             tableModel.addRow(dataBaru);
         }
 
