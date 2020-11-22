@@ -5,6 +5,7 @@
  */
 package frames;
 
+import beans.ClassRoom;
 import beans.Document;
 import beans.Schedule;
 import beans.User;
@@ -30,7 +31,9 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JList;
 
 /**
  *
@@ -69,6 +72,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         refreshUser();
         refreshDocument();
         refreshSchedule();
+        refreshClassRoom();
 
         // hide the home link
         labelBackToHome.setVisible(false);
@@ -157,6 +161,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void refreshScheduleByDay(String dayName) {
+
+        SWThreadWorker workSchedule = new SWThreadWorker(this);
+        workSchedule.setWork(SWTKey.WORK_REFRESH_SCHEDULE_BY_DAY);
+        workSchedule.addData("day_schedule", dayName);
+        prepareToken(workSchedule);
+        executorService.schedule(workSchedule, 2, TimeUnit.SECONDS);
+
+    }
+
     private void refreshDocument() {
 
         SWThreadWorker workDoc = new SWThreadWorker(this);
@@ -174,6 +188,15 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workSched.addData("username", "admin");
         prepareToken(workSched);
         executorService.schedule(workSched, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void refreshClassRoom() {
+
+        SWThreadWorker workClassRoom = new SWThreadWorker(this);
+        workClassRoom.setWork(SWTKey.WORK_REFRESH_CLASSROOM);
+        prepareToken(workClassRoom);
+        executorService.schedule(workClassRoom, 2, TimeUnit.SECONDS);
 
     }
 
@@ -346,7 +369,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonDocumentManagement = new javax.swing.JButton();
         buttonAttendance = new javax.swing.JButton();
         buttonPayment = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
+        buttonSchedule = new javax.swing.JButton();
         buttonSettings = new javax.swing.JButton();
         buttonFuture2 = new javax.swing.JButton();
         buttonFuture3 = new javax.swing.JButton();
@@ -523,11 +546,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonPayment.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         panelHome.add(buttonPayment);
 
-        jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time64.png"))); // NOI18N
-        jButton5.setText("Schedule");
-        jButton5.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton5.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        panelHome.add(jButton5);
+        buttonSchedule.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time64.png"))); // NOI18N
+        buttonSchedule.setText("Schedule");
+        buttonSchedule.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        buttonSchedule.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        buttonSchedule.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonScheduleActionPerformed(evt);
+            }
+        });
+        panelHome.add(buttonSchedule);
 
         buttonSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/option64.png"))); // NOI18N
         buttonSettings.setText("Settings");
@@ -986,7 +1014,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         comboboxUsernameSched.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         panelScheduleForm.add(comboboxUsernameSched, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 200, -1));
 
-        comboboxDaySched.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        comboboxDaySched.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" }));
+        comboboxDaySched.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comboboxDaySchedItemStateChanged(evt);
+            }
+        });
         panelScheduleForm.add(comboboxDaySched, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
 
         jLabel18.setText("Username : ");
@@ -1285,13 +1318,32 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_labelRefreshScheduleMouseExited
 
     private void buttonCancelScheduleFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelScheduleFormActionPerformed
-        // TODO add your handling code here:
+        cardLayoutEntity.show(panelSchedule, "panelScheduleManagement");
+        labelBackToHome.setVisible(true);
     }//GEN-LAST:event_buttonCancelScheduleFormActionPerformed
 
     private void buttonSaveScheduleFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveScheduleFormActionPerformed
         cardLayoutEntity.show(panelSchedule, "panelScheduleManagement");
         saveSchedule();
     }//GEN-LAST:event_buttonSaveScheduleFormActionPerformed
+
+    private void buttonScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonScheduleActionPerformed
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelSchedule");
+        cardLayoutEntity = (CardLayout) panelSchedule.getLayout();
+        cardLayoutEntity.show(panelSchedule, "panelScheduleManagement");
+
+        labelBackToHome.setVisible(true);
+
+    }//GEN-LAST:event_buttonScheduleActionPerformed
+
+
+    private void comboboxDaySchedItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboboxDaySchedItemStateChanged
+        // when the item selected changed
+        // we check the registered class of that day
+        String classSelected = comboboxDaySched.getSelectedItem().toString();
+        refreshScheduleByDay(classSelected);
+
+    }//GEN-LAST:event_comboboxDaySchedItemStateChanged
 
     /**
      * @param args the command line arguments
@@ -1350,6 +1402,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonSaveDocumentForm;
     private javax.swing.JButton buttonSaveScheduleForm;
     private javax.swing.JButton buttonSaveUserForm;
+    private javax.swing.JButton buttonSchedule;
     private javax.swing.JButton buttonSettings;
     private javax.swing.JButton buttonUserManagement;
     private javax.swing.JComboBox<String> comboboxClassRegSched;
@@ -1357,7 +1410,6 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JComboBox<String> comboboxUsernameDoc;
     private javax.swing.JComboBox<String> comboboxUsernameSched;
     private javax.swing.JFileChooser fileChooser;
-    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1517,7 +1569,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         editMode = editWork;
 
-        ((DefaultListModel) listAnotherClassSched.getModel()).removeAllElements();
+        // clearing list
+        listAnotherClassSched.setModel(new DefaultListModel());
 
         spinnerHourSched.setValue(0);
         spinnerMinutesSched.setValue(0);
@@ -1558,13 +1611,32 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
-    private void renderUsernameForDocument(User[] dataIn) {
-        comboboxUsernameDoc.removeAllItems();
+    private void renderUsernameForCombobox(User[] dataIn, JComboBox jc) {
+        jc.removeAllItems();
 
         for (User single : dataIn) {
-            comboboxUsernameDoc.addItem(single.getUsername());
+            jc.addItem(single.getUsername());
         }
 
+    }
+
+    private void renderClassRoomForCombobox(ClassRoom[] dataIn, JComboBox jc) {
+        jc.removeAllItems();
+
+        for (ClassRoom d : dataIn) {
+            jc.addItem(d.getName());
+        }
+    }
+
+    private void renderScheduleForList(Schedule[] sched, JList elContainer) {
+
+        DefaultListModel dfm = new DefaultListModel();
+        
+        for (Schedule s : sched) {
+            dfm.addElement(s.getClass_registered());
+        }
+
+        elContainer.setModel(dfm);
     }
 
     @Override
@@ -1582,10 +1654,21 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 tabRender.render(tableUserData, dataIn);
 
                 // rendering the username for document ui form
-                renderUsernameForDocument(dataIn);
+                renderUsernameForCombobox(dataIn, comboboxUsernameDoc);
+                renderUsernameForCombobox(dataIn, comboboxUsernameSched);
+
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_CLASSROOM)) {
+                ClassRoom[] dataIn = objectG.fromJson(innerData, ClassRoom[].class);
+
+                renderClassRoomForCombobox(dataIn, comboboxClassRegSched);
+
             } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
                 Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
                 tabRender.render(tableScheduleData, dataIn);
+
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE_BY_DAY)) {
+                Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
+                renderScheduleForList(dataIn, listAnotherClassSched);
 
             } else if (urlTarget.equalsIgnoreCase(WebReference.REGISTER_USER)
                     || urlTarget.equalsIgnoreCase(WebReference.DELETE_USER)) {

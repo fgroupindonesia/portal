@@ -68,6 +68,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_DOCUMENT_DELETE:
                 name = "document_delete";
                 break;
+            case SWTKey.WORK_REFRESH_SCHEDULE_BY_DAY:
+                name = "refresh_schedule_by_day";
+                break;
             case SWTKey.WORK_REFRESH_USER:
                 name = "refresh_user";
                 break;
@@ -79,6 +82,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_TEST_INTERNET:
                 name = "test_internet";
+                break;
+            case SWTKey.WORK_REFRESH_CLASSROOM:
+                name = "refresh_classroom";
                 break;
             case SWTKey.WORK_BROWSER_PREPARE:
                 name = "refresh_browser";
@@ -159,6 +165,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_BROWSER_PREPARE:
                 prepareBrowser();
                 break;
+            case SWTKey.WORK_REFRESH_CLASSROOM:
+                refreshClassRoomData();
+                break;
             case SWTKey.WORK_REFRESH_DOCUMENT:
                 refreshDocumentData();
                 break;
@@ -167,6 +176,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_REFRESH_PAYMENT:
                 refreshPaymentData();
+                break;
+            case SWTKey.WORK_REFRESH_SCHEDULE_BY_DAY:
+                refreshScheduleDataByDay();
                 break;
             case SWTKey.WORK_REFRESH_SCHEDULE:
                 refreshScheduleData();
@@ -287,8 +299,8 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void documentUpdate() {
         urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST_FILE);
     }
-    
-     private void scheduleDelete() {
+
+    private void scheduleDelete() {
         urlExecutor.start(WebReference.DELETE_SCHEDULE, HttpCall.METHOD_POST);
     }
 
@@ -323,6 +335,16 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void refreshUserData() {
 
         urlExecutor.start(WebReference.ALL_USER, HttpCall.METHOD_POST);
+    }
+
+    private void refreshClassRoomData() {
+
+        urlExecutor.start(WebReference.ALL_CLASSROOM, HttpCall.METHOD_POST);
+    }
+
+    private void refreshScheduleDataByDay() {
+
+        urlExecutor.start(WebReference.ALL_SCHEDULE_BY_DAY, HttpCall.METHOD_POST);
     }
 
     private void refreshDocumentData() {

@@ -367,12 +367,16 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
 
     private void textfieldPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfieldPassActionPerformed
+        checkFormFilled();
+        
         if (formCompleted) {
             proceedTestLoggingIn();
         }
     }//GEN-LAST:event_textfieldPassActionPerformed
 
     private void textfieldUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfieldUsernameActionPerformed
+        checkFormFilled();
+        
         if (formCompleted) {
             proceedTestLoggingIn();
         }

@@ -17,6 +17,8 @@ public class WebReference {
     public static final String ALL_PAYMENT = REMOTE + "payment/all";
     public static final String ALL_ATTENDANCE = REMOTE + "attendance/all";
     public static final String ALL_SCHEDULE = REMOTE + "schedule/all";
+    public static final String ALL_SCHEDULE_BY_DAY = REMOTE + "schedule/allday";
+    public static final String ALL_CLASSROOM = REMOTE + "classroom/all";
     public static final String LAST_HISTORY = REMOTE + "history/last";
     public static final String LAST_PAYMENT = REMOTE + "payment/last";
     

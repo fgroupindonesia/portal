@@ -18,9 +18,11 @@ public class SWTKey {
     public static final int WORK_REFRESH_PAYMENT = 4;
     
     public static final int WORK_REFRESH_SCHEDULE = 5;
+    public static final int WORK_REFRESH_SCHEDULE_BY_DAY = 52;
     public static final int WORK_REFRESH_USER = 51;
     public static final int WORK_REFRESH_PROFILE = 6;
     public static final int WORK_REFRESH_PICTURE = 7;
+    public static final int WORK_REFRESH_CLASSROOM = 71;
     
     public static final int WORK_REFRESH_DASHBOARD = 8;
     public static final int WORK_REFRESH_HISTORY = 9;
