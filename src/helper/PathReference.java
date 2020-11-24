@@ -18,9 +18,14 @@ public class PathReference {
     public static String TeamviewerPath = ToolsDirName + "\\TeamViewer_Setup.exe";
     public static String LogoPath = DirName + "\\fgroup.jpg";
     public static String UserPropicPath = DirName + "\\propic.jpg";
+    public static String SignaturePath = DirName + "\\signature.jpg";
     
     public static void setPropicFileName(String name){
         UserPropicPath = DirName + "\\" + name;
+    }
+    
+    public static void setSignatureFileName(String name){
+        SignaturePath = DirName + "\\" + name;
     }
     
     

@@ -908,14 +908,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
             },
             new String [] {
-                "[ x ]", "Class", "Status", "Date Created"
+                "[ x ]", "Username", "Class", "Status", "Signature", "Date Created", "Date Modified"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false, false
+                true, true, false, false, true, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -931,12 +931,21 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         if (tableAttendanceData.getColumnModel().getColumnCount() > 0) {
             tableAttendanceData.getColumnModel().getColumn(0).setResizable(false);
             tableAttendanceData.getColumnModel().getColumn(0).setPreferredWidth(35);
-            tableAttendanceData.getColumnModel().getColumn(1).setMinWidth(100);
-            tableAttendanceData.getColumnModel().getColumn(1).setPreferredWidth(100);
-            tableAttendanceData.getColumnModel().getColumn(2).setMinWidth(75);
-            tableAttendanceData.getColumnModel().getColumn(2).setPreferredWidth(75);
-            tableAttendanceData.getColumnModel().getColumn(3).setMinWidth(125);
-            tableAttendanceData.getColumnModel().getColumn(3).setPreferredWidth(125);
+            tableAttendanceData.getColumnModel().getColumn(1).setMinWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(1).setMaxWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(2).setMinWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(3).setMinWidth(75);
+            tableAttendanceData.getColumnModel().getColumn(3).setPreferredWidth(75);
+            tableAttendanceData.getColumnModel().getColumn(4).setMinWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(4).setPreferredWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(4).setMaxWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(5).setMinWidth(125);
+            tableAttendanceData.getColumnModel().getColumn(5).setPreferredWidth(125);
+            tableAttendanceData.getColumnModel().getColumn(6).setMinWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(6).setPreferredWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(6).setMaxWidth(0);
         }
 
         panelAttandanceAll.add(jScrollPane3, java.awt.BorderLayout.CENTER);

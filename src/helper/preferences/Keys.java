@@ -22,6 +22,7 @@ public class Keys {
     public static final String TOKEN_API = "api_token";
     public static final String DATE_EXPIRED_TOKEN = "expired_date";
     public static final String USER_PROPIC = "user_propic";
+    public static final String SIGNATURE_ATTENDANCE = "signature_attendance";
     public static final String SYSTEM_LANGUAGE = "system_language";
     public static final String DEFAULT_SYSTEM_LANGUAGE = "English (default)";
 

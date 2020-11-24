@@ -44,6 +44,18 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String name = null;
 
         switch (whatWork()) {
+            case SWTKey.WORK_ATTENDANCE_SAVE:
+                name = "attendance_save";
+                break;
+            case SWTKey.WORK_ATTENDANCE_EDIT:
+                name = "attendance_edit";
+                break;
+            case SWTKey.WORK_ATTENDANCE_UPDATE:
+                name = "attendance_update";
+                break;
+            case SWTKey.WORK_ATTENDANCE_DELETE:
+                name = "attendance_delete";
+                break;
             case SWTKey.WORK_SCHEDULE_SAVE:
                 name = "schedule_save";
                 break;
@@ -126,6 +138,18 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         System.out.println("I am working on " + whatWorkAsString());
 
         switch (whatWork()) {
+            case SWTKey.WORK_ATTENDANCE_UPDATE:
+                attendanceUpdate();
+                break;
+            case SWTKey.WORK_ATTENDANCE_EDIT:
+                attendanceEdit();
+                break;
+            case SWTKey.WORK_ATTENDANCE_SAVE:
+                attendanceSave();
+                break;
+            case SWTKey.WORK_ATTENDANCE_DELETE:
+                attendanceDelete();
+                break;
             case SWTKey.WORK_SCHEDULE_UPDATE:
                 scheduleUpdate();
                 break;
@@ -298,6 +322,22 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     private void documentUpdate() {
         urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST_FILE);
+    }
+    
+     private void attendanceDelete() {
+        urlExecutor.start(WebReference.DELETE_ATTENDANCE, HttpCall.METHOD_POST);
+    }
+
+    private void attendanceSave() {
+        urlExecutor.start(WebReference.ADD_ATTENDANCE, HttpCall.METHOD_POST_FILE);
+    }
+
+    private void attendanceEdit() {
+        urlExecutor.start(WebReference.DETAIL_ATTENDANCE, HttpCall.METHOD_POST);
+    }
+
+    private void attendanceUpdate() {
+        urlExecutor.start(WebReference.UPDATE_ATTENDANCE, HttpCall.METHOD_POST_FILE);
     }
 
     private void scheduleDelete() {

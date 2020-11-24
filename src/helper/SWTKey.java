@@ -22,6 +22,7 @@ public class SWTKey {
     public static final int WORK_REFRESH_USER = 51;
     public static final int WORK_REFRESH_PROFILE = 6;
     public static final int WORK_REFRESH_PICTURE = 7;
+    public static final int WORK_REFRESH_SIGNATURE = 70;
     public static final int WORK_REFRESH_CLASSROOM = 71;
     
     public static final int WORK_REFRESH_DASHBOARD = 8;
@@ -46,6 +47,10 @@ public class SWTKey {
     public static final int WORK_SCHEDULE_SAVE = 21;
     public static final int WORK_SCHEDULE_UPDATE = 22;
     
-    
+    // edit is actually obtaining the data
+    public static final int WORK_ATTENDANCE_EDIT = 23;
+    public static final int WORK_ATTENDANCE_DELETE = 24;
+    public static final int WORK_ATTENDANCE_SAVE = 25;
+    public static final int WORK_ATTENDANCE_UPDATE = 26;
     
 }

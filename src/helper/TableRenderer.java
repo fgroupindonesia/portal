@@ -122,7 +122,16 @@ public class TableRenderer {
         DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
         tableModel.setRowCount(0);
         for (Attendance d : dataCome) {
-            Object[] dataBaru = new Object[]{false, d.getClass_registered(), d.getStatus(), d.getDate_created()};
+            Object[] dataBaru = new Object[]{
+                false, 
+                d.getId(),
+                d.getUsername(),
+                d.getClass_registered(), 
+                d.getStatus(), 
+                d.getSignature(),
+                d.getDate_created(),
+                d.getDate_modified()
+            };
             tableModel.addRow(dataBaru);
         }
 

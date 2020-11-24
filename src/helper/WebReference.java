@@ -23,6 +23,7 @@ public class WebReference {
     public static final String LAST_PAYMENT = REMOTE + "payment/last";
     
     public static final String PICTURE_USER = REMOTE + "user/picture";
+    x public static final String SIGNATURE_ATTENDANCE = REMOTE + "user/picture";
     public static final String PROFILE_USER = REMOTE + "user/profile";
     public static final String LOGIN_USER = REMOTE + "user/login";
     public static final String REGISTER_USER = REMOTE + "user/register";
@@ -33,6 +34,11 @@ public class WebReference {
     public static final String DELETE_DOCUMENT = REMOTE + "document/delete";
     public static final String UPDATE_DOCUMENT = REMOTE + "document/update";
     public static final String ADD_DOCUMENT = REMOTE + "document/add";
+    
+    public static final String DETAIL_ATTENDANCE = REMOTE + "attendance/detail";
+    public static final String DELETE_ATTENDANCE = REMOTE + "attendance/delete";
+    public static final String UPDATE_ATTENDANCE = REMOTE + "attendance/update";
+    public static final String ADD_ATTENDANCE = REMOTE + "attendance/add";
     
     public static final String DETAIL_SCHEDULE = REMOTE + "schedule/detail";
     public static final String DELETE_SCHEDULE = REMOTE + "schedule/delete";

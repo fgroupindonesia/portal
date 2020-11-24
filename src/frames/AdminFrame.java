@@ -5,6 +5,7 @@
  */
 package frames;
 
+import beans.Attendance;
 import beans.ClassRoom;
 import beans.Document;
 import beans.Schedule;
@@ -73,6 +74,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         refreshDocument();
         refreshSchedule();
         refreshClassRoom();
+        refreshAttendance();
 
         // hide the home link
         labelBackToHome.setVisible(false);
@@ -116,6 +118,21 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void renderAttendanceForm(Attendance dataCome) {
+
+        idForm = (short) dataCome.getId();
+
+        comboboxClassRegAttendance.setSelectedItem(dataCome.getClass_registered());
+        comboboxUsernameAttendance.setSelectedItem(dataCome.getUsername());
+        comboboxStatusAttendance.setSelectedItem(dataCome.getStatus());
+
+        if (!dataCome.getSignature().equalsIgnoreCase("not available")) {
+            // we are required to download the image from server
+            refreshSignaturePicture(dataCome.getSignature());
+        }
+
+    }
+    
     private void renderDocumentForm(Document dataCome) {
 
         idForm = (short) dataCome.getId();
@@ -173,6 +190,27 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
 
     }
+    
+    private void refreshSignaturePicture(String filename) {
+
+        // set the path temporarily 
+        // for later usage in locally
+        PathReference.setSignatureFileName(filename);
+        File dest = new File(PathReference.SignaturePath);
+
+        configuration.setValue(Keys.SIGNATURE_ATTENDANCE, dest.getAbsolutePath());
+
+        SWThreadWorker workSignature = new SWThreadWorker(this);
+
+        // execute the download picture process
+        workSignature.setWork(SWTKey.WORK_REFRESH_SIGNATURE);
+        workSignature.writeMode(true);
+        workSignature.addData("signature", filename);
+
+        // executorService.submit(workSched);
+        executorService.schedule(workSignature, 2, TimeUnit.SECONDS);
+
+    }
 
     private void refreshUser() {
 
@@ -191,7 +229,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         executorService.schedule(workAttendance, 2, TimeUnit.SECONDS);
 
     }
-    
+
     private void refreshScheduleByDay(String dayName) {
 
         SWThreadWorker workSchedule = new SWThreadWorker(this);
@@ -238,6 +276,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workUser.addData("username", usernameIn);
         prepareToken(workUser);
         executorService.schedule(workUser, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void getAttendance(int idIn) {
+
+        SWThreadWorker workAttendance = new SWThreadWorker(this);
+        workAttendance.setWork(SWTKey.WORK_ATTENDANCE_EDIT);
+        workAttendance.addData("id", idIn+"");
+        prepareToken(workAttendance);
+        executorService.schedule(workAttendance, 2, TimeUnit.SECONDS);
 
     }
 
@@ -289,6 +337,34 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+     private void saveAttendance() {
+        labelLoadingStatus.setVisible(true);
+        SWThreadWorker workAttendanceEntity = new SWThreadWorker(this);
+
+        // check whether this is edit or new form?
+        if (editMode) {
+            // updating data
+            workAttendanceEntity.setWork(SWTKey.WORK_ATTENDANCE_UPDATE);
+            workAttendanceEntity.addData("id", idForm + "");
+        } else {
+            // saving new data
+            workAttendanceEntity.setWork(SWTKey.WORK_ATTENDANCE_SAVE);
+        }
+
+        workAttendanceEntity.addData("username", comboboxUsernameAttendance.getSelectedItem().toString());
+        workAttendanceEntity.addData("class_registered", comboboxClassRegAttendance.getSelectedItem().toString());
+        workAttendanceEntity.addData("status", comboboxStatusAttendance.getSelectedItem().toString());
+        
+
+        if (signatureFile != null) {
+            workAttendanceEntity.addFile("signature", signatureFile);
+        }
+
+        prepareToken(workAttendanceEntity);
+        executorService.schedule(workAttendanceEntity, 2, TimeUnit.SECONDS);
+
+    }
+    
     private void saveUser() {
         labelLoadingStatus.setVisible(true);
         SWThreadWorker workUserEntity = new SWThreadWorker(this);
@@ -373,6 +449,19 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             workUser.setWork(SWTKey.WORK_USER_DELETE);
             prepareToken(workUser);
             executorService.schedule(workUser, 1, TimeUnit.SECONDS);
+        }
+
+    }
+
+    private void deleteAttendance(ArrayList<String> dataIn) {
+
+        // for document usage the d is actually a number (Integer)
+        for (String d : dataIn) {
+            SWThreadWorker workAttendance = new SWThreadWorker(this);
+            workAttendance.addData("id", d);
+            workAttendance.setWork(SWTKey.WORK_ATTENDANCE_DELETE);
+            prepareToken(workAttendance);
+            executorService.schedule(workAttendance, 1, TimeUnit.SECONDS);
         }
 
     }
@@ -1630,15 +1719,41 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_buttonAddAttendanceActionPerformed
 
     private void buttonEditAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditAttendanceActionPerformed
-        // TODO add your handling code here:
+
+        ArrayList dataAttendance = tabRender.getCheckedRows(tableUserData, 1);
+
+        if (dataAttendance.size() == 1) {
+            // go to userForm
+            cardLayoutEntity.show(panelAttendance, "panelAttendanceForm");
+
+            // clean the form but for editing mode
+            cleanUpAttendanceForm(true);
+
+            // call the API with id passed
+            getAttendance(Integer.parseInt(dataAttendance.get(0).toString()));
+
+            // show the loading bar
+            labelLoadingStatus.setVisible(true);
+        } else {
+            UIEffect.popup("please select 1 single data only!", this);
+        }
+
     }//GEN-LAST:event_buttonEditAttendanceActionPerformed
 
     private void buttonDeleteAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteAttendanceActionPerformed
-        // TODO add your handling code here:
+        ArrayList dataAttendance = tabRender.getCheckedRows(tableUserData, 1);
+
+        if (dataAttendance.size() == 0) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing id only
+            deleteAttendance(dataAttendance);
+            labelLoadingStatus.setVisible(true);
+        }
     }//GEN-LAST:event_buttonDeleteAttendanceActionPerformed
 
     private void labelRefreshAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshAttendanceMouseClicked
-        
+
         // change to loading icon
         labelRefreshAttendance.setIcon(loadingImage);
 
@@ -1655,11 +1770,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_labelRefreshAttendanceMouseExited
 
     private void buttonCancelAttendanceFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelAttendanceFormActionPerformed
-        // TODO add your handling code here:
+        cardLayoutEntity.show(panelAttendance, "panelAttendanceManagement");
+        labelBackToHome.setVisible(true);
     }//GEN-LAST:event_buttonCancelAttendanceFormActionPerformed
 
     private void buttonSaveAttendanceFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveAttendanceFormActionPerformed
-        // TODO add your handling code here:
+        cardLayoutEntity.show(panelAttendance, "panelAttendanceManagement");
+        saveAttendance();
     }//GEN-LAST:event_buttonSaveAttendanceFormActionPerformed
 
     private void comboboxStatusAttendanceItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboboxStatusAttendanceItemStateChanged
@@ -1854,6 +1971,22 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         }
 
     }
+    
+    private void loadSignaturePictureLocally() {
+
+        String signaturePic = configuration.getStringValue(Keys.SIGNATURE_ATTENDANCE);
+
+        System.out.println("Trying to load " + signaturePic);
+
+        lockAttendanceForm(false);
+        labelLoadingStatus.setVisible(false);
+
+        if (!signaturePic.contains("not available")) {
+            // set the propic
+            UIEffect.iconChanger(labelSignatureAttendance, (signaturePic));
+        }
+
+    }
 
     private void lockUserForm(boolean b) {
 
@@ -1869,15 +2002,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void lockAttendanceForm(boolean b) {
 
-        
         comboboxClassRegAttendance.setEnabled(!b);
         comboboxStatusAttendance.setEnabled(!b);
         comboboxUsernameAttendance.setEnabled(!b);
-        
+
         labelBrowseSignatureAttendance.setVisible(!b);
 
     }
-    
+
     private void lockScheduleForm(boolean b) {
 
         listAnotherClassSched.setEnabled(!b);
@@ -1941,7 +2073,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         // this is default entry
         labelSignatureAttendance.setIcon(null);
         labelSignatureAttendance.setText("preview");
-               
+
         signatureFile = null;
 
         if (editMode) {
@@ -2079,7 +2211,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                     || urlTarget.equalsIgnoreCase(WebReference.UPDATE_SCHEDULE)) {
                 // thus we refresh the schedule table
                 refreshSchedule();
-            } else if (urlTarget.equalsIgnoreCase(WebReference.PROFILE_USER)) {
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_ATTENDANCE)
+                    || urlTarget.equalsIgnoreCase(WebReference.DELETE_ATTENDANCE)
+                    || urlTarget.equalsIgnoreCase(WebReference.UPDATE_ATTENDANCE)) {
+                // thus we refresh the attendance table
+                refreshAttendance();
+            }else if (urlTarget.equalsIgnoreCase(WebReference.PROFILE_USER)) {
 
                 // we got the single user data here
                 User dataIn = objectG.fromJson(innerData, User.class);
@@ -2090,11 +2227,28 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
                 loadUserPictureLocally();
 
+            } else if (urlTarget.contains(WebReference.SIGNATURE_ATTENDANCE)) {
+
+                System.out.println("Obtaining Signature from web is success...\nNow applying it locally.");
+                loadSignaturePictureLocally();
+
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
+                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
+                tabRender.render(tableAttendanceData, dataIn);
+                labelRefreshAttendance.setIcon(refreshImage);
+                labelLoadingStatus.setVisible(false);
+
             } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
                 Document[] dataIn = objectG.fromJson(innerData, Document[].class);
                 tabRender.render(tableDocumentData, dataIn);
                 labelRefreshDocument.setIcon(refreshImage);
                 labelLoadingStatus.setVisible(false);
+
+            } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_ATTENDANCE)) {
+
+                // we got the single attendance data here
+                Attendance dataIn = objectG.fromJson(innerData, Attendance.class);
+                renderAttendanceForm(dataIn);
 
             } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_DOCUMENT)) {
 
