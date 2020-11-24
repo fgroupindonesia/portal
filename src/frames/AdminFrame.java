@@ -41,7 +41,7 @@ import javax.swing.JList;
  */
 public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProcess {
 
-    File propicFile, docFile;
+    File propicFile, docFile, signatureFile;
     short idForm;
     TableRenderer tabRender = new TableRenderer();
     LoginFrame loginFrame;
@@ -131,6 +131,28 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void renderScheduleForm(Schedule dataCome) {
+
+        idForm = (short) dataCome.getId();
+
+        comboboxUsernameSched.setSelectedItem(dataCome.getUsername());
+        comboboxClassRegSched.setSelectedItem(dataCome.getClass_registered());
+        comboboxDaySched.setSelectedItem(dataCome.getDay_schedule());
+
+        String time = dataCome.getTime_schedule();
+        String timeData[] = time.split(":");
+
+        int jam = Integer.parseInt(timeData[0]);
+        int menit = Integer.parseInt(timeData[1]);
+
+        spinnerHourSched.setValue(jam);
+        spinnerMinutesSched.setValue(menit);
+
+        lockScheduleForm(false);
+        labelLoadingStatus.setVisible(false);
+
+    }
+
     private void refreshUserPicture(String filename) {
 
         // set the path temporarily 
@@ -161,6 +183,15 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void refreshAttendance() {
+
+        SWThreadWorker workAttendance = new SWThreadWorker(this);
+        workAttendance.setWork(SWTKey.WORK_REFRESH_ATTENDANCE);
+        prepareToken(workAttendance);
+        executorService.schedule(workAttendance, 2, TimeUnit.SECONDS);
+
+    }
+    
     private void refreshScheduleByDay(String dayName) {
 
         SWThreadWorker workSchedule = new SWThreadWorker(this);
@@ -220,8 +251,18 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
-    private void saveDocument() {
+    private void getSchedule(int anID) {
 
+        SWThreadWorker workSched = new SWThreadWorker(this);
+        workSched.setWork(SWTKey.WORK_SCHEDULE_EDIT);
+        workSched.addData("id", anID + "");
+        prepareToken(workSched);
+        executorService.schedule(workSched, 1, TimeUnit.SECONDS);
+
+    }
+
+    private void saveDocument() {
+        labelLoadingStatus.setVisible(true);
         SWThreadWorker workDocumentEntity = new SWThreadWorker(this);
 
         // check whether this is edit or new form?
@@ -249,7 +290,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }
 
     private void saveUser() {
-
+        labelLoadingStatus.setVisible(true);
         SWThreadWorker workUserEntity = new SWThreadWorker(this);
 
         // check whether this is edit or new form?
@@ -298,6 +339,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void saveSchedule() {
 
+        labelLoadingStatus.setVisible(true);
+
         SWThreadWorker workScheduleEntity = new SWThreadWorker(this);
 
         // check whether this is edit or new form?
@@ -343,6 +386,19 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             workDoc.setWork(SWTKey.WORK_DOCUMENT_DELETE);
             prepareToken(workDoc);
             executorService.schedule(workDoc, 1, TimeUnit.SECONDS);
+        }
+
+    }
+
+    private void deleteSchedule(ArrayList<String> dataIn) {
+
+        // for schedule usage the d is actually a number (Integer)
+        for (String d : dataIn) {
+            SWThreadWorker workSched = new SWThreadWorker(this);
+            workSched.addData("id", d);
+            workSched.setWork(SWTKey.WORK_SCHEDULE_DELETE);
+            prepareToken(workSched);
+            executorService.schedule(workSched, 1, TimeUnit.SECONDS);
         }
 
     }
@@ -434,7 +490,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonDeleteSchedule = new javax.swing.JButton();
         labelScheduleManagement = new javax.swing.JLabel();
         labelRefreshSchedule = new javax.swing.JLabel();
-        panelUserTable1 = new javax.swing.JPanel();
+        panelScheduleTable = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
         tableScheduleData = new javax.swing.JTable();
         panelScheduleForm = new javax.swing.JPanel();
@@ -452,6 +508,29 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jLabel20 = new javax.swing.JLabel();
         jScrollPane7 = new javax.swing.JScrollPane();
         listAnotherClassSched = new javax.swing.JList<>();
+        panelAttendance = new javax.swing.JPanel();
+        panelAttendanceManagement = new javax.swing.JPanel();
+        panelAttendanceControl = new javax.swing.JPanel();
+        buttonAddAttendance = new javax.swing.JButton();
+        buttonEditAttendance = new javax.swing.JButton();
+        buttonDeleteAttendance = new javax.swing.JButton();
+        labelAttendanceManagement = new javax.swing.JLabel();
+        labelRefreshAttendance = new javax.swing.JLabel();
+        panelAttendanceTable = new javax.swing.JPanel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        tableAttendanceData = new javax.swing.JTable();
+        panelAttendanceForm = new javax.swing.JPanel();
+        buttonCancelAttendanceForm = new javax.swing.JButton();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        buttonSaveAttendanceForm = new javax.swing.JButton();
+        comboboxClassRegAttendance = new javax.swing.JComboBox<>();
+        comboboxUsernameAttendance = new javax.swing.JComboBox<>();
+        comboboxStatusAttendance = new javax.swing.JComboBox<>();
+        jLabel24 = new javax.swing.JLabel();
+        labelBrowseSignatureAttendance = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        labelSignatureAttendance = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         labelBottomPadding = new javax.swing.JLabel();
         labelBackToHome = new javax.swing.JLabel();
@@ -538,6 +617,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonAttendance.setText("Attendance");
         buttonAttendance.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonAttendance.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        buttonAttendance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonAttendanceActionPerformed(evt);
+            }
+        });
         panelHome.add(buttonAttendance);
 
         buttonPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cash64.png"))); // NOI18N
@@ -938,18 +1022,18 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelScheduleManagement.add(panelScheduleControl, java.awt.BorderLayout.PAGE_START);
 
-        panelUserTable1.setLayout(new java.awt.BorderLayout());
+        panelScheduleTable.setLayout(new java.awt.BorderLayout());
 
         tableScheduleData.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "[ x ]", "Id", "Day", "Time", "Class"
+                "[ x ]", "Id", "Username", "Day", "Time", "Class"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -967,14 +1051,17 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             tableScheduleData.getColumnModel().getColumn(2).setMinWidth(100);
             tableScheduleData.getColumnModel().getColumn(2).setPreferredWidth(100);
             tableScheduleData.getColumnModel().getColumn(2).setMaxWidth(100);
-            tableScheduleData.getColumnModel().getColumn(3).setMinWidth(80);
-            tableScheduleData.getColumnModel().getColumn(3).setPreferredWidth(80);
-            tableScheduleData.getColumnModel().getColumn(3).setMaxWidth(80);
+            tableScheduleData.getColumnModel().getColumn(3).setMinWidth(100);
+            tableScheduleData.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tableScheduleData.getColumnModel().getColumn(3).setMaxWidth(100);
+            tableScheduleData.getColumnModel().getColumn(4).setMinWidth(80);
+            tableScheduleData.getColumnModel().getColumn(4).setPreferredWidth(80);
+            tableScheduleData.getColumnModel().getColumn(4).setMaxWidth(80);
         }
 
-        panelUserTable1.add(jScrollPane5, java.awt.BorderLayout.CENTER);
+        panelScheduleTable.add(jScrollPane5, java.awt.BorderLayout.CENTER);
 
-        panelScheduleManagement.add(panelUserTable1, java.awt.BorderLayout.CENTER);
+        panelScheduleManagement.add(panelScheduleTable, java.awt.BorderLayout.CENTER);
 
         panelSchedule.add(panelScheduleManagement, "panelScheduleManagement");
 
@@ -1030,11 +1117,169 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         jScrollPane7.setViewportView(listAnotherClassSched);
 
-        panelScheduleForm.add(jScrollPane7, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 80, 130, 130));
+        panelScheduleForm.add(jScrollPane7, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 80, 210, 130));
 
         panelSchedule.add(panelScheduleForm, "panelScheduleForm");
 
         panelInnerCenter.add(panelSchedule, "panelSchedule");
+
+        panelAttendance.setLayout(new java.awt.CardLayout());
+
+        panelAttendanceManagement.setLayout(new java.awt.BorderLayout());
+
+        panelAttendanceControl.setPreferredSize(new java.awt.Dimension(658, 40));
+        panelAttendanceControl.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        buttonAddAttendance.setText("Add");
+        buttonAddAttendance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonAddAttendanceActionPerformed(evt);
+            }
+        });
+        panelAttendanceControl.add(buttonAddAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 5, 60, -1));
+
+        buttonEditAttendance.setText("Edit");
+        buttonEditAttendance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonEditAttendanceActionPerformed(evt);
+            }
+        });
+        panelAttendanceControl.add(buttonEditAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(514, 5, 60, -1));
+
+        buttonDeleteAttendance.setText("Delete");
+        buttonDeleteAttendance.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonDeleteAttendanceActionPerformed(evt);
+            }
+        });
+        panelAttendanceControl.add(buttonDeleteAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(589, 5, -1, -1));
+
+        labelAttendanceManagement.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
+        labelAttendanceManagement.setText("Attendance Management");
+        panelAttendanceControl.add(labelAttendanceManagement, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 280, 40));
+
+        labelRefreshAttendance.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh16.png"))); // NOI18N
+        labelRefreshAttendance.setText("Refresh");
+        labelRefreshAttendance.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelRefreshAttendance.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelRefreshAttendanceMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelRefreshAttendanceMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelRefreshAttendanceMouseExited(evt);
+            }
+        });
+        panelAttendanceControl.add(labelRefreshAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 10, 70, 20));
+
+        panelAttendanceManagement.add(panelAttendanceControl, java.awt.BorderLayout.PAGE_START);
+
+        panelAttendanceTable.setLayout(new java.awt.BorderLayout());
+
+        tableAttendanceData.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "[ x ]", "Id", "Username", "Class Reg", "Status", "Signature", "Date Created", "Date Modified"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane6.setViewportView(tableAttendanceData);
+        if (tableAttendanceData.getColumnModel().getColumnCount() > 0) {
+            tableAttendanceData.getColumnModel().getColumn(0).setMinWidth(30);
+            tableAttendanceData.getColumnModel().getColumn(0).setPreferredWidth(30);
+            tableAttendanceData.getColumnModel().getColumn(0).setMaxWidth(30);
+            tableAttendanceData.getColumnModel().getColumn(1).setMinWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(1).setMaxWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(2).setMinWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(2).setMaxWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(3).setMinWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(3).setMaxWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(4).setMinWidth(80);
+            tableAttendanceData.getColumnModel().getColumn(4).setPreferredWidth(80);
+            tableAttendanceData.getColumnModel().getColumn(4).setMaxWidth(80);
+        }
+
+        panelAttendanceTable.add(jScrollPane6, java.awt.BorderLayout.CENTER);
+
+        panelAttendanceManagement.add(panelAttendanceTable, java.awt.BorderLayout.CENTER);
+
+        panelAttendance.add(panelAttendanceManagement, "panelAttendanceManagement");
+
+        panelAttendanceForm.setBorder(javax.swing.BorderFactory.createTitledBorder("Attendance Form"));
+        panelAttendanceForm.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        buttonCancelAttendanceForm.setText("Cancel");
+        buttonCancelAttendanceForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonCancelAttendanceFormActionPerformed(evt);
+            }
+        });
+        panelAttendanceForm.add(buttonCancelAttendanceForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
+
+        jLabel21.setText("Status :");
+        panelAttendanceForm.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 150, -1));
+
+        jLabel22.setText("Class Registered :");
+        panelAttendanceForm.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 160, 150, -1));
+
+        buttonSaveAttendanceForm.setText("Save");
+        buttonSaveAttendanceForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSaveAttendanceFormActionPerformed(evt);
+            }
+        });
+        panelAttendanceForm.add(buttonSaveAttendanceForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(555, 250, 60, -1));
+
+        comboboxClassRegAttendance.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        panelAttendanceForm.add(comboboxClassRegAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, 200, -1));
+
+        comboboxUsernameAttendance.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        panelAttendanceForm.add(comboboxUsernameAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 200, -1));
+
+        comboboxStatusAttendance.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday" }));
+        comboboxStatusAttendance.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                comboboxStatusAttendanceItemStateChanged(evt);
+            }
+        });
+        panelAttendanceForm.add(comboboxStatusAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
+
+        jLabel24.setText("Username : ");
+        panelAttendanceForm.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 150, -1));
+
+        labelBrowseSignatureAttendance.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelBrowseSignatureAttendance.setForeground(new java.awt.Color(0, 51, 255));
+        labelBrowseSignatureAttendance.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelBrowseSignatureAttendance.setText("<html><u>Browse Picture</u></html>");
+        labelBrowseSignatureAttendance.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        panelAttendanceForm.add(labelBrowseSignatureAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 210, 120, -1));
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Signature Picture"));
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
+        labelSignatureAttendance.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelSignatureAttendance.setText("preview");
+        jPanel1.add(labelSignatureAttendance, java.awt.BorderLayout.CENTER);
+
+        panelAttendanceForm.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, 210, 170));
+
+        panelAttendance.add(panelAttendanceForm, "panelAttendanceForm");
+
+        panelInnerCenter.add(panelAttendance, "panelAttendance");
 
         panelCenter.add(panelInnerCenter, new org.netbeans.lib.awtextra.AbsoluteConstraints(43, 48, 658, 297));
 
@@ -1294,11 +1539,37 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_buttonAddScheduleActionPerformed
 
     private void buttonEditScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditScheduleActionPerformed
-        // TODO add your handling code here:
+        ArrayList dataSched = tabRender.getCheckedRows(tableScheduleData, 1);
+
+        if (dataSched.size() == 1) {
+            // go to schedForm
+            cardLayoutEntity.show(panelSchedule, "panelScheduleForm");
+
+            // clean the form but for editing mode
+            cleanUpScheduleForm(true);
+
+            // call the API with id passed
+            getSchedule(Integer.parseInt(dataSched.get(0).toString()));
+
+            // show the loading bar
+            labelLoadingStatus.setVisible(true);
+        } else {
+            UIEffect.popup("please select 1 single data only!", this);
+        }
     }//GEN-LAST:event_buttonEditScheduleActionPerformed
 
     private void buttonDeleteScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteScheduleActionPerformed
-        // TODO add your handling code here:
+
+        ArrayList dataSchedule = tabRender.getCheckedRows(tableScheduleData, 1);
+
+        if (dataSchedule.size() == 0) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing id only
+            deleteSchedule(dataSchedule);
+            labelLoadingStatus.setVisible(true);
+        }
+
     }//GEN-LAST:event_buttonDeleteScheduleActionPerformed
 
     private void labelRefreshScheduleMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshScheduleMouseClicked
@@ -1338,12 +1609,72 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
 
     private void comboboxDaySchedItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboboxDaySchedItemStateChanged
+        labelLoadingStatus.setVisible(true);
+
         // when the item selected changed
         // we check the registered class of that day
-        String classSelected = comboboxDaySched.getSelectedItem().toString();
-        refreshScheduleByDay(classSelected);
-
+        if (comboboxDaySched.getSelectedItem() != null) {
+            String classSelected = comboboxDaySched.getSelectedItem().toString();
+            refreshScheduleByDay(classSelected);
+        } else {
+            // clearup the list
+            listAnotherClassSched.setModel(new DefaultListModel());
+            labelLoadingStatus.setVisible(false);
+        }
     }//GEN-LAST:event_comboboxDaySchedItemStateChanged
+
+    private void buttonAddAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddAttendanceActionPerformed
+        cardLayoutEntity.show(panelAttendance, "panelAttendanceForm");
+        // clean but not for editing mode
+        cleanUpAttendanceForm(false);
+    }//GEN-LAST:event_buttonAddAttendanceActionPerformed
+
+    private void buttonEditAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditAttendanceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonEditAttendanceActionPerformed
+
+    private void buttonDeleteAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteAttendanceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonDeleteAttendanceActionPerformed
+
+    private void labelRefreshAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshAttendanceMouseClicked
+        
+        // change to loading icon
+        labelRefreshAttendance.setIcon(loadingImage);
+
+        // refresh the table
+        refreshAttendance();
+    }//GEN-LAST:event_labelRefreshAttendanceMouseClicked
+
+    private void labelRefreshAttendanceMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshAttendanceMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshAttendanceMouseEntered
+
+    private void labelRefreshAttendanceMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshAttendanceMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshAttendanceMouseExited
+
+    private void buttonCancelAttendanceFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelAttendanceFormActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonCancelAttendanceFormActionPerformed
+
+    private void buttonSaveAttendanceFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveAttendanceFormActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonSaveAttendanceFormActionPerformed
+
+    private void comboboxStatusAttendanceItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboboxStatusAttendanceItemStateChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comboboxStatusAttendanceItemStateChanged
+
+    private void buttonAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAttendanceActionPerformed
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelAttendance");
+        cardLayoutEntity = (CardLayout) panelAttendance.getLayout();
+        cardLayoutEntity.show(panelAttendance, "panelAttendanceManagement");
+
+        labelBackToHome.setVisible(true);
+        // document has no picture
+
+    }//GEN-LAST:event_buttonAttendanceActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1382,31 +1713,39 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonAddAttendance;
     private javax.swing.JButton buttonAddDocument;
     private javax.swing.JButton buttonAddSchedule;
     private javax.swing.JButton buttonAddUser;
     private javax.swing.JButton buttonAttendance;
+    private javax.swing.JButton buttonCancelAttendanceForm;
     private javax.swing.JButton buttonCancelDocumentForm;
     private javax.swing.JButton buttonCancelScheduleForm;
     private javax.swing.JButton buttonCancelUserForm;
+    private javax.swing.JButton buttonDeleteAttendance;
     private javax.swing.JButton buttonDeleteDocument;
     private javax.swing.JButton buttonDeleteSchedule;
     private javax.swing.JButton buttonDeleteUser;
     private javax.swing.JButton buttonDocumentManagement;
+    private javax.swing.JButton buttonEditAttendance;
     private javax.swing.JButton buttonEditDocument;
     private javax.swing.JButton buttonEditSchedule;
     private javax.swing.JButton buttonEditUser;
     private javax.swing.JButton buttonFuture2;
     private javax.swing.JButton buttonFuture3;
     private javax.swing.JButton buttonPayment;
+    private javax.swing.JButton buttonSaveAttendanceForm;
     private javax.swing.JButton buttonSaveDocumentForm;
     private javax.swing.JButton buttonSaveScheduleForm;
     private javax.swing.JButton buttonSaveUserForm;
     private javax.swing.JButton buttonSchedule;
     private javax.swing.JButton buttonSettings;
     private javax.swing.JButton buttonUserManagement;
+    private javax.swing.JComboBox<String> comboboxClassRegAttendance;
     private javax.swing.JComboBox<String> comboboxClassRegSched;
     private javax.swing.JComboBox<String> comboboxDaySched;
+    private javax.swing.JComboBox<String> comboboxStatusAttendance;
+    private javax.swing.JComboBox<String> comboboxUsernameAttendance;
     private javax.swing.JComboBox<String> comboboxUsernameDoc;
     private javax.swing.JComboBox<String> comboboxUsernameSched;
     private javax.swing.JFileChooser fileChooser;
@@ -1421,6 +1760,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1428,28 +1770,39 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
+    private javax.swing.JLabel labelAttendanceManagement;
     private javax.swing.JLabel labelBackToHome;
     private javax.swing.JLabel labelBottomPadding;
+    private javax.swing.JLabel labelBrowseSignatureAttendance;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelLinkChangeFileDoc;
     private javax.swing.JLabel labelLinkChangePicture;
     private javax.swing.JLabel labelLoadingStatus;
     private javax.swing.JLabel labelMinimize;
     private javax.swing.JLabel labelPreviewPicture;
+    private javax.swing.JLabel labelRefreshAttendance;
     private javax.swing.JLabel labelRefreshDocument;
     private javax.swing.JLabel labelRefreshSchedule;
     private javax.swing.JLabel labelRefreshUser;
     private javax.swing.JLabel labelRightPadding;
     private javax.swing.JLabel labelScheduleManagement;
+    private javax.swing.JLabel labelSignatureAttendance;
     private javax.swing.JLabel labelTime;
     private javax.swing.JLabel labelUserManagement;
     private javax.swing.JList<String> listAnotherClassSched;
+    private javax.swing.JPanel panelAttendance;
+    private javax.swing.JPanel panelAttendanceControl;
+    private javax.swing.JPanel panelAttendanceForm;
+    private javax.swing.JPanel panelAttendanceManagement;
+    private javax.swing.JPanel panelAttendanceTable;
     private javax.swing.JPanel panelCenter;
     private javax.swing.JPanel panelDocument;
     private javax.swing.JPanel panelDocumentControl;
@@ -1463,14 +1816,15 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel panelScheduleControl;
     private javax.swing.JPanel panelScheduleForm;
     private javax.swing.JPanel panelScheduleManagement;
+    private javax.swing.JPanel panelScheduleTable;
     private javax.swing.JPanel panelUser;
     private javax.swing.JPanel panelUserControl;
     private javax.swing.JPanel panelUserForm;
     private javax.swing.JPanel panelUserManagement;
     private javax.swing.JPanel panelUserTable;
-    private javax.swing.JPanel panelUserTable1;
     private javax.swing.JSpinner spinnerHourSched;
     private javax.swing.JSpinner spinnerMinutesSched;
+    private javax.swing.JTable tableAttendanceData;
     private javax.swing.JTable tableDocumentData;
     private javax.swing.JTable tableScheduleData;
     private javax.swing.JTable tableUserData;
@@ -1513,6 +1867,17 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void lockAttendanceForm(boolean b) {
+
+        
+        comboboxClassRegAttendance.setEnabled(!b);
+        comboboxStatusAttendance.setEnabled(!b);
+        comboboxUsernameAttendance.setEnabled(!b);
+        
+        labelBrowseSignatureAttendance.setVisible(!b);
+
+    }
+    
     private void lockScheduleForm(boolean b) {
 
         listAnotherClassSched.setEnabled(!b);
@@ -1560,6 +1925,30 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             // so later it will be unlocked by async success call
 
             lockUserForm(editMode);
+            labelLoadingStatus.setVisible(true);
+        }
+
+    }
+
+    private void cleanUpAttendanceForm(boolean editWork) {
+
+        editMode = editWork;
+
+        comboboxUsernameAttendance.setSelectedIndex(-1);
+        comboboxClassRegAttendance.setSelectedIndex(-1);
+        comboboxStatusAttendance.setSelectedIndex(-1);
+
+        // this is default entry
+        labelSignatureAttendance.setIcon(null);
+        labelSignatureAttendance.setText("preview");
+               
+        signatureFile = null;
+
+        if (editMode) {
+            // we lock first
+            // so later it will be unlocked by async success call
+
+            lockAttendanceForm(editMode);
             labelLoadingStatus.setVisible(true);
         }
 
@@ -1631,9 +2020,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void renderScheduleForList(Schedule[] sched, JList elContainer) {
 
         DefaultListModel dfm = new DefaultListModel();
-        
+
         for (Schedule s : sched) {
-            dfm.addElement(s.getClass_registered());
+            dfm.addElement(s.getClass_registered() + " - " + s.getTime_schedule());
         }
 
         elContainer.setModel(dfm);
@@ -1666,9 +2055,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
                 tabRender.render(tableScheduleData, dataIn);
 
+                labelRefreshSchedule.setIcon(refreshImage);
+                labelLoadingStatus.setVisible(false);
+
             } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE_BY_DAY)) {
                 Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
                 renderScheduleForList(dataIn, listAnotherClassSched);
+
+                labelLoadingStatus.setVisible(false);
 
             } else if (urlTarget.equalsIgnoreCase(WebReference.REGISTER_USER)
                     || urlTarget.equalsIgnoreCase(WebReference.DELETE_USER)) {
@@ -1708,7 +2102,21 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 Document dataIn = objectG.fromJson(innerData, Document.class);
                 renderDocumentForm(dataIn);
 
+            } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_SCHEDULE)) {
+
+                // we got the single schedule data here
+                Schedule dataIn = objectG.fromJson(innerData, Schedule.class);
+                renderScheduleForm(dataIn);
+
             }
+        } else {
+
+            // when it is invalid but coming from all sched by day
+            if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE_BY_DAY)) {
+                // we clear up the list
+                listAnotherClassSched.setModel(new DefaultListModel());
+            }
+
         }
     }
 }

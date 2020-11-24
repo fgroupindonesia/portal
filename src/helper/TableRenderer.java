@@ -106,6 +106,7 @@ public class TableRenderer {
         for (Schedule d : dataCome) {
             Object[] dataBaru = new Object[]{false,
                 d.getId(),
+                d.getUsername(),
                 d.getDay_schedule(),
                 d.getTime_schedule(),
                 d.getClass_registered()
