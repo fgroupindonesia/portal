@@ -89,6 +89,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_USER_DELETE:
                 name = "user_delete";
                 break;
+            case SWTKey.WORK_USER_UPDATE:
+                name = "user_update";
+                break;
             case SWTKey.WORK_USER_SAVE:
                 name = "user_save";
                 break;
@@ -121,6 +124,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_REFRESH_PICTURE:
                 name = "refresh_picture";
+                break;
+            case SWTKey.WORK_REFRESH_SIGNATURE:
+                name = "refresh_signature";
                 break;
             case SWTKey.WORK_LOGIN:
                 name = "login";
@@ -180,6 +186,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_USER_DELETE:
                 userDelete();
                 break;
+            case SWTKey.WORK_USER_UPDATE:
+                userUpdate();
+                break;
             case SWTKey.WORK_USER_SAVE:
                 userSave();
                 break;
@@ -215,6 +224,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_REFRESH_PICTURE:
                 refreshPictureData();
+                break;
+            case SWTKey.WORK_REFRESH_SIGNATURE:
+                refreshSignatureData();
                 break;
             case SWTKey.WORK_LOGIN:
                 userLogin();
@@ -281,6 +293,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     public void addData(String k, String v) {
+        System.out.println("Key : " + k + " with value : " + v);
         urlExecutor.addData(k, v);
     }
 
@@ -301,7 +314,19 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void userSave() {
-        urlExecutor.start(WebReference.REGISTER_USER, HttpCall.METHOD_POST_FILE);
+        if (hasFile()) {
+            urlExecutor.start(WebReference.REGISTER_USER, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.REGISTER_USER, HttpCall.METHOD_POST);
+        }
+    }
+
+    private void userUpdate() {
+        if (hasFile()) {
+            urlExecutor.start(WebReference.UPDATE_USER, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.UPDATE_USER, HttpCall.METHOD_POST);
+        }
     }
 
     private void userDelete() {
@@ -313,7 +338,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void documentSave() {
-        urlExecutor.start(WebReference.ADD_DOCUMENT, HttpCall.METHOD_POST_FILE);
+        if (hasFile()) {
+            urlExecutor.start(WebReference.ADD_DOCUMENT, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.ADD_DOCUMENT, HttpCall.METHOD_POST);
+        }
     }
 
     private void documentEdit() {
@@ -323,13 +352,21 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void documentUpdate() {
         urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST_FILE);
     }
-    
-     private void attendanceDelete() {
+
+    private void attendanceDelete() {
         urlExecutor.start(WebReference.DELETE_ATTENDANCE, HttpCall.METHOD_POST);
     }
 
+    private boolean hasFile() {
+        return urlExecutor.isFileAttached();
+    }
+
     private void attendanceSave() {
-        urlExecutor.start(WebReference.ADD_ATTENDANCE, HttpCall.METHOD_POST_FILE);
+        if (hasFile()) {
+            urlExecutor.start(WebReference.ADD_ATTENDANCE, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.ADD_ATTENDANCE, HttpCall.METHOD_POST);
+        }
     }
 
     private void attendanceEdit() {
@@ -369,6 +406,13 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
         // the url is manually defined here
         String urlManual = WebReference.PICTURE_USER + "?propic=" + urlExecutor.getData("propic");
+        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+    }
+
+    private void refreshSignatureData() {
+
+        // the url is manually defined here
+        String urlManual = WebReference.SIGNATURE_ATTENDANCE + "?signature=" + urlExecutor.getData("signature");
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
 

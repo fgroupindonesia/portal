@@ -16,7 +16,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -51,6 +50,10 @@ public class HttpCall {
 
         return postData.toString();
 
+    }
+
+    public boolean isFileAttached() {
+        return (fileData.size() > 0);
     }
 
     /**
@@ -214,7 +217,6 @@ public class HttpCall {
 
                             request.flush();
 
-
                         }
 
                     }
@@ -239,8 +241,14 @@ public class HttpCall {
                 System.out.println("We got propic " + getData("propic"));
 
                 // set the complete path locally
-                PathReference.setPropicFileName(getData("propic"));
-                String fileName = PathReference.UserPropicPath;
+                String fileName = null;
+                if (urlTarget.contains(WebReference.SIGNATURE_ATTENDANCE)) {
+                    PathReference.setSignatureFileName(getData("signature"));
+                    fileName = PathReference.SignaturePath;
+                } else if (urlTarget.contains(WebReference.PICTURE_USER)) {
+                    PathReference.setPropicFileName(getData("propic"));
+                    fileName = PathReference.UserPropicPath;
+                }
 
                 // download here
                 FileCopier.downloadFromURL(url, fileName);

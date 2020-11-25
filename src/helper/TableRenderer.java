@@ -55,9 +55,9 @@ public class TableRenderer {
                 false,
                 d.getId(),
                 d.getUsername(),
-                d.getPass(),
-                d.getEmail(),
-                d.getAddress(),
+                UIEffect.decodeSafe(d.getPass()),
+                UIEffect.decodeSafe(d.getEmail()),
+                UIEffect.decodeSafe(d.getAddress()),
                 d.getPropic(),
                 d.getMobile()
             };
@@ -74,8 +74,8 @@ public class TableRenderer {
         for (Document d : dataCome) {
             Object[] dataBaru = new Object[]{false,
                 d.getId(),
-                d.getTitle(),
-                d.getDescription(),
+                UIEffect.decodeSafe(d.getTitle()),
+                UIEffect.decodeSafe(d.getDescription()),
                 d.getFilename(),
                 d.getUsername(),
                 d.getUrl(),
@@ -109,12 +109,17 @@ public class TableRenderer {
                 d.getUsername(),
                 d.getDay_schedule(),
                 d.getTime_schedule(),
-                d.getClass_registered()
+                UIEffect.decodeSafe(d.getClass_registered())
             };
-            
+
             tableModel.addRow(dataBaru);
         }
 
+    }
+
+    // this is for UTF-8 decoder
+    private static String decode(String val) {
+        return UIEffect.decodeSafe(val);
     }
 
     public void render(JTable el, Attendance[] dataCome) {
@@ -123,11 +128,11 @@ public class TableRenderer {
         tableModel.setRowCount(0);
         for (Attendance d : dataCome) {
             Object[] dataBaru = new Object[]{
-                false, 
+                false,
                 d.getId(),
                 d.getUsername(),
-                d.getClass_registered(), 
-                d.getStatus(), 
+                decode(d.getClass_registered()),
+                d.getStatus(),
                 d.getSignature(),
                 d.getDate_created(),
                 d.getDate_modified()

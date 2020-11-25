@@ -5,6 +5,9 @@
  */
 package beans;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+
 /**
  *
  * @author ASUS

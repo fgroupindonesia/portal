@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import javax.imageio.ImageIO;
@@ -31,6 +32,18 @@ public class UIEffect {
     private static JLabel labelTime;
     private static Timer timer;
 
+    // this is for UTF-8 decoder
+    public static String decodeSafe(String val) {
+        String en = null;
+        try {
+            en = URLDecoder.decode(val, "UTF-8");
+        } catch (Exception ex) {
+
+        }
+
+        return en;
+    }
+    
     private static void addingTimer() {
         timer = new Timer(500, new ActionListener() {
             @Override

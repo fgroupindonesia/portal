@@ -23,7 +23,7 @@ public class WebReference {
     public static final String LAST_PAYMENT = REMOTE + "payment/last";
     
     public static final String PICTURE_USER = REMOTE + "user/picture";
-    x public static final String SIGNATURE_ATTENDANCE = REMOTE + "user/picture";
+    public static final String SIGNATURE_ATTENDANCE = REMOTE + "attendance/signature";
     public static final String PROFILE_USER = REMOTE + "user/profile";
     public static final String LOGIN_USER = REMOTE + "user/login";
     public static final String REGISTER_USER = REMOTE + "user/register";
