@@ -53,4 +53,11 @@ public class SWTKey {
     public static final int WORK_ATTENDANCE_SAVE = 25;
     public static final int WORK_ATTENDANCE_UPDATE = 26;
     
+     // edit is actually obtaining the data
+    public static final int WORK_PAYMENT_EDIT = 27;
+    public static final int WORK_PAYMENT_DELETE = 28;
+    public static final int WORK_PAYMENT_SAVE = 29;
+    public static final int WORK_PAYMENT_UPDATE = 30;
+    
+    
 }

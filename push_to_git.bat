@@ -1,5 +1,5 @@
 git add .
-git commit -m "Adding sql sample dummy data."
+git commit -m "Adding currency UIEffect for Payment Form."
 git push origin main
 git gc --prune
 git pull

@@ -38,6 +38,15 @@ public class RupiahGenerator {
 
         return nilai;
     }
+    
+   public int getIntNumber(String rupiah){
+       int nilai  = 0;
+       
+       double d = this.getNumber(rupiah);
+       nilai = (int) d;
+       
+       return nilai;
+   }
 
     public String getText(double harga) {
 

@@ -63,6 +63,31 @@ public class UIEffect {
         System.out.println("Stopping timer is done!");
     }
 
+    public static void focusLostCurrency(JTextField el){
+        // when empty set back to Rp.0
+        if(el.getText().trim().length()==0){
+            el.setText(new RupiahGenerator().getText(0));
+        }else {
+            // when there is a number 
+            // we add Rp.x
+            double nilai = Double.parseDouble(el.getText());
+            el.setText(new RupiahGenerator().getText(nilai));
+        }
+        
+        
+    }
+    
+    public static void focusGainCurrency(JTextField el){
+        
+        // when there is a number we remove all marker Rp. etc
+        // until remain only number
+        if(el.getText().length()>0){
+            String nilai = el.getText();
+            el.setText(new RupiahGenerator().getIntNumber(nilai)+"");
+        }
+        
+    }
+    
     protected static void updateClock() {
 
         if (labelTime != null) {

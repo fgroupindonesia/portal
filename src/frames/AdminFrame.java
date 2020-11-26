@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import helper.HttpCall;
 import helper.JSONChecker;
 import helper.PathReference;
+import helper.RupiahGenerator;
 import helper.SWTKey;
 import helper.SWThreadWorker;
 import helper.TableRenderer;
@@ -42,7 +43,7 @@ import javax.swing.JList;
  */
 public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProcess {
 
-    File propicFile, docFile, signatureFile;
+    File propicFile, docFile, signatureFile, payFile;
     short idForm;
     TableRenderer tabRender = new TableRenderer();
     LoginFrame loginFrame;
@@ -253,6 +254,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void refreshPayment() {
+
+        SWThreadWorker workPay = new SWThreadWorker(this);
+        workPay.setWork(SWTKey.WORK_REFRESH_PAYMENT);
+        workPay.addData("username", "admin");
+        prepareToken(workPay);
+        executorService.schedule(workPay, 2, TimeUnit.SECONDS);
+
+    }
+
     private void refreshSchedule() {
 
         SWThreadWorker workSched = new SWThreadWorker(this);
@@ -302,6 +313,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void getPayment(int anID) {
+
+        SWThreadWorker workPay = new SWThreadWorker(this);
+        workPay.setWork(SWTKey.WORK_PAYMENT_EDIT);
+        workPay.addData("id", anID + "");
+        prepareToken(workPay);
+        executorService.schedule(workPay, 2, TimeUnit.SECONDS);
+
+    }
+
     private void getSchedule(int anID) {
 
         SWThreadWorker workSched = new SWThreadWorker(this);
@@ -313,7 +334,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }
 
     private void saveDocument() {
-        labelLoadingStatus.setVisible(true);
+        showLoadingStatus();
         SWThreadWorker workDocumentEntity = new SWThreadWorker(this);
 
         // check whether this is edit or new form?
@@ -337,6 +358,34 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         prepareToken(workDocumentEntity);
         executorService.schedule(workDocumentEntity, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void savePayment() {
+
+        showLoadingStatus();
+        SWThreadWorker workPaymentEntity = new SWThreadWorker(this);
+
+        // check whether this is edit or new form?
+        if (editMode) {
+            // updating data
+            workPaymentEntity.setWork(SWTKey.WORK_PAYMENT_UPDATE);
+            workPaymentEntity.addData("id", idForm + "");
+        } else {
+            // saving new data
+            workPaymentEntity.setWork(SWTKey.WORK_PAYMENT_SAVE);
+        }
+
+        workPaymentEntity.addData("amount", textfieldAmountPayment.getText());
+        workPaymentEntity.addData("method", comboboxMethodPayment.getSelectedItem().toString());
+        workPaymentEntity.addData("username", comboboxUsernameDoc.getSelectedItem().toString());
+
+        if (payFile != null) {
+            workPaymentEntity.addFile("document", payFile);
+        }
+
+        prepareToken(workPaymentEntity);
+        executorService.schedule(workPaymentEntity, 2, TimeUnit.SECONDS);
 
     }
 
@@ -468,6 +517,19 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             workAttendance.setWork(SWTKey.WORK_ATTENDANCE_DELETE);
             prepareToken(workAttendance);
             executorService.schedule(workAttendance, 1, TimeUnit.SECONDS);
+        }
+
+    }
+
+    private void deletePayment(ArrayList<String> dataIn) {
+
+        // for payment usage the d is actually a number (Integer)
+        for (String d : dataIn) {
+            SWThreadWorker workPay = new SWThreadWorker(this);
+            workPay.addData("id", d);
+            workPay.setWork(SWTKey.WORK_PAYMENT_DELETE);
+            prepareToken(workPay);
+            executorService.schedule(workPay, 1, TimeUnit.SECONDS);
         }
 
     }
@@ -747,6 +809,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonPayment.setText("Payment");
         buttonPayment.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonPayment.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        buttonPayment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonPaymentActionPerformed(evt);
+            }
+        });
         panelHome.add(buttonPayment);
 
         buttonSchedule.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time64.png"))); // NOI18N
@@ -1558,6 +1625,15 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jPanel2.add(labelScreenshotPayment, java.awt.BorderLayout.CENTER);
 
         panelPaymentForm.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, 210, 170));
+
+        textfieldAmountPayment.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                textfieldAmountPaymentFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textfieldAmountPaymentFocusLost(evt);
+            }
+        });
         panelPaymentForm.add(textfieldAmountPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 120, 150, -1));
 
         jLabel27.setText("Amount : ");
@@ -2011,19 +2087,53 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_labelBrowseSignatureAttendanceMouseClicked
 
     private void buttonAddPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddPaymentActionPerformed
-        // TODO add your handling code here:
+
+        cardLayoutEntity.show(panelPayment, "panelPaymentForm");
+        // clean but not for editing mode
+        cleanUpPaymentForm(false);
+
     }//GEN-LAST:event_buttonAddPaymentActionPerformed
 
     private void buttonEditPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditPaymentActionPerformed
-        // TODO add your handling code here:
+
+        ArrayList dataPay = tabRender.getCheckedRows(tablePaymentData, 1);
+
+        if (dataPay.size() == 1) {
+            // go to userForm
+            cardLayoutEntity.show(panelPayment, "panelPaymentForm");
+
+            // clean the form but for editing mode
+            cleanUpPaymentForm(true);
+
+            // call the API with id passed
+            getPayment(Integer.parseInt(dataPay.get(0).toString()));
+
+            // show the loading bar
+            showLoadingStatus();
+        } else {
+            UIEffect.popup("please select 1 single data only!", this);
+        }
+
     }//GEN-LAST:event_buttonEditPaymentActionPerformed
 
     private void buttonDeletePaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeletePaymentActionPerformed
-        // TODO add your handling code here:
+        ArrayList dataPay = tabRender.getCheckedRows(tablePaymentData, 1);
+
+        if (dataPay.size() == 0) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing id only
+            deletePayment(dataPay);
+            labelLoadingStatus.setVisible(true);
+        }
     }//GEN-LAST:event_buttonDeletePaymentActionPerformed
 
     private void labelRefreshPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshPaymentMouseClicked
-        // TODO add your handling code here:
+        // change to loading icon
+        labelRefreshDocument.setIcon(loadingImage);
+
+        // refresh the table
+        refreshPayment();
     }//GEN-LAST:event_labelRefreshPaymentMouseClicked
 
     private void labelRefreshPaymentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshPaymentMouseEntered
@@ -2035,16 +2145,47 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_labelRefreshPaymentMouseExited
 
     private void buttonCancelPaymentFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelPaymentFormActionPerformed
-        // TODO add your handling code here:
+        cardLayoutEntity.show(panelPayment, "panelPaymentManagement");
+        labelBackToHome.setVisible(true);
     }//GEN-LAST:event_buttonCancelPaymentFormActionPerformed
 
     private void buttonSavePaymentFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSavePaymentFormActionPerformed
-        // TODO add your handling code here:
+        cardLayoutEntity.show(panelPayment, "panelPaymentManagement");
+        savePayment();
     }//GEN-LAST:event_buttonSavePaymentFormActionPerformed
 
     private void labelBrowseScreenshotPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotPaymentMouseClicked
-        // TODO add your handling code here:
+         // browse file
+        int result = fileChooser.showOpenDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            payFile = fileChooser.getSelectedFile();
+            try {
+                labelScreenshotPayment.setIcon(new ImageIcon(ImageIO.read(payFile)));
+            } catch (Exception e) {
+                e.printStackTrace();
+                UIEffect.popup("Error while browse picutre applied!", this);
+            }
+        } else {
+            // if no file was chosen
+            payFile = null;
+        }
     }//GEN-LAST:event_labelBrowseScreenshotPaymentMouseClicked
+
+    private void buttonPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonPaymentActionPerformed
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelPayment");
+        cardLayoutEntity = (CardLayout) panelPayment.getLayout();
+        cardLayoutEntity.show(panelPayment, "panelPaymentManagement");
+
+        labelBackToHome.setVisible(true);
+    }//GEN-LAST:event_buttonPaymentActionPerformed
+
+    private void textfieldAmountPaymentFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPaymentFocusLost
+        UIEffect.focusLostCurrency(textfieldAmountPayment);
+    }//GEN-LAST:event_textfieldAmountPaymentFocusLost
+
+    private void textfieldAmountPaymentFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPaymentFocusGained
+        UIEffect.focusGainCurrency(textfieldAmountPayment);
+    }//GEN-LAST:event_textfieldAmountPaymentFocusGained
 
     /**
      * @param args the command line arguments
@@ -2314,6 +2455,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void lockPaymentForm(boolean b) {
+
+        textfieldAmountPayment.setEnabled(!b);
+        comboboxUsernamePayment.setEnabled(!b);
+        comboboxMethodPayment.setEnabled(!b);
+
+        labelScreenshotPayment.setEnabled(!b);
+
+    }
+
     private void cleanUpUserForm(boolean editWork) {
 
         editMode = editWork;
@@ -2410,6 +2561,29 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void cleanUpPaymentForm(boolean editWork) {
+
+        editMode = editWork;
+
+        textfieldAmountPayment.setText("");
+        comboboxUsernamePayment.setSelectedIndex(-1);
+        comboboxMethodPayment.setSelectedIndex(-1);
+
+        labelScreenshotPayment.setText("preview");
+        labelScreenshotPayment.setIcon(null);
+
+        payFile = null;
+
+        if (editMode) {
+            // we lock first
+            // so later it will be unlocked by async success call
+
+            lockPaymentForm(editMode);
+            showLoadingStatus();
+        }
+
+    }
+
     private void renderUsernameForCombobox(User[] dataIn, JComboBox jc) {
         jc.removeAllItems();
 
@@ -2457,7 +2631,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 renderUsernameForCombobox(dataIn, comboboxUsernameSched);
                 renderUsernameForCombobox(dataIn, comboboxUsernameAttendance);
                 renderUsernameForCombobox(dataIn, comboboxUsernamePayment);
-                
+
                 hideLoadingStatus();
 
             } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_CLASSROOM)) {
@@ -2518,15 +2692,15 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
                 Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
                 tabRender.render(tableAttendanceData, dataIn);
-                
+
                 hideLoadingStatus();
 
             } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
                 Document[] dataIn = objectG.fromJson(innerData, Document[].class);
                 tabRender.render(tableDocumentData, dataIn);
-                
+
                 hideLoadingStatus();
-                
+
             } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_ATTENDANCE)) {
 
                 // we got the single attendance data here
