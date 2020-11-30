@@ -21,6 +21,8 @@ public class User {
     private String propic;
     private String mobile;
     private String date_created;
+    private String tmv_id;
+    private String tmv_pass;
 
     public User(){
     
@@ -141,6 +143,34 @@ public class User {
      */
     public void setDate_created(String date_created) {
         this.date_created = date_created;
+    }
+
+    /**
+     * @return the tmv_pass
+     */
+    public String getTmv_pass() {
+        return tmv_pass;
+    }
+
+    /**
+     * @param tmv_pass the tmv_pass to set
+     */
+    public void setTmv_pass(String tmv_pass) {
+        this.tmv_pass = tmv_pass;
+    }
+
+    /**
+     * @return the tmv_id
+     */
+    public String getTmv_id() {
+        return tmv_id;
+    }
+
+    /**
+     * @param tmv_id the tmv_id to set
+     */
+    public void setTmv_id(String tmv_id) {
+        this.tmv_id = tmv_id;
     }
     
 }
