@@ -24,11 +24,14 @@ public class WebReference {
     
     public static final String PICTURE_USER = REMOTE + "user/picture";
     public static final String SIGNATURE_ATTENDANCE = REMOTE + "attendance/signature";
+    public static final String SCREENSHOT_PAYMENT = REMOTE + "payment/screenshot";
+    
     public static final String PROFILE_USER = REMOTE + "user/profile";
     public static final String LOGIN_USER = REMOTE + "user/login";
     public static final String REGISTER_USER = REMOTE + "user/register";
     public static final String UPDATE_USER = REMOTE + "user/update";
     public static final String DELETE_USER = REMOTE + "user/delete";
+    public static final String DELETE_PICTURE = REMOTE + "user/picture/delete";
     
     public static final String DETAIL_DOCUMENT = REMOTE + "document/detail";
     public static final String DELETE_DOCUMENT = REMOTE + "document/delete";
@@ -39,6 +42,13 @@ public class WebReference {
     public static final String DELETE_ATTENDANCE = REMOTE + "attendance/delete";
     public static final String UPDATE_ATTENDANCE = REMOTE + "attendance/update";
     public static final String ADD_ATTENDANCE = REMOTE + "attendance/add";
+    public static final String DELETE_SIGNATURE = REMOTE + "attendance/signature/delete";    
+    
+    public static final String DETAIL_PAYMENT = REMOTE + "payment/detail";
+    public static final String DELETE_PAYMENT = REMOTE + "payment/delete";
+    public static final String UPDATE_PAYMENT = REMOTE + "payment/update";
+    public static final String ADD_PAYMENT = REMOTE + "payment/add";
+    public static final String DELETE_SCREENSHOT = REMOTE + "payment/screenshot/delete";    
     
     public static final String DETAIL_SCHEDULE = REMOTE + "schedule/detail";
     public static final String DELETE_SCHEDULE = REMOTE + "schedule/delete";

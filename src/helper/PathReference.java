@@ -19,6 +19,7 @@ public class PathReference {
     public static String LogoPath = DirName + "\\fgroup.jpg";
     public static String UserPropicPath = DirName + "\\propic.jpg";
     public static String SignaturePath = DirName + "\\signature.jpg";
+    public static String ScreenshotPaymentPath = DirName + "\\screenshot_payment.jpg";
     
     public static void setPropicFileName(String name){
         UserPropicPath = DirName + "\\" + name;
@@ -26,6 +27,10 @@ public class PathReference {
     
     public static void setSignatureFileName(String name){
         SignaturePath = DirName + "\\" + name;
+    }
+    
+    public static void setScreenshotPaymentFileName(String name){
+        ScreenshotPaymentPath = DirName + "\\" + name;
     }
     
     

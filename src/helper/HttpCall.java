@@ -248,6 +248,9 @@ public class HttpCall {
                 } else if (urlTarget.contains(WebReference.PICTURE_USER)) {
                     PathReference.setPropicFileName(getData("propic"));
                     fileName = PathReference.UserPropicPath;
+                }else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT)) {
+                    PathReference.setScreenshotPaymentFileName(getData("screenshot"));
+                    fileName = PathReference.ScreenshotPaymentPath;
                 }
 
                 // download here

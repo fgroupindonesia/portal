@@ -6,6 +6,7 @@
 package frames;
 
 import beans.AccessToken;
+import beans.User;
 
 import com.google.gson.Gson;
 import helper.BarcodeGenerator;
@@ -485,9 +486,13 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             } else {
                 // now this is the usual process of logging in
 
+                System.out.println("Logging success....");
+                
                 String innerData = jchecker.getValueAsString("multi_data");
                 AccessToken dataIn = objectG.fromJson(innerData, AccessToken.class);
 
+                System.out.println("Updating Configuration locally....");
+                
                 // update for this token
                 configuration.setValue(Keys.TOKEN_API, dataIn.getToken());
                 configuration.setValue(Keys.DATE_EXPIRED_TOKEN, dataIn.getExpired_date());
@@ -496,8 +501,8 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                     AdminFrame nextFrame = new AdminFrame(this);
                     nextFrame.setVisible(true);
                 } else {
-                    ClientFrame nextFrame = new ClientFrame(this);
-                    nextFrame.setUsername(textfieldUsername.getText());
+                    User person = new User(textfieldUsername, textfieldPass);
+                    ClientFrame nextFrame = new ClientFrame(this, person);
                     nextFrame.setVisible(true);
                 }
 

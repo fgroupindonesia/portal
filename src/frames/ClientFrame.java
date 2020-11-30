@@ -64,33 +64,34 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     RupiahGenerator rpGen = new RupiahGenerator();
     //   ExecutorService executorService = Executors.newFixedThreadPool(28);
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(28);
-
-    public void setUsername(String username) {
-        labelWelcomeUser.setText("Hello " + username + "!");
-    }
-
-    public ClientFrame(LoginFrame logRef) {
+    
+    User personLogged;
+    
+    public ClientFrame(LoginFrame logRef, User dataIn) {
+        personLogged = dataIn;
         loginFrame = logRef;
         processNicely();
     }
-
+    
     public ClientFrame() {
         processNicely();
     }
-
+    
     private void processNicely() {
         initComponents();
 
         // activate the effect stuff
         UIDragger.setFrame(this);
-
+        
         UIEffect.iconChanger(this);
         UIEffect.playTimeEffect(labelTime);
-
+        
+        labelWelcomeUser.setText("Hello " + personLogged.getUsername() + "!");
+        
         labelPanelViewName.setText("Home");
         cardLayouterMain = (CardLayout) panelContentCenter.getLayout();
         cardLayouterAttendance = (CardLayout) panelAttandanceContent.getLayout();
-
+        
         showPaymentForm(false);
 
         // for setting ui
@@ -107,10 +108,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         refreshPayment();
         refreshSchedule();
         refreshHistory();
-
+        
         prepareBrowserNow();
     }
-
+    
     SWThreadWorker prepbrowser = new SWThreadWorker(this);
     SWThreadWorker workSched = new SWThreadWorker(this);
     SWThreadWorker workHist = new SWThreadWorker(this);
@@ -119,44 +120,44 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     SWThreadWorker workPay = new SWThreadWorker(this);
     SWThreadWorker workProfile = new SWThreadWorker(this);
     SWThreadWorker workPicture = new SWThreadWorker(this);
-
+    
     private void prepareBrowserNow() {
-
+        
         prepbrowser.setBrowser(browser);
         prepbrowser.setPanelInnerBrowser(panelInnerBrowser);
         prepbrowser.setWork(SWTKey.WORK_BROWSER_PREPARE);
         executorService.submit(prepbrowser);
-
+        
     }
-
+    
     private String getTokenLocally() {
         return configuration.getStringValue(Keys.TOKEN_API);
     }
-
+    
     private void prepareToken(SWThreadWorker obSW) {
         System.out.println("adding token for " + obSW.whatWorkAsString() + " " + getTokenLocally());
         obSW.addData("token", this.getTokenLocally());
     }
-
+    
     private void refreshHistory() {
-
+        
         workHist.setWork(SWTKey.WORK_REFRESH_HISTORY);
-        workHist.addData("username", "asd");
+        workHist.addData("username", personLogged.getUsername());
         workHist.addData("limit", "5");
         prepareToken(workHist);
 
         // executorService.submit(workSched);
         executorService.schedule(workHist, 5, TimeUnit.SECONDS);
-
+        
     }
-
+    
     private void refreshUserPicture(String filename) {
 
         // set the path temporarily 
         // for later usage in locally
         PathReference.setPropicFileName(filename);
         File dest = new File(PathReference.UserPropicPath);
-
+        
         configuration.setValue(Keys.USER_PROPIC, dest.getAbsolutePath());
 
         // execute the download picture process
@@ -166,64 +167,64 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         // executorService.submit(workSched);
         executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
-
+        
     }
-
+    
     private void refreshProfile() {
-
+        
         workProfile.setWork(SWTKey.WORK_REFRESH_PROFILE);
         // executorService.submit(workSched);
-        workProfile.addData("username", "asd");
+        workProfile.addData("username", personLogged.getUsername());
         prepareToken(workProfile);
-
+        
         executorService.schedule(workProfile, 3, TimeUnit.SECONDS);
-
+        
     }
-
+    
     private void refreshSchedule() {
-
+        
         workSched.setWork(SWTKey.WORK_REFRESH_SCHEDULE);
-        workSched.addData("username", "asd");
+        workSched.addData("username", personLogged.getUsername());
         prepareToken(workSched);
 
         //executorService.submit(workSched);
         executorService.schedule(workSched, 3, TimeUnit.SECONDS);
-
+        
     }
-
+    
     private void refreshAttendance() {
-
+        
         workAtt.setWork(SWTKey.WORK_REFRESH_ATTENDANCE);
-        workAtt.addData("username", "asd");
+        workAtt.addData("username", personLogged.getUsername());
         prepareToken(workAtt);
 
         //executorService.submit(workAtt);
         executorService.schedule(workAtt, 2, TimeUnit.SECONDS);
-
+        
     }
-
+    
     private void refreshPayment() {
-
+        
         workPay.setWork(SWTKey.WORK_REFRESH_PAYMENT);
-        workPay.addData("username", "asd");
+        workPay.addData("username", personLogged.getUsername());
         prepareToken(workPay);
         //executorService.submit(workPay);
         executorService.schedule(workPay, 2, TimeUnit.SECONDS);
-
+        
     }
-
+    
     private void refreshDocument() {
-
+        
         workDoc.setWork(SWTKey.WORK_REFRESH_DOCUMENT);
-        workDoc.addData("username", "asd");
+        workDoc.addData("username", personLogged.getUsername());
         prepareToken(workDoc);
         //executorService.submit(workDoc);
         executorService.schedule(workDoc, 2, TimeUnit.SECONDS);
-
+        
     }
-
+    
     private void showAttendanceStat(boolean stat) {
-
+        
         if (stat) {
             labelShowAttendanceStatistic.setEnabled(false);
             labelShowAttendanceData.setEnabled(true);
@@ -233,24 +234,24 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             labelShowAttendanceData.setEnabled(false);
             cardLayouterAttendance.show(panelAttandanceContent, "panelAttendanceAll");
         }
-
+        
     }
-
+    
     private void generateAttendanceStat() {
-
+        
         ChartGenerator cmaker = new ChartGenerator();
-
+        
         CategoryDataset dataset = cmaker.createDataset();
-
+        
         JFreeChart chart = cmaker.createChart(dataset);
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         //chart.getPlot().setBackgroundPaint(Color.red);
 
         panelAttandanceStatistic.add(chartPanel, java.awt.BorderLayout.CENTER);
-
+        
         pack();
-
+        
     }
 
     /**
@@ -645,6 +646,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelProfile.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 200, 220, 90));
 
         buttonSaveProfile.setText("Save");
+        buttonSaveProfile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSaveProfileActionPerformed(evt);
+            }
+        });
         panelProfile.add(buttonSaveProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 300, 80, 30));
 
         jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/teamviewer16.png"))); // NOI18N
@@ -835,14 +841,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
             },
             new String [] {
-                "[ x ]", "Date Created", "Amount", "Method"
+                "[ x ]", "Id", "Username", "Amount", "Method", "Screenshoot", "Date Created"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false, false
+                true, true, true, false, false, true, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -858,12 +864,21 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         if (tablePaymentData.getColumnModel().getColumnCount() > 0) {
             tablePaymentData.getColumnModel().getColumn(0).setResizable(false);
             tablePaymentData.getColumnModel().getColumn(0).setPreferredWidth(35);
-            tablePaymentData.getColumnModel().getColumn(1).setMinWidth(120);
-            tablePaymentData.getColumnModel().getColumn(1).setPreferredWidth(120);
-            tablePaymentData.getColumnModel().getColumn(2).setMinWidth(120);
-            tablePaymentData.getColumnModel().getColumn(2).setPreferredWidth(120);
+            tablePaymentData.getColumnModel().getColumn(1).setMinWidth(0);
+            tablePaymentData.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tablePaymentData.getColumnModel().getColumn(1).setMaxWidth(0);
+            tablePaymentData.getColumnModel().getColumn(2).setMinWidth(0);
+            tablePaymentData.getColumnModel().getColumn(2).setPreferredWidth(0);
+            tablePaymentData.getColumnModel().getColumn(2).setMaxWidth(0);
             tablePaymentData.getColumnModel().getColumn(3).setMinWidth(120);
             tablePaymentData.getColumnModel().getColumn(3).setPreferredWidth(120);
+            tablePaymentData.getColumnModel().getColumn(4).setMinWidth(120);
+            tablePaymentData.getColumnModel().getColumn(4).setPreferredWidth(120);
+            tablePaymentData.getColumnModel().getColumn(5).setMinWidth(0);
+            tablePaymentData.getColumnModel().getColumn(5).setPreferredWidth(0);
+            tablePaymentData.getColumnModel().getColumn(5).setMaxWidth(0);
+            tablePaymentData.getColumnModel().getColumn(6).setMinWidth(120);
+            tablePaymentData.getColumnModel().getColumn(6).setPreferredWidth(120);
         }
 
         panelPaymentTable.add(jScrollPane2, java.awt.BorderLayout.CENTER);
@@ -1218,9 +1233,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // browse the picture...
         FileFilter imageFilter = new FileNameExtensionFilter(
                 "Image files", ImageIO.getReaderFileSuffixes());
-
+        
         fileChooser.setFileFilter(imageFilter);
-
+        
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             // change accordingly
             // copy the image to Local AppData path
@@ -1230,7 +1245,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             //System.out.println(source.getName());
             PathReference.setPropicFileName(source.getName());
             File dest = new File(PathReference.UserPropicPath);
-
+            
             try {
                 FileCopier.copyTo(source, dest);
                 UIEffect.iconChanger(labelPropicUser, dest.getAbsolutePath());
@@ -1239,9 +1254,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 configuration.setValue(Keys.USER_PROPIC, dest.getAbsolutePath());
                 System.out.println("now is " + dest.getAbsolutePath());
             } catch (Exception ex) {
-
+                
             }
-
+            
         }
     }//GEN-LAST:event_labelPropicUserMouseClicked
 
@@ -1252,29 +1267,29 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void buttonSaveSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveSettingsActionPerformed
         configuration.setValue(Keys.AUTO_UPDATE_TOOLS, checkboxAutoupdateToolsSetting.isSelected());
-
+        
         String notifClass = radioButtonGroupNotifClass.getSelection().getActionCommand();
         configuration.setValue(Keys.NOTIF_CLASS_START, notifClass);
-
+        
         String notifSession = radioButtonGroupNotifSessionLimit.getSelection().getActionCommand();
         configuration.setValue(Keys.NOTIF_SESSION_LIMIT, notifSession);
-
+        
         configuration.setValue(Keys.SYSTEM_LANGUAGE, comboboxSystemLanguage.getSelectedItem().toString());
 
     }//GEN-LAST:event_buttonSaveSettingsActionPerformed
 
     private void buttonTerminateTmvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonTerminateTmvActionPerformed
         CMDExecutor.killTeamviewer();
-
+        
         buttonTerminateTmv.setEnabled(false);
         buttonRunTmv.setEnabled(true);
     }//GEN-LAST:event_buttonTerminateTmvActionPerformed
 
     private void buttonRunTmvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonRunTmvActionPerformed
-
+        
         buttonTerminateTmv.setEnabled(true);
         buttonRunTmv.setEnabled(false);
-
+        
         CMDExecutor.runTeamviewer();
 
     }//GEN-LAST:event_buttonRunTmvActionPerformed
@@ -1282,16 +1297,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void labelAddPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelAddPaymentMouseClicked
         showPaymentForm(true);
     }//GEN-LAST:event_labelAddPaymentMouseClicked
-
+    
     private void showPaymentForm(boolean stat) {
         if (stat) {
-
+            
             panelPaymentForm.setPreferredSize(new java.awt.Dimension(200, 371));
-
+            
         } else {
             panelPaymentForm.setPreferredSize(new java.awt.Dimension(0, 371));
         }
-
+        
         panelPaymentForm.invalidate();
     }
 
@@ -1305,7 +1320,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void buttonSavePaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSavePaymentActionPerformed
         showPaymentForm(false);
-
+        
         postDataPayment();
 
     }//GEN-LAST:event_buttonSavePaymentActionPerformed
@@ -1353,19 +1368,19 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_labelDocumentOpenMouseExited
 
     private void labelDocumentDownloadMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseClicked
-
+        
         cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
     }//GEN-LAST:event_labelDocumentDownloadMouseClicked
-
+    
     private void postDataPayment() {
-
+        
         RupiahGenerator rp = new RupiahGenerator();
-
+        
         Payment data = new Payment();
         data.setAmount(ABORT);
-
+        
     }
-
+    
 
     private void labelDocumentDownloadMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseEntered
         // TODO add your handling code here:
@@ -1389,26 +1404,26 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
         browser.loadURL("http://bing.com");
-
+        
         cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
     }//GEN-LAST:event_buttonVisitChromeActionPerformed
 
     private void buttonVisitWhatsappActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitWhatsappActionPerformed
         browser.loadURL("http://web.whatsapp.com");
-
+        
         cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
     }//GEN-LAST:event_buttonVisitWhatsappActionPerformed
-
+    
     public void setBrowserBack(Browser b) {
         browser = b;
     }
-
+    
     public void setPanelInnerBrowserBack(JPanel jp) {
         panelInnerBrowser = jp;
     }
 
     private void textfieldAmountPaymentFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPaymentFocusLost
-
+        
         if (!UIEffect.isEmpty(textfieldAmountPayment)) {
             double d = Double.parseDouble(textfieldAmountPayment.getText());
             textfieldAmountPayment.setText(rpGen.getText(d));
@@ -1422,17 +1437,21 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         }
     }//GEN-LAST:event_textfieldAmountPaymentFocusGained
 
+    private void buttonSaveProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveProfileActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonSaveProfileActionPerformed
+    
     private void loadUserPictureLocally() {
-
+        
         String propic = configuration.getStringValue(Keys.USER_PROPIC);
-
-        System.out.println("Trying to load " + propic);
-
-        if (!propic.contains("default")) {
+        
+        System.out.println("Client Frame is Trying to load " + propic);
+        
+        if (!propic.contains("default") && propic.length() > 0) {
             // set the propic
             UIEffect.iconChanger(labelPropicUser, (propic));
         }
-
+        
     }
 
     // for settings ui
@@ -1442,23 +1461,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         checkboxAutoupdateToolsSetting.setSelected(configuration.getBooleanValue(Keys.AUTO_UPDATE_TOOLS));
         comboboxSystemLanguage.setSelectedItem(configuration.getStringValue(Keys.SYSTEM_LANGUAGE));
-
+        
         if (configuration.getStringValue(Keys.NOTIF_CLASS_START).equalsIgnoreCase(Keys.DEFAULT_NOTIF_CLASS_START)) {
             radioNotifClass1HourSetting.setSelected(true);
         } else {
             radioNotifClass1HourSetting.setSelected(false);
         }
-
+        
         if (configuration.getStringValue(Keys.NOTIF_SESSION_LIMIT).equalsIgnoreCase(Keys.DEFAULT_NOTIF_SESSION_LIMIT)) {
             radioNotifSessionAtLeast1Setting.setSelected(true);
         } else {
             radioNotifSessionAtLeast1Setting.setSelected(false);
         }
-
+        
     }
-
+    
     private void logout() {
-
+        
         loginFrame.show();
         this.dispose();
     }
@@ -1480,7 +1499,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 }
             }
         } catch (Exception ex) {
-
+            
         }
         //</editor-fold>
 
@@ -1613,7 +1632,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelScheduleDay2.setVisible(false);
         labelScheduleDay3.setVisible(false);
     }
-
+    
     private void hideHistoryLabels() {
         //labelScheduleDay1.setVisible(false);
         labelHistoryLast2.setVisible(false);
@@ -1621,21 +1640,22 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelHistoryLast4.setVisible(false);
         labelHistoryLast5.setVisible(false);
     }
-
+    
     @Override
     public void checkResponse(String resp, String callingFromURL) {
         Gson objectG = new Gson();
-
+        
         System.out.println(callingFromURL + " have " + resp);
         JSONChecker jchecker = new JSONChecker();
-
+        
         if (jchecker.isValid(resp)) {
-
+            
             boolean b = callingFromURL.contains(WebReference.PICTURE_USER);
-
+            
             ImageIcon okIcon = new ImageIcon(getClass().getResource("/images/ok16.png"));
             ImageIcon coinIcon = new ImageIcon(getClass().getResource("/images/coin.png"));
-
+            ImageIcon sessionIcon = new ImageIcon(getClass().getResource("/images/note16.png"));
+            
             String innerData = jchecker.getValueAsString("multi_data");
 
             //System.out.println(callingFromURL + " is valid " + b);
@@ -1645,19 +1665,25 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
                 Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
                 tabRender.render(tableAttendanceData, dataIn);
+                
+                labelTotalSessionCompleted.setText("Total Session Completed: " + dataIn.length);
+                labelTotalSessionCompleted.setIcon(sessionIcon);
             } else if (callingFromURL.contains(WebReference.PICTURE_USER)) {
-
+                
                 System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
                 loadUserPictureLocally();
-
+                
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
                 Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
                 tabRender.render(tablePaymentData, dataIn);
-
+                
                 labelLastPayment.setText("Last Payment : " + dataIn[dataIn.length - 1].getDate_created());
                 labelLastPayment.setIcon(coinIcon);
-
+                
             } else if (callingFromURL.equalsIgnoreCase(WebReference.PROFILE_USER)) {
+                
+                System.out.println("Obtaining Profile User data...");
+                
                 User dataIn = objectG.fromJson(innerData, User.class);
                 textfieldUsernameProfile.setText(dataIn.getUsername());
                 textfieldPasswordProfile.setText(dataIn.getPass());
@@ -1670,12 +1696,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                     System.out.println("calling the inside picture");
                     refreshUserPicture(dataIn.getPropic());
                 }
-
+                
                 System.out.println("Complete User Profile data was obtained!");
-
+                
             } else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
                 History[] dataIn = objectG.fromJson(innerData, History[].class);
-
+                
                 switch (dataIn.length) {
                     case 5:
                         labelHistoryLast5.setText(" " + dataIn[4].getDescription() + " on " + dataIn[4].getDate_created());
@@ -1700,10 +1726,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                         labelHistoryLast4.setVisible(false);
                         labelHistoryLast5.setVisible(false);
                 }
-
+                
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
                 Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
-
+                
                 ImageIcon calendarIcon = new ImageIcon(getClass().getResource("/images/calendar16.png"));
                 ImageIcon classIcon = new ImageIcon(getClass().getResource("/images/class.png"));
 
@@ -1712,7 +1738,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 panelSchedule.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule : " + className));
                 labelClassRegistered.setText("Class Registered : " + className);
                 labelClassRegistered.setIcon(classIcon);
-
+                
                 switch (dataIn.length) {
                     case 3:
                         labelScheduleDay3.setText(" " + dataIn[2].getDay_schedule() + " " + dataIn[2].getTime_schedule());
@@ -1729,13 +1755,34 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                         labelScheduleDay2.setVisible(false);
                         labelScheduleDay3.setVisible(false);
                 }
-
+                
             }
-
+            
         } else {
+            
+            if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
+                hideHistoryData();
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_PAYMENT)) {
+                hidePaymentData();
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
+                hideScheduleData();
+            }
+            
             System.out.println(callingFromURL + " catched");
         }
-
+        
     }
-
+    
+    private void hideHistoryData() {
+        labelHistoryLast1.setVisible(false);
+    }
+    
+    private void hideScheduleData() {
+        labelScheduleDay1.setVisible(false);
+    }
+    
+    private void hidePaymentData() {
+        labelLastPayment.setVisible(false);
+    }
+    
 }

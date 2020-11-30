@@ -5,6 +5,8 @@
  */
 package beans;
 
+import javax.swing.JTextField;
+
 /**
  *
  * @author ASUS
@@ -20,6 +22,15 @@ public class User {
     private String mobile;
     private String date_created;
 
+    public User(){
+    
+    }
+    
+    public User(JTextField usernameEl, JTextField passEl){
+        username = usernameEl.getText();
+        pass = passEl.getText();
+    }
+    
     /**
      * @return the id
      */

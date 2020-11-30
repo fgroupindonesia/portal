@@ -5,7 +5,9 @@
  */
 package helper;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 
 /**
@@ -13,6 +15,14 @@ import java.io.InputStreamReader;
  * @author ASUS
  */
 public class CMDExecutor {
+
+    public static void openPicture(File fileIn) {
+        try {
+            Desktop.getDesktop().open(fileIn);
+        } catch (Exception ex) {
+            UIEffect.popup("Error while opening picture", null);
+        }
+    }
 
     public static void runTeamviewer() {
         String command = PathReference.TeamviewerPath;

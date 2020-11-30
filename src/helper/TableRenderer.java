@@ -92,7 +92,13 @@ public class TableRenderer {
         RupiahGenerator rp = new RupiahGenerator();
 
         for (Payment d : dataCome) {
-            Object[] dataBaru = new Object[]{false, d.getDate_created(), rp.getText(d.getAmount()), d.getMethod()};
+            Object[] dataBaru = new Object[]{false,
+                d.getId(),
+                d.getUsername(),
+                rp.getText(d.getAmount()),
+                UIEffect.decodeSafe(d.getMethod()),
+                d.getScreenshot(),
+                d.getDate_created(),};
             tableModel.addRow(dataBaru);
         }
 

@@ -8,9 +8,11 @@ package frames;
 import beans.Attendance;
 import beans.ClassRoom;
 import beans.Document;
+import beans.Payment;
 import beans.Schedule;
 import beans.User;
 import com.google.gson.Gson;
+import helper.CMDExecutor;
 import helper.HttpCall;
 import helper.JSONChecker;
 import helper.PathReference;
@@ -54,6 +56,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     ImageIcon loadingImage = new ImageIcon(getClass().getResource("/images/loadingprel.gif"));
     ImageIcon errorImage = new ImageIcon(getClass().getResource("/images/terminate.png"));
     ImageIcon refreshImage = new ImageIcon(getClass().getResource("/images/refresh16.png"));
+    ImageIcon defaultUser = new ImageIcon(getClass().getResource("/images/user.png"));
+
+    // for form checking before save mechanism
+    User userEdited;
+    Attendance attendanceEdited;
+    Payment paymentEdited;
+    Document documentEdited;
+    Schedule scheduleEdited;
 
 // for every entity form has this edit mode
     boolean editMode;
@@ -77,10 +87,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         refreshSchedule();
         refreshClassRoom();
         refreshAttendance();
+        refreshPayment();
 
         // hide the home link
         labelBackToHome.setVisible(false);
-        labelLoadingStatus.setVisible(false);
+        hideLoadingStatus();
 
         // hide visibility of padding jlabel
         labelBottomPadding.setVisible(false);
@@ -116,6 +127,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         if (!dataCome.getPropic().equalsIgnoreCase("default.png")) {
             // we are required to download the image from server
             refreshUserPicture(dataCome.getPropic());
+        } else {
+            // we open the form access
+            lockUserForm(false);
+            hideLoadingStatus();
         }
 
     }
@@ -131,6 +146,29 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         if (!dataCome.getSignature().equalsIgnoreCase("not available")) {
             // we are required to download the image from server
             refreshSignaturePicture(dataCome.getSignature());
+        } else {
+            // we open the form access
+            lockPaymentForm(false);
+            hideLoadingStatus();
+        }
+
+    }
+
+    private void renderPaymentForm(Payment dataCome) {
+
+        idForm = (short) dataCome.getId();
+
+        comboboxUsernamePayment.setSelectedItem(dataCome.getUsername());
+        textfieldAmountPayment.setText(dataCome.getAmount() + "");
+        comboboxMethodPayment.setSelectedItem(UIEffect.decodeSafe(dataCome.getMethod()));
+
+        if (!dataCome.getScreenshot().equalsIgnoreCase("not available")) {
+            // we are required to download the image from server
+            refreshScreenshotPicture(dataCome.getScreenshot());
+        } else {
+            // we open the form access
+            lockPaymentForm(false);
+            hideLoadingStatus();
         }
 
     }
@@ -146,7 +184,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         comboboxUsernameDoc.setSelectedItem(dataCome.getUsername());
 
         lockDocumentForm(false);
-        labelLoadingStatus.setVisible(false);
+        hideLoadingStatus();
 
     }
 
@@ -168,7 +206,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         spinnerMinutesSched.setValue(menit);
 
         lockScheduleForm(false);
-        labelLoadingStatus.setVisible(false);
+        hideLoadingStatus();
 
     }
 
@@ -211,6 +249,84 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // executorService.submit(workSched);
         executorService.schedule(workSignature, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void refreshScreenshotPicture(String filename) {
+
+        // set the path temporarily 
+        // for later usage in locally
+        PathReference.setScreenshotPaymentFileName(filename);
+        File dest = new File(PathReference.ScreenshotPaymentPath);
+
+        configuration.setValue(Keys.SCREENSHOT_LAST_PAYMENT, dest.getAbsolutePath());
+
+        SWThreadWorker workScreenshot = new SWThreadWorker(this);
+
+        // execute the download picture process
+        workScreenshot.setWork(SWTKey.WORK_REFRESH_SCREENSHOT_PAYMENT);
+        workScreenshot.writeMode(true);
+        workScreenshot.addData("screenshot", filename);
+
+        // executorService.submit(workSched);
+        executorService.schedule(workScreenshot, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void deleteSignaturePicture() {
+
+        // clear up the path temporarily 
+        PathReference.setSignatureFileName("");
+
+        configuration.setValue(Keys.SIGNATURE_ATTENDANCE, "");
+
+        SWThreadWorker workSignature = new SWThreadWorker(this);
+
+        // execute the download picture process
+        workSignature.setWork(SWTKey.WORK_DELETE_SIGNATURE);
+        workSignature.addData("id", idForm + "");
+
+        prepareToken(workSignature);
+        // executorService.submit(workSched);
+        executorService.schedule(workSignature, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void deleteUserPicture() {
+
+        // clear up the path temporarily 
+        PathReference.setPropicFileName("");
+
+        configuration.setValue(Keys.USER_PROPIC, "");
+
+        SWThreadWorker workPropic = new SWThreadWorker(this);
+
+        // execute the download picture process
+        workPropic.setWork(SWTKey.WORK_DELETE_PICTURE);
+        workPropic.addData("id", idForm + "");
+
+        prepareToken(workPropic);
+        // executorService.submit(workSched);
+        executorService.schedule(workPropic, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void deleteScreenshotPicture() {
+
+        // clear up the path temporarily 
+        PathReference.setScreenshotPaymentFileName("");
+
+        configuration.setValue(Keys.SCREENSHOT_LAST_PAYMENT, "");
+
+        SWThreadWorker workScreenshot = new SWThreadWorker(this);
+
+        // execute the download picture process
+        workScreenshot.setWork(SWTKey.WORK_DELETE_SCREENSHOT_PAYMENT);
+        workScreenshot.addData("id", idForm + "");
+
+        prepareToken(workScreenshot);
+        // executorService.submit(workSched);
+        executorService.schedule(workScreenshot, 2, TimeUnit.SECONDS);
 
     }
 
@@ -376,12 +492,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             workPaymentEntity.setWork(SWTKey.WORK_PAYMENT_SAVE);
         }
 
-        workPaymentEntity.addData("amount", textfieldAmountPayment.getText());
+        RupiahGenerator rpg = new RupiahGenerator();
+
+        workPaymentEntity.addData("amount", rpg.getIntNumber(textfieldAmountPayment.getText()) + "");
         workPaymentEntity.addData("method", comboboxMethodPayment.getSelectedItem().toString());
-        workPaymentEntity.addData("username", comboboxUsernameDoc.getSelectedItem().toString());
+        workPaymentEntity.addData("username", comboboxUsernamePayment.getSelectedItem().toString());
 
         if (payFile != null) {
-            workPaymentEntity.addFile("document", payFile);
+            workPaymentEntity.addFile("screenshot", payFile);
         }
 
         prepareToken(workPaymentEntity);
@@ -421,7 +539,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }
 
     private void saveUser() {
-        labelLoadingStatus.setVisible(true);
+        showLoadingStatus();
         SWThreadWorker workUserEntity = new SWThreadWorker(this);
 
         // check whether this is edit or new form?
@@ -470,7 +588,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void saveSchedule() {
 
-        labelLoadingStatus.setVisible(true);
+        showLoadingStatus();
 
         SWThreadWorker workScheduleEntity = new SWThreadWorker(this);
 
@@ -585,7 +703,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonSchedule = new javax.swing.JButton();
         buttonSettings = new javax.swing.JButton();
         buttonFuture2 = new javax.swing.JButton();
-        buttonFuture3 = new javax.swing.JButton();
+        buttonLogout = new javax.swing.JButton();
         panelUser = new javax.swing.JPanel();
         panelUserManagement = new javax.swing.JPanel();
         panelUserControl = new javax.swing.JPanel();
@@ -610,9 +728,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         textareaAddress = new javax.swing.JTextArea();
         textfieldMobile = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
-        labelPreviewPicture = new javax.swing.JLabel();
         labelLinkChangePicture = new javax.swing.JLabel();
         buttonSaveUserForm = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        labelPreviewPicture = new javax.swing.JLabel();
         panelDocument = new javax.swing.JPanel();
         panelDocumentManagement = new javax.swing.JPanel();
         panelDocumentControl = new javax.swing.JPanel();
@@ -774,6 +893,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         buttonUserManagement.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user.png"))); // NOI18N
         buttonUserManagement.setText("Users");
+        buttonUserManagement.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         buttonUserManagement.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonUserManagement.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonUserManagement.addActionListener(new java.awt.event.ActionListener() {
@@ -785,6 +905,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         buttonDocumentManagement.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/file.png"))); // NOI18N
         buttonDocumentManagement.setText("Documents");
+        buttonDocumentManagement.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         buttonDocumentManagement.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonDocumentManagement.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonDocumentManagement.addActionListener(new java.awt.event.ActionListener() {
@@ -796,6 +917,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         buttonAttendance.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/calendar64.png"))); // NOI18N
         buttonAttendance.setText("Attendance");
+        buttonAttendance.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         buttonAttendance.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonAttendance.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonAttendance.addActionListener(new java.awt.event.ActionListener() {
@@ -807,6 +929,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         buttonPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cash64.png"))); // NOI18N
         buttonPayment.setText("Payment");
+        buttonPayment.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         buttonPayment.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonPayment.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonPayment.addActionListener(new java.awt.event.ActionListener() {
@@ -818,6 +941,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         buttonSchedule.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time64.png"))); // NOI18N
         buttonSchedule.setText("Schedule");
+        buttonSchedule.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         buttonSchedule.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonSchedule.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonSchedule.addActionListener(new java.awt.event.ActionListener() {
@@ -829,6 +953,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         buttonSettings.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/option64.png"))); // NOI18N
         buttonSettings.setText("Settings");
+        buttonSettings.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         buttonSettings.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonSettings.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         panelHome.add(buttonSettings);
@@ -839,11 +964,17 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonFuture2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         panelHome.add(buttonFuture2);
 
-        buttonFuture3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/warning64.png"))); // NOI18N
-        buttonFuture3.setText("next release");
-        buttonFuture3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        buttonFuture3.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        panelHome.add(buttonFuture3);
+        buttonLogout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock64.png"))); // NOI18N
+        buttonLogout.setText("Logout");
+        buttonLogout.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        buttonLogout.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        buttonLogout.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        buttonLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonLogoutActionPerformed(evt);
+            }
+        });
+        panelHome.add(buttonLogout);
 
         panelInnerCenter.add(panelHome, "panelHome");
 
@@ -956,14 +1087,41 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             }
         });
         panelUserForm.add(buttonCancelUserForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
+
+        textfieldUsername.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textfieldUsernameKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textfieldUsernameKeyTyped(evt);
+            }
+        });
         panelUserForm.add(textfieldUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 200, -1));
 
         jLabel5.setText("Password :");
         panelUserForm.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 150, -1));
+
+        textfieldPass.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textfieldPassKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textfieldPassKeyTyped(evt);
+            }
+        });
         panelUserForm.add(textfieldPass, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 200, -1));
 
         jLabel6.setText("Email :");
         panelUserForm.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 160, 150, -1));
+
+        textfieldEmail.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textfieldEmailKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textfieldEmailKeyTyped(evt);
+            }
+        });
         panelUserForm.add(textfieldEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, 200, -1));
 
         jLabel7.setText("Address :");
@@ -972,28 +1130,41 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         textareaAddress.setColumns(20);
         textareaAddress.setLineWrap(true);
         textareaAddress.setRows(5);
+        textareaAddress.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textareaAddressKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textareaAddressKeyTyped(evt);
+            }
+        });
         jScrollPane2.setViewportView(textareaAddress);
 
         panelUserForm.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 60, -1, 100));
+
+        textfieldMobile.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textfieldMobileKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textfieldMobileKeyTyped(evt);
+            }
+        });
         panelUserForm.add(textfieldMobile, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 240, 200, -1));
 
         jLabel8.setText("Mobile :");
         panelUserForm.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 220, 150, -1));
 
-        labelPreviewPicture.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        labelPreviewPicture.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user.png"))); // NOI18N
-        labelPreviewPicture.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        panelUserForm.add(labelPreviewPicture, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 170, 120, 110));
-
         labelLinkChangePicture.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
         labelLinkChangePicture.setForeground(new java.awt.Color(0, 0, 204));
-        labelLinkChangePicture.setText("<html><u>Change Picture</u></html>");
+        labelLinkChangePicture.setText("<html><u>Browse Picture</u></html>");
+        labelLinkChangePicture.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         labelLinkChangePicture.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 labelLinkChangePictureMouseClicked(evt);
             }
         });
-        panelUserForm.add(labelLinkChangePicture, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 180, -1, -1));
+        panelUserForm.add(labelLinkChangePicture, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 190, -1, -1));
 
         buttonSaveUserForm.setText("Save");
         buttonSaveUserForm.addActionListener(new java.awt.event.ActionListener() {
@@ -1002,6 +1173,22 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             }
         });
         panelUserForm.add(buttonSaveUserForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(555, 250, 60, -1));
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Profile Picture"));
+        jPanel3.setLayout(new java.awt.BorderLayout());
+
+        labelPreviewPicture.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelPreviewPicture.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user.png"))); // NOI18N
+        labelPreviewPicture.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelPreviewPicture.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        labelPreviewPicture.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelPreviewPictureMouseClicked(evt);
+            }
+        });
+        jPanel3.add(labelPreviewPicture, java.awt.BorderLayout.CENTER);
+
+        panelUserForm.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 170, 120, 120));
 
         panelUser.add(panelUserForm, "panelUserForm");
 
@@ -1467,6 +1654,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         labelSignatureAttendance.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelSignatureAttendance.setText("preview");
+        labelSignatureAttendance.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelSignatureAttendanceMouseClicked(evt);
+            }
+        });
         jPanel1.add(labelSignatureAttendance, java.awt.BorderLayout.CENTER);
 
         panelAttendanceForm.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, 210, 170));
@@ -1622,6 +1814,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         labelScreenshotPayment.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelScreenshotPayment.setText("preview");
+        labelScreenshotPayment.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelScreenshotPayment.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelScreenshotPaymentMouseClicked(evt);
+            }
+        });
         jPanel2.add(labelScreenshotPayment, java.awt.BorderLayout.CENTER);
 
         panelPaymentForm.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, 210, 170));
@@ -1712,22 +1910,32 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_buttonCancelUserFormActionPerformed
 
     private void labelLinkChangePictureMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkChangePictureMouseClicked
+        if (labelLinkChangePicture.getText().contains("Delete")) {
+            // call the delete to the API
+            deleteUserPicture();
 
-        // browse file
-        int result = fileChooser.showOpenDialog(null);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            propicFile = fileChooser.getSelectedFile();
-            try {
-                labelPreviewPicture.setIcon(new ImageIcon(ImageIO.read(propicFile)));
-            } catch (Exception e) {
-                e.printStackTrace();
-                UIEffect.popup("Error while browse picutre applied!", this);
-            }
-        } else {
-            // if no file was chosen
+            labelLinkChangePicture.setText(UIEffect.underline("Browse Picture"));
             propicFile = null;
-        }
+            labelPreviewPicture.setIcon(null);
+            labelPreviewPicture.setText("preview");
 
+        } else {
+            // browse file
+            int result = fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                propicFile = fileChooser.getSelectedFile();
+                try {
+                    labelPreviewPicture.setIcon(new ImageIcon(ImageIO.read(propicFile)));
+                    enableUserFormSave();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    UIEffect.popup("Error while browse picutre applied!", this);
+                }
+            } else {
+                // if no file was chosen
+                propicFile = null;
+            }
+        }
     }//GEN-LAST:event_labelLinkChangePictureMouseClicked
 
     private void buttonAddUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddUserActionPerformed
@@ -1750,7 +1958,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         } else {
             // passing username only
             deleteUser(dataUser);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
 
     }//GEN-LAST:event_buttonDeleteUserActionPerformed
@@ -1769,7 +1977,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             getUserProfile(dataUser.get(0).toString());
 
             // show the loading bar
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         } else {
             UIEffect.popup("please select 1 single data only!", this);
         }
@@ -1799,7 +2007,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             getDocument(Integer.parseInt(dataDocument.get(0).toString()));
 
             // show the loading bar
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         } else {
             UIEffect.popup("please select 1 single data only!", this);
         }
@@ -1813,7 +2021,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         } else {
             // passing id only
             deleteDocument(dataDocument);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
     }//GEN-LAST:event_buttonDeleteDocumentActionPerformed
 
@@ -1840,7 +2048,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void buttonSaveDocumentFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveDocumentFormActionPerformed
         cardLayoutEntity.show(panelDocument, "panelDocumentManagement");
         saveDocument();
-        labelLoadingStatus.setVisible(true);
+        showLoadingStatus();
     }//GEN-LAST:event_buttonSaveDocumentFormActionPerformed
 
     private void buttonDocumentManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDocumentManagementActionPerformed
@@ -1914,7 +2122,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             getSchedule(Integer.parseInt(dataSched.get(0).toString()));
 
             // show the loading bar
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         } else {
             UIEffect.popup("please select 1 single data only!", this);
         }
@@ -1929,7 +2137,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         } else {
             // passing id only
             deleteSchedule(dataSchedule);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
 
     }//GEN-LAST:event_buttonDeleteScheduleActionPerformed
@@ -1971,7 +2179,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
 
     private void comboboxDaySchedItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboboxDaySchedItemStateChanged
-        labelLoadingStatus.setVisible(true);
+        showLoadingStatus();
 
         // when the item selected changed
         // we check the registered class of that day
@@ -1981,7 +2189,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         } else {
             // clearup the list
             listAnotherClassSched.setModel(new DefaultListModel());
-            labelLoadingStatus.setVisible(false);
+            showLoadingStatus();
         }
     }//GEN-LAST:event_comboboxDaySchedItemStateChanged
 
@@ -1990,6 +2198,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         // clean but not for editing mode
         cleanUpAttendanceForm(false);
     }//GEN-LAST:event_buttonAddAttendanceActionPerformed
+
 
     private void buttonEditAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditAttendanceActionPerformed
 
@@ -2006,7 +2215,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             getAttendance(Integer.parseInt(dataAttendance.get(0).toString()));
 
             // show the loading bar
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         } else {
             UIEffect.popup("please select 1 single data only!", this);
         }
@@ -2021,7 +2230,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         } else {
             // passing id only
             deleteAttendance(dataAttendance);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
     }//GEN-LAST:event_buttonDeleteAttendanceActionPerformed
 
@@ -2069,20 +2278,31 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void labelBrowseSignatureAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseSignatureAttendanceMouseClicked
 
         // browse file
-        int result = fileChooser.showOpenDialog(null);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            signatureFile = fileChooser.getSelectedFile();
-            try {
-                labelSignatureAttendance.setIcon(new ImageIcon(ImageIO.read(signatureFile)));
-            } catch (Exception e) {
-                e.printStackTrace();
-                UIEffect.popup("Error while browse signature picture applied!", this);
-            }
-        } else {
-            // if no file was chosen
-            signatureFile = null;
-        }
+        if (labelBrowseSignatureAttendance.getText().contains("Delete")) {
+            // call the delete to the API
+            deleteSignaturePicture();
 
+            labelBrowseSignatureAttendance.setText(UIEffect.underline("Browse Picture"));
+            signatureFile = null;
+            labelSignatureAttendance.setIcon(null);
+            labelSignatureAttendance.setText("preview");
+
+        } else {
+
+            int result = fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                signatureFile = fileChooser.getSelectedFile();
+                try {
+                    labelSignatureAttendance.setIcon(new ImageIcon(ImageIO.read(signatureFile)));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    UIEffect.popup("Error while browse signature picture applied!", this);
+                }
+            } else {
+                // if no file was chosen
+                signatureFile = null;
+            }
+        }
 
     }//GEN-LAST:event_labelBrowseSignatureAttendanceMouseClicked
 
@@ -2124,7 +2344,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         } else {
             // passing id only
             deletePayment(dataPay);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
     }//GEN-LAST:event_buttonDeletePaymentActionPerformed
 
@@ -2155,19 +2375,37 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_buttonSavePaymentFormActionPerformed
 
     private void labelBrowseScreenshotPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotPaymentMouseClicked
-         // browse file
-        int result = fileChooser.showOpenDialog(null);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            payFile = fileChooser.getSelectedFile();
-            try {
-                labelScreenshotPayment.setIcon(new ImageIcon(ImageIO.read(payFile)));
-            } catch (Exception e) {
-                e.printStackTrace();
-                UIEffect.popup("Error while browse picutre applied!", this);
-            }
-        } else {
-            // if no file was chosen
+
+        // check first whether it is for delete
+        // or for browse picture?
+        if (labelBrowseScreenshotPayment.getText().contains("Delete")) {
+            // call the delete to the API
+            deleteScreenshotPicture();
+
+            labelBrowseScreenshotPayment.setText(UIEffect.underline("Browse Picture"));
             payFile = null;
+            labelScreenshotPayment.setIcon(null);
+            labelScreenshotPayment.setText("preview");
+
+        } else {
+            // call the browse process
+
+            // browse file
+            int result = fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                payFile = fileChooser.getSelectedFile();
+                try {
+                    labelScreenshotPayment.setIcon(new ImageIcon(ImageIO.read(payFile)));
+                    labelBrowseScreenshotPayment.setText(UIEffect.underline("Delete"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    UIEffect.popup("Error while browse picutre applied!", this);
+                }
+            } else {
+                // if no file was chosen
+                payFile = null;
+            }
+
         }
     }//GEN-LAST:event_labelBrowseScreenshotPaymentMouseClicked
 
@@ -2186,6 +2424,118 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void textfieldAmountPaymentFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPaymentFocusGained
         UIEffect.focusGainCurrency(textfieldAmountPayment);
     }//GEN-LAST:event_textfieldAmountPaymentFocusGained
+
+    private void labelScreenshotPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScreenshotPaymentMouseClicked
+        if (labelScreenshotPayment.getIcon() != null) {
+            File lokasiScreenshot = new File(PathReference.ScreenshotPaymentPath);
+            CMDExecutor.openPicture(lokasiScreenshot);
+        }
+    }//GEN-LAST:event_labelScreenshotPaymentMouseClicked
+
+    private void textfieldUsernameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldUsernameKeyTyped
+        // only for edited form
+        enableUserFormSave();
+    }//GEN-LAST:event_textfieldUsernameKeyTyped
+
+    private void textfieldPassKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldPassKeyTyped
+
+    }//GEN-LAST:event_textfieldPassKeyTyped
+
+    private void textfieldEmailKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldEmailKeyTyped
+
+    }//GEN-LAST:event_textfieldEmailKeyTyped
+
+    private void textfieldMobileKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldMobileKeyTyped
+
+    }//GEN-LAST:event_textfieldMobileKeyTyped
+
+    private void textareaAddressKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textareaAddressKeyTyped
+
+    }//GEN-LAST:event_textareaAddressKeyTyped
+
+    private void textfieldUsernameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldUsernameKeyReleased
+        enableUserFormSave();
+    }//GEN-LAST:event_textfieldUsernameKeyReleased
+
+    private void textfieldPassKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldPassKeyReleased
+        enableUserFormSave();
+    }//GEN-LAST:event_textfieldPassKeyReleased
+
+    private void textfieldEmailKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldEmailKeyReleased
+        enableUserFormSave();
+    }//GEN-LAST:event_textfieldEmailKeyReleased
+
+    private void textfieldMobileKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldMobileKeyReleased
+        enableUserFormSave();
+    }//GEN-LAST:event_textfieldMobileKeyReleased
+
+    private void textareaAddressKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textareaAddressKeyReleased
+        enableUserFormSave();
+    }//GEN-LAST:event_textareaAddressKeyReleased
+
+    private void labelPreviewPictureMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelPreviewPictureMouseClicked
+        if (labelPreviewPicture.getIcon() != defaultUser) {
+            File lokasiPropic = new File(PathReference.UserPropicPath);
+            CMDExecutor.openPicture(lokasiPropic);
+        }
+    }//GEN-LAST:event_labelPreviewPictureMouseClicked
+
+    private void labelSignatureAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelSignatureAttendanceMouseClicked
+         if (labelSignatureAttendance.getIcon() != null) {
+            File lokasiSignature = new File(PathReference.SignaturePath);
+            CMDExecutor.openPicture(lokasiSignature);
+        }
+    }//GEN-LAST:event_labelSignatureAttendanceMouseClicked
+
+    private void buttonLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLogoutActionPerformed
+logout();
+    }//GEN-LAST:event_buttonLogoutActionPerformed
+
+    
+    
+    private void enableUserFormSave() {
+
+        if (editMode) {
+            boolean changes = false;
+
+            if (!userEdited.getUsername().equals(textfieldUsername.getText())) {
+                changes = true;
+            } else if (!userEdited.getPass().equals(textfieldPass.getText())) {
+                changes = true;
+            } else if (!userEdited.getMobile().equals(textfieldMobile.getText())) {
+                changes = true;
+            } else if (!userEdited.getEmail().equals(textfieldEmail.getText())) {
+                changes = true;
+            } else if (!userEdited.getAddress().equals(textareaAddress.getText())) {
+                changes = true;
+            } else if (propicFile != null) {
+                if (!propicFile.getAbsolutePath().contains(userEdited.getPropic())) {
+                    changes = true;
+                }
+            }
+
+            buttonSaveUserForm.setEnabled(changes);
+        } else {
+
+            // when this is new form
+            boolean allow = false;
+
+            if (!UIEffect.isEmpty(textfieldUsername)) {
+                if (!UIEffect.isEmpty(textfieldPass)) {
+                    if (!UIEffect.isEmpty(textfieldEmail)) {
+                        if (!UIEffect.isEmpty(textfieldMobile)) {
+                            if (!UIEffect.isEmpty(textareaAddress)) {
+                                allow = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            buttonSaveUserForm.setEnabled(allow);
+
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -2247,7 +2597,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonEditSchedule;
     private javax.swing.JButton buttonEditUser;
     private javax.swing.JButton buttonFuture2;
-    private javax.swing.JButton buttonFuture3;
+    private javax.swing.JButton buttonLogout;
     private javax.swing.JButton buttonPayment;
     private javax.swing.JButton buttonSaveAttendanceForm;
     private javax.swing.JButton buttonSaveDocumentForm;
@@ -2294,6 +2644,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -2381,11 +2732,32 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         System.out.println("Trying to load " + propic);
 
         lockUserForm(false);
-        labelLoadingStatus.setVisible(false);
+        hideLoadingStatus();
 
         if (!propic.contains("default")) {
             // set the propic
             UIEffect.iconChanger(labelPreviewPicture, (propic));
+
+            // change the text of the browse button
+            labelLinkChangePicture.setText("Delete");
+        }
+
+    }
+
+    private void loadScreenshotPaymentLocally() {
+
+        String propic = configuration.getStringValue(Keys.SCREENSHOT_LAST_PAYMENT);
+
+        System.out.println("Trying to load " + propic);
+
+        lockPaymentForm(false);
+        hideLoadingStatus();
+
+        if (!propic.contains("not available")) {
+            // set the propic
+            UIEffect.iconChanger(labelScreenshotPayment, (propic));
+            // change the browse link
+            labelBrowseScreenshotPayment.setText(UIEffect.underline("Delete"));
         }
 
     }
@@ -2397,12 +2769,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         System.out.println("Trying to load " + signaturePic);
 
         lockAttendanceForm(false);
-        labelLoadingStatus.setVisible(false);
+        hideLoadingStatus();
 
         if (!signaturePic.contains("not available")) {
             // set the propic
             UIEffect.iconChanger(labelSignatureAttendance, (signaturePic));
 
+            // change the text of the browse button
+            labelBrowseSignatureAttendance.setText("Delete");
         }
 
     }
@@ -2417,6 +2791,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         textfieldPass.setEnabled(!b);
         textfieldUsername.setEnabled(!b);
 
+        if (editMode) {
+            buttonSaveUserForm.setEnabled(b);
+        } else {
+            buttonSaveUserForm.setEnabled(!b);
+        }
     }
 
     private void lockAttendanceForm(boolean b) {
@@ -2425,8 +2804,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         comboboxStatusAttendance.setEnabled(!b);
         comboboxUsernameAttendance.setEnabled(!b);
 
-        labelBrowseSignatureAttendance.setVisible(!b);
-
+        //labelBrowseSignatureAttendance.setVisible(!b);
     }
 
     private void lockScheduleForm(boolean b) {
@@ -2469,8 +2847,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         editMode = editWork;
 
-        ImageIcon defaultUser = new ImageIcon(getClass().getResource("/images/user.png"));
-
+        
         textfieldUsername.setText("");
         textareaAddress.setText("");
         textfieldEmail.setText("");
@@ -2486,8 +2863,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             // so later it will be unlocked by async success call
 
             lockUserForm(editMode);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
+
+        // protect the form from hijack saving
+        buttonSaveUserForm.setEnabled(false);
 
     }
 
@@ -2510,7 +2890,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             // so later it will be unlocked by async success call
 
             lockAttendanceForm(editMode);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
 
     }
@@ -2534,7 +2914,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             // so later it will be unlocked by async success call
 
             lockScheduleForm(editMode);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
 
     }
@@ -2556,7 +2936,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             // so later it will be unlocked by async success call
 
             lockDocumentForm(editMode);
-            labelLoadingStatus.setVisible(true);
+            showLoadingStatus();
         }
 
     }
@@ -2571,6 +2951,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         labelScreenshotPayment.setText("preview");
         labelScreenshotPayment.setIcon(null);
+        labelBrowseScreenshotPayment.setText("Browse Picture");
 
         payFile = null;
 
@@ -2652,6 +3033,24 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
                 hideLoadingStatus();
 
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
+                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
+                tabRender.render(tableAttendanceData, dataIn);
+
+                hideLoadingStatus();
+
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
+                Document[] dataIn = objectG.fromJson(innerData, Document[].class);
+                tabRender.render(tableDocumentData, dataIn);
+
+                hideLoadingStatus();
+
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
+                Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
+                tabRender.render(tablePaymentData, dataIn);
+
+                hideLoadingStatus();
+
             } else if (urlTarget.equalsIgnoreCase(WebReference.REGISTER_USER)
                     || urlTarget.equalsIgnoreCase(WebReference.DELETE_USER)
                     || urlTarget.equalsIgnoreCase(WebReference.UPDATE_USER)) {
@@ -2668,6 +3067,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                     || urlTarget.equalsIgnoreCase(WebReference.UPDATE_SCHEDULE)) {
                 // thus we refresh the schedule table
                 refreshSchedule();
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_PAYMENT)
+                    || urlTarget.equalsIgnoreCase(WebReference.DELETE_PAYMENT)
+                    || urlTarget.equalsIgnoreCase(WebReference.UPDATE_PAYMENT)) {
+                // thus we refresh the payment table
+                refreshPayment();
             } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_ATTENDANCE)
                     || urlTarget.equalsIgnoreCase(WebReference.DELETE_ATTENDANCE)
                     || urlTarget.equalsIgnoreCase(WebReference.UPDATE_ATTENDANCE)) {
@@ -2677,29 +3081,30 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
                 // we got the single user data here
                 User dataIn = objectG.fromJson(innerData, User.class);
+                // data temporarily saved here for button save checking
+                userEdited = dataIn;
                 renderUserForm(dataIn);
 
-            } else if (urlTarget.contains(WebReference.PICTURE_USER)) {
+            } else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT) && !urlTarget.contains("delete")) {
 
-                System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
+                System.out.println("Obtaining Screenshot Picture from web is success...\nNow applying it locally.");
+                loadScreenshotPaymentLocally();
+
+            } else if (urlTarget.contains(WebReference.PICTURE_USER) && !urlTarget.contains("delete")) {
+
+                System.out.println("Obtaining User Picture from web is success...\nNow applying it locally.");
                 loadUserPictureLocally();
 
-            } else if (urlTarget.contains(WebReference.SIGNATURE_ATTENDANCE)) {
+            } else if (urlTarget.contains(WebReference.SIGNATURE_ATTENDANCE) && !urlTarget.contains("delete")) {
 
-                System.out.println("Obtaining Signature from web is success...\nNow applying it locally.");
+                System.out.println("Obtaining Signature Picture from web is success...\nNow applying it locally.");
                 loadSignaturePictureLocally();
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
-                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
-                tabRender.render(tableAttendanceData, dataIn);
+            } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_PAYMENT)) {
 
-                hideLoadingStatus();
-
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
-                Document[] dataIn = objectG.fromJson(innerData, Document[].class);
-                tabRender.render(tableDocumentData, dataIn);
-
-                hideLoadingStatus();
+                // we got the single payment data here
+                Payment dataIn = objectG.fromJson(innerData, Payment.class);
+                renderPaymentForm(dataIn);
 
             } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_ATTENDANCE)) {
 

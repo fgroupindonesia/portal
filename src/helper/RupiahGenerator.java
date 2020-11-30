@@ -33,24 +33,24 @@ public class RupiahGenerator {
             Number number = kursIndonesia.parse(rupiah);
             nilai = number.doubleValue();
         } catch (Exception ex) {
-            System.out.println("Error in Rupiah Generator");
+            System.out.println("Error while parsing Rupiah Generator");
         }
 
         return nilai;
     }
-    
-   public int getIntNumber(String rupiah){
-       int nilai  = 0;
-       
-       double d = this.getNumber(rupiah);
-       nilai = (int) d;
-       
-       return nilai;
-   }
+
+    public int getIntNumber(String rupiah) {
+        int nilai = 0;
+
+        double d = this.getNumber(rupiah);
+        nilai = (int) d;
+
+        return nilai;
+    }
 
     public String getText(double harga) {
-
-        return kursIndonesia.format(harga);
+    // we remove the ,00 decimal behind
+        return kursIndonesia.format(harga).replace(",00", "");
     }
 
 }

@@ -44,6 +44,27 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String name = null;
 
         switch (whatWork()) {
+            case SWTKey.WORK_DELETE_SCREENSHOT_PAYMENT:
+                name = "delete_screenshot_payment";
+                break;
+            case SWTKey.WORK_REFRESH_SCREENSHOT_PAYMENT:
+                name = "refresh_screenshot_payment";
+                break;
+            case SWTKey.WORK_PAYMENT_SAVE:
+                name = "payment_save";
+                break;
+            case SWTKey.WORK_PAYMENT_EDIT:
+                name = "payment_edit";
+                break;
+            case SWTKey.WORK_PAYMENT_UPDATE:
+                name = "payment_update";
+                break;
+            case SWTKey.WORK_PAYMENT_DELETE:
+                name = "payment_delete";
+                break;
+            case SWTKey.WORK_DELETE_SIGNATURE:
+                name = "delete_signature";
+                break;
             case SWTKey.WORK_ATTENDANCE_SAVE:
                 name = "attendance_save";
                 break;
@@ -82,6 +103,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_REFRESH_SCHEDULE_BY_DAY:
                 name = "refresh_schedule_by_day";
+                break;
+            case SWTKey.WORK_DELETE_PICTURE:
+                name = "delete_picture";
                 break;
             case SWTKey.WORK_REFRESH_USER:
                 name = "refresh_user";
@@ -144,6 +168,27 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         System.out.println("I am working on " + whatWorkAsString());
 
         switch (whatWork()) {
+            case SWTKey.WORK_DELETE_SCREENSHOT_PAYMENT:
+                screenshotDelete();
+                break;
+            case SWTKey.WORK_REFRESH_SCREENSHOT_PAYMENT:
+                refreshScreenshotPaymentData();
+                break;
+            case SWTKey.WORK_PAYMENT_UPDATE:
+                paymentUpdate();
+                break;
+            case SWTKey.WORK_PAYMENT_EDIT:
+                paymentEdit();
+                break;
+            case SWTKey.WORK_PAYMENT_SAVE:
+                paymentSave();
+                break;
+            case SWTKey.WORK_PAYMENT_DELETE:
+                paymentDelete();
+                break;
+            case SWTKey.WORK_DELETE_SIGNATURE:
+                signatureDelete();
+                break;
             case SWTKey.WORK_ATTENDANCE_UPDATE:
                 attendanceUpdate();
                 break;
@@ -179,6 +224,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_DOCUMENT_DELETE:
                 documentDelete();
+                break;
+            case SWTKey.WORK_DELETE_PICTURE:
+                pictureDelete();
                 break;
             case SWTKey.WORK_REFRESH_USER:
                 refreshUserData();
@@ -353,12 +401,51 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST_FILE);
     }
 
-    private void attendanceDelete() {
-        urlExecutor.start(WebReference.DELETE_ATTENDANCE, HttpCall.METHOD_POST);
-    }
-
     private boolean hasFile() {
         return urlExecutor.isFileAttached();
+    }
+
+    private void paymentDelete() {
+        urlExecutor.start(WebReference.DELETE_PAYMENT, HttpCall.METHOD_POST);
+    }
+    
+    // this is for user picture
+    private void pictureDelete() {
+        urlExecutor.start(WebReference.DELETE_PICTURE, HttpCall.METHOD_POST);
+    }
+    
+    // this is for payment picture
+    private void screenshotDelete() {
+        urlExecutor.start(WebReference.DELETE_SCREENSHOT, HttpCall.METHOD_POST);
+    }
+    
+    // this is for attendance picture
+    private void signatureDelete() {
+        urlExecutor.start(WebReference.DELETE_SIGNATURE, HttpCall.METHOD_POST);
+    }
+
+    private void paymentSave() {
+        if (hasFile()) {
+            urlExecutor.start(WebReference.ADD_PAYMENT, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.ADD_PAYMENT, HttpCall.METHOD_POST);
+        }
+    }
+
+    private void paymentEdit() {
+        urlExecutor.start(WebReference.DETAIL_PAYMENT, HttpCall.METHOD_POST);
+    }
+
+    private void paymentUpdate() {
+        if (hasFile()) {
+            urlExecutor.start(WebReference.UPDATE_PAYMENT, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.UPDATE_PAYMENT, HttpCall.METHOD_POST);
+        }
+    }
+
+    private void attendanceDelete() {
+        urlExecutor.start(WebReference.DELETE_ATTENDANCE, HttpCall.METHOD_POST);
     }
 
     private void attendanceSave() {
@@ -406,6 +493,13 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
         // the url is manually defined here
         String urlManual = WebReference.PICTURE_USER + "?propic=" + urlExecutor.getData("propic");
+        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+    }
+
+    private void refreshScreenshotPaymentData() {
+
+        // the url is manually defined here
+        String urlManual = WebReference.SCREENSHOT_PAYMENT + "?screenshot=" + urlExecutor.getData("screenshot");
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
 

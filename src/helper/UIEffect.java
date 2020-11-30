@@ -19,6 +19,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
@@ -32,6 +33,11 @@ public class UIEffect {
     private static JLabel labelTime;
     private static Timer timer;
 
+    //this is for JLabel HTML
+    public static String underline(String text){
+        return "<html><u>" + text + "</u></html>";
+    }
+    
     // this is for UTF-8 decoder
     public static String decodeSafe(String val) {
         String en = null;
@@ -83,7 +89,12 @@ public class UIEffect {
         // until remain only number
         if(el.getText().length()>0){
             String nilai = el.getText();
+            if(nilai.contains("Rp")){
             el.setText(new RupiahGenerator().getIntNumber(nilai)+"");
+            } else {
+                el.setText(nilai.replace(".0", ""));
+            }
+                   
         }
         
     }
@@ -107,6 +118,12 @@ public class UIEffect {
 
     }
 
+    public static boolean isEmpty(JTextArea el) {
+
+        return (el.getText().trim().length() == 0);
+
+    }
+    
     public static boolean isEmpty(JTextField el) {
 
         return (el.getText().trim().length() == 0);
@@ -144,6 +161,12 @@ public class UIEffect {
                 Image.SCALE_SMOOTH);
 
         el.setIcon(new ImageIcon(dimg));
+        
+    // important to remove from the memory usage
+        
+        dimg.flush();
+        img.flush();
+        
     }
 
     public static void mouseHover(JLabel el){
