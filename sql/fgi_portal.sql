@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 25, 2020 at 11:53 AM
+-- Generation Time: Nov 30, 2020 at 11:28 AM
 -- Server version: 5.5.39
 -- PHP Version: 5.4.31
 
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS `data_attendance` (
 INSERT INTO `data_attendance` (`id`, `username`, `class_registered`, `status`, `signature`, `date_created`, `date_modified`) VALUES
 (7, 'udin', 'java+web', 'hadir', '1606274767_sign0x.png', '2020-11-24 16:24:52', '2020-11-25 03:26:07'),
 (9, 'udin', 'java+web', 'hadir', 'sign01.png', '2020-11-25 09:20:26', '2020-11-25 03:34:37'),
-(10, 'udin', 'java desktop', 'idzin', '1606276114_coloringpen.png', '2020-11-25 09:22:48', '2020-11-25 03:48:34'),
-(11, 'dddd', 'java desktop', 'idzin', '1606276688_coloringpen.png', '2020-11-25 10:58:08', '2020-11-25 03:58:08'),
+(10, 'udin', 'java desktop', 'idzin', 'not available', '2020-11-25 09:22:48', '2020-11-30 04:43:04'),
+(11, 'dddd', 'java desktop', 'idzin', 'not available', '2020-11-25 10:58:08', '2020-11-30 04:37:00'),
 (12, 'dddd', 'java desktop', 'idzin', 'not available', '2020-11-25 10:58:18', '2020-11-25 03:58:18'),
 (13, 'dddd', 'java web', 'hadir', 'not available', '2020-11-25 11:32:17', '2020-11-25 04:32:17');
 
@@ -133,18 +133,17 @@ CREATE TABLE IF NOT EXISTS `data_payment` (
   `username` varchar(75) NOT NULL,
   `amount` double NOT NULL,
   `method` varchar(45) NOT NULL,
-  `screenshot` varchar(75) NOT NULL,
+  `screenshot` varchar(75) NOT NULL DEFAULT 'not available',
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
 
 --
 -- Dumping data for table `data_payment`
 --
 
 INSERT INTO `data_payment` (`id`, `username`, `amount`, `method`, `screenshot`, `date_created`) VALUES
-(1, 'asd', 450000, 'atm', 'asd_trf.jpg', '2020-10-21 08:36:48'),
-(2, 'ccc', 500000, 'atm', 'ccc_atm.jpg', '2020-10-21 08:37:25'),
-(3, 'asd', 650000, 'cash', 'asd_cash.jpg', '2020-10-21 08:37:25');
+(3, 'dddd', 500000, 'Cash', 'not available', '2020-11-30 03:42:05'),
+(10, 'udin', 100000, 'Transfer Bank', 'not available', '2020-11-30 04:19:19');
 
 -- --------------------------------------------------------
 
@@ -180,7 +179,7 @@ CREATE TABLE IF NOT EXISTS `data_token` (
   `token` varchar(75) NOT NULL,
   `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `expired_date` datetime NOT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=26 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=29 ;
 
 --
 -- Dumping data for table `data_token`
@@ -198,7 +197,10 @@ INSERT INTO `data_token` (`id`, `username`, `token`, `created_date`, `expired_da
 (22, 'admin', 'a5322041aca232360577b8303ff09a107bf94449', '2020-11-19 13:31:26', '2020-11-20 20:11:26'),
 (23, 'admin', '29b18f6017729b34804d073dcd2d49618a5386cc', '2020-11-22 03:50:57', '2020-11-23 10:11:57'),
 (24, 'admin', '4cf5d8f290cfb698a1cab2cde3c96bf1574f030f', '2020-11-24 07:49:56', '2020-11-25 14:11:56'),
-(25, 'admin', '3eb80fb7b8a63a23044bfe77ccb6e606a16a1058', '2020-11-25 07:43:19', '2020-11-26 14:11:19');
+(25, 'admin', '3eb80fb7b8a63a23044bfe77ccb6e606a16a1058', '2020-11-25 07:43:19', '2020-11-26 14:11:19'),
+(26, 'admin', 'f49ee4aa22c35b983a028e4e277a8e706e2bc647', '2020-11-28 07:24:24', '2020-11-29 14:11:24'),
+(27, 'admin', '1036d1305bde10a9beb3d701271fea5d9187a3c1', '2020-11-30 03:19:46', '2020-12-01 10:12:46'),
+(28, 'udin', '30956bab90246302df6844f74f920ca632f601a5', '2020-11-30 07:12:09', '2020-12-01 14:12:09');
 
 -- --------------------------------------------------------
 
@@ -214,17 +216,19 @@ CREATE TABLE IF NOT EXISTS `data_user` (
   `address` varchar(200) NOT NULL,
   `propic` varchar(75) NOT NULL DEFAULT 'default.png',
   `mobile` varchar(75) NOT NULL DEFAULT 'not available',
+  `tmv_id` varchar(25) NOT NULL DEFAULT 'not available',
+  `tmv_pass` varchar(25) NOT NULL DEFAULT 'not available',
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=39 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=43 ;
 
 --
 -- Dumping data for table `data_user`
 --
 
-INSERT INTO `data_user` (`id`, `username`, `pass`, `email`, `address`, `propic`, `mobile`, `date_created`) VALUES
-(1, 'admin', 'admin', 'home@home.com', 'bdg', 'default.png', 'not available', '2020-10-22 08:25:09'),
-(37, 'dddd', 'ddd', 'dddd@ymail.com', 'jakarta ku kan berpetualang', '1605693156_handbrake.png', '123-123', '2020-11-25 07:00:27'),
-(38, 'udin', 'udin123 baru pass', 'udin@udin.com', 'jakarta', '1606041059_pencil.png', '09128', '2020-11-25 07:44:51');
+INSERT INTO `data_user` (`id`, `username`, `pass`, `email`, `address`, `propic`, `mobile`, `tmv_id`, `tmv_pass`, `date_created`) VALUES
+(1, 'admin', 'admin', 'home@home.com', 'bdg', 'default.png', 'not available', 'not available', 'not available', '2020-10-22 08:25:09'),
+(37, 'dddd', 'ddd', 'dddd@ymail.com', 'jakarta ku kan berpetualangan ya', 'default.png', '123-123', 'not available', 'not available', '2020-11-30 06:44:04'),
+(38, 'udin', '123', 'udin@udin.com', 'jakarta aja dinnn hehe', 'default.png', '09128', '432996191', 'asd', '2020-11-30 10:26:59');
 
 --
 -- Indexes for dumped tables
@@ -306,7 +310,7 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=8;
 -- AUTO_INCREMENT for table `data_payment`
 --
 ALTER TABLE `data_payment`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=11;
 --
 -- AUTO_INCREMENT for table `data_schedule`
 --
@@ -316,12 +320,12 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=11;
 -- AUTO_INCREMENT for table `data_token`
 --
 ALTER TABLE `data_token`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=26;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=29;
 --
 -- AUTO_INCREMENT for table `data_user`
 --
 ALTER TABLE `data_user`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=39;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=43;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
