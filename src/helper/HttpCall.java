@@ -251,6 +251,10 @@ public class HttpCall {
                 }else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT)) {
                     PathReference.setScreenshotPaymentFileName(getData("screenshot"));
                     fileName = PathReference.ScreenshotPaymentPath;
+                }else {
+                    // this is for downloading manual
+                    PathReference.setDocumentFileName(getData("filename"));
+                    fileName = PathReference.DocumentFilePath;
                 }
 
                 // download here

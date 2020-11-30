@@ -849,6 +849,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 formMousePressed(evt);
             }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                formMouseReleased(evt);
+            }
         });
 
         panelHeader.setBackground(new java.awt.Color(255, 0, 0));
@@ -2490,6 +2493,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void buttonLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLogoutActionPerformed
 logout();
     }//GEN-LAST:event_buttonLogoutActionPerformed
+
+    private void formMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseReleased
+        UIDragger.mouseReleased(evt);
+    }//GEN-LAST:event_formMouseReleased
 
     
     

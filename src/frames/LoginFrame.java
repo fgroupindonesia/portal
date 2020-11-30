@@ -81,6 +81,11 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         setTitle("Login");
         setUndecorated(true);
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowActivated(java.awt.event.WindowEvent evt) {
+                formWindowActivated(evt);
+            }
+        });
 
         panelBase.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         panelBase.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
@@ -91,6 +96,9 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         panelBase.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 panelBaseMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                panelBaseMouseReleased(evt);
             }
         });
         panelBase.setLayout(new java.awt.CardLayout());
@@ -369,7 +377,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void textfieldPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfieldPassActionPerformed
         checkFormFilled();
-        
+
         if (formCompleted) {
             proceedTestLoggingIn();
         }
@@ -377,7 +385,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void textfieldUsernameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textfieldUsernameActionPerformed
         checkFormFilled();
-        
+
         if (formCompleted) {
             proceedTestLoggingIn();
         }
@@ -412,6 +420,14 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
 
     }//GEN-LAST:event_textfieldPassKeyTyped
+
+    private void formWindowActivated(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowActivated
+        UIDragger.setFrame(this);
+    }//GEN-LAST:event_formWindowActivated
+
+    private void panelBaseMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelBaseMouseReleased
+        UIDragger.mouseReleased(evt);
+    }//GEN-LAST:event_panelBaseMouseReleased
 
     /**
      * @param args the command line arguments
@@ -487,12 +503,12 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 // now this is the usual process of logging in
 
                 System.out.println("Logging success....");
-                
+
                 String innerData = jchecker.getValueAsString("multi_data");
                 AccessToken dataIn = objectG.fromJson(innerData, AccessToken.class);
 
                 System.out.println("Updating Configuration locally....");
-                
+
                 // update for this token
                 configuration.setValue(Keys.TOKEN_API, dataIn.getToken());
                 configuration.setValue(Keys.DATE_EXPIRED_TOKEN, dataIn.getExpired_date());
@@ -520,15 +536,14 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 internetExist = false;
                 showErrorLoading(true, "please check your internet!");
 
-                
             } else {
                 // set the error icon for bad cridentials
                 showErrorLoading(true, "invalid username & password!");
             }
-            
+
             // empty value for this token
-                configuration.setValue(Keys.TOKEN_API, "");
-                configuration.setValue(Keys.DATE_EXPIRED_TOKEN, "");
+            configuration.setValue(Keys.TOKEN_API, "");
+            configuration.setValue(Keys.DATE_EXPIRED_TOKEN, "");
 
         }
 

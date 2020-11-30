@@ -5,6 +5,7 @@
  */
 package helper;
 
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
@@ -22,6 +23,10 @@ public class UIDragger {
         frameRef = refIn;
     }
 
+    public static void mouseReleased(MouseEvent evt) {
+        frameRef.setCursor(null);
+    }
+    
     public static void mouseDragged(MouseEvent evt) {
         int thisX = frameRef.getLocation().x;
         int thisY = frameRef.getLocation().y;
@@ -34,6 +39,8 @@ public class UIDragger {
         int X = thisX + xMoved;
         int Y = thisY + yMoved;
         frameRef.setLocation(X, Y);
+        
+        frameRef.setCursor(Cursor.MOVE_CURSOR);
     }
 
     public static void mousePressed(MouseEvent evt) {

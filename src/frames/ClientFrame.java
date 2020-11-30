@@ -24,6 +24,7 @@ import helper.RupiahGenerator;
 import helper.SWTKey;
 import helper.SWThreadWorker;
 import helper.TableRenderer;
+import helper.TrayMaker;
 import helper.preferences.SettingPreference;
 import helper.UIDragger;
 import helper.UIEffect;
@@ -33,9 +34,12 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Frame;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -45,6 +49,9 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.CategoryDataset;
 
 /**
@@ -66,7 +73,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(28);
 
     File propicFile;
+    File screenshotFile;
+
     ImageIcon loadingImage = new ImageIcon(getClass().getResource("/images/loadingprel.gif"));
+    ImageIcon okImage = new ImageIcon(getClass().getResource("/images/ok16.png"));
+    ImageIcon refreshImage = new ImageIcon(getClass().getResource("/images/refresh24.png"));
+
     User personLogged;
 
     public ClientFrame(LoginFrame logRef, User dataIn) {
@@ -81,6 +93,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void processNicely() {
         initComponents();
+
+        //hide the ui effect
+        progressBarDownload.setVisible(false);
+        labelPercentage.setVisible(false);
 
         // activate the effect stuff
         UIDragger.setFrame(this);
@@ -115,13 +131,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     SWThreadWorker prepbrowser = new SWThreadWorker(this);
-    SWThreadWorker workSched = new SWThreadWorker(this);
-    SWThreadWorker workHist = new SWThreadWorker(this);
-    SWThreadWorker workAtt = new SWThreadWorker(this);
-    SWThreadWorker workDoc = new SWThreadWorker(this);
-    SWThreadWorker workPay = new SWThreadWorker(this);
-    SWThreadWorker workProfile = new SWThreadWorker(this);
-    SWThreadWorker workPicture = new SWThreadWorker(this);
 
     private void prepareBrowserNow() {
 
@@ -141,8 +150,30 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         obSW.addData("token", this.getTokenLocally());
     }
 
+    private void downloadFile(String target, String fname) {
+
+        SWThreadWorker workDownload = new SWThreadWorker(this);
+        workDownload.setWork(SWTKey.WORK_DOCUMENT_DOWNLOAD);
+        workDownload.writeMode(true);
+        workDownload.addData("url", target);
+        workDownload.addData("filename", fname);
+        workDownload.addData("username", personLogged.getUsername());
+        prepareToken(workDownload);
+
+        // optional for showing the effect
+        FileCopier.setProgressBar(progressBarDownload);
+        FileCopier.setProgressLabel(labelPercentage, labelLoadingStatus);
+
+        showLoadingStatus("Download");
+
+        // executorService.submit(workSched);
+        executorService.schedule(workDownload, 2, TimeUnit.SECONDS);
+
+    }
+
     private void refreshHistory() {
 
+        SWThreadWorker workHist = new SWThreadWorker(this);
         workHist.setWork(SWTKey.WORK_REFRESH_HISTORY);
         workHist.addData("username", personLogged.getUsername());
         workHist.addData("limit", "5");
@@ -162,6 +193,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         configuration.setValue(Keys.USER_PROPIC, dest.getAbsolutePath());
 
+        SWThreadWorker workPicture = new SWThreadWorker(this);
         // execute the download picture process
         workPicture.setWork(SWTKey.WORK_REFRESH_PICTURE);
         workPicture.writeMode(true);
@@ -174,6 +206,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshProfile() {
 
+        SWThreadWorker workProfile = new SWThreadWorker(this);
         workProfile.setWork(SWTKey.WORK_REFRESH_PROFILE);
         // executorService.submit(workSched);
         workProfile.addData("username", personLogged.getUsername());
@@ -185,6 +218,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshSchedule() {
 
+        SWThreadWorker workSched = new SWThreadWorker(this);
         workSched.setWork(SWTKey.WORK_REFRESH_SCHEDULE);
         workSched.addData("username", personLogged.getUsername());
         prepareToken(workSched);
@@ -196,6 +230,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshAttendance() {
 
+        SWThreadWorker workAtt = new SWThreadWorker(this);
         workAtt.setWork(SWTKey.WORK_REFRESH_ATTENDANCE);
         workAtt.addData("username", personLogged.getUsername());
         prepareToken(workAtt);
@@ -207,6 +242,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshPayment() {
 
+        SWThreadWorker workPay = new SWThreadWorker(this);
         workPay.setWork(SWTKey.WORK_REFRESH_PAYMENT);
         workPay.addData("username", personLogged.getUsername());
         prepareToken(workPay);
@@ -217,6 +253,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshDocument() {
 
+        SWThreadWorker workDoc = new SWThreadWorker(this);
         workDoc.setWork(SWTKey.WORK_REFRESH_DOCUMENT);
         workDoc.addData("username", personLogged.getUsername());
         prepareToken(workDoc);
@@ -243,13 +280,25 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         ChartGenerator cmaker = new ChartGenerator();
 
+        int hadir = tabRender.getRowCountValue(tableAttendanceData, 4, "hadir");
+        int idzin = tabRender.getRowCountValue(tableAttendanceData, 4, "idzin");
+        int sakit = tabRender.getRowCountValue(tableAttendanceData, 4, "sakit");
+
+        cmaker.setJumlahHadir(hadir);
+        cmaker.setJumlahIdzin(idzin);
+        cmaker.setJumlahSakit(sakit);
+
         CategoryDataset dataset = cmaker.createDataset();
 
         JFreeChart chart = cmaker.createChart(dataset);
+
+        // coloring grey to the Background from default of white
+        chart.setBackgroundPaint(null);
+
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        //chart.getPlot().setBackgroundPaint(Color.red);
 
+        //chart.getPlot().setBackgroundPaint(Color.red);
         panelAttandanceStatistic.add(chartPanel, java.awt.BorderLayout.CENTER);
 
         pack();
@@ -285,6 +334,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonSettings = new javax.swing.JButton();
         buttonLogout = new javax.swing.JButton();
         labelLoadingStatus = new javax.swing.JLabel();
+        progressBarDownload = new javax.swing.JProgressBar();
+        labelPercentage = new javax.swing.JLabel();
         panelCenter = new javax.swing.JPanel();
         panelContentCenter = new javax.swing.JPanel();
         panelHome = new javax.swing.JPanel();
@@ -351,12 +402,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelScreenshotPayment = new javax.swing.JLabel();
         buttonSavePayment = new javax.swing.JButton();
         jLabel17 = new javax.swing.JLabel();
+        labelBrowseScreenshotPayment = new javax.swing.JLabel();
         panelPaymentData = new javax.swing.JPanel();
         panelPaymentTable = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tablePaymentData = new javax.swing.JTable();
         panelControllerPayment = new javax.swing.JPanel();
         labelAddPayment = new javax.swing.JLabel();
+        labelRefreshPayment = new javax.swing.JLabel();
         panelAttendance = new javax.swing.JPanel();
         panelAttendanceData = new javax.swing.JPanel();
         panelAttandanceContent = new javax.swing.JPanel();
@@ -367,6 +420,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelControllerAttendance = new javax.swing.JPanel();
         labelShowAttendanceData = new javax.swing.JLabel();
         labelShowAttendanceStatistic = new javax.swing.JLabel();
+        labelRefreshAttendance = new javax.swing.JLabel();
         panelDocument = new javax.swing.JPanel();
         panelDocumentData = new javax.swing.JPanel();
         panelDocumentContent = new javax.swing.JPanel();
@@ -375,6 +429,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelControllerDocument = new javax.swing.JPanel();
         labelDocumentOpen = new javax.swing.JLabel();
         labelDocumentDownload = new javax.swing.JLabel();
+        labelRefreshDocument = new javax.swing.JLabel();
         panelInnerBrowser = new javax.swing.JPanel();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
@@ -382,6 +437,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
+        setPreferredSize(new java.awt.Dimension(750, 500));
 
         panelBase.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         panelBase.setPreferredSize(new java.awt.Dimension(750, 439));
@@ -393,6 +449,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelBase.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 panelBaseMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                panelBaseMouseReleased(evt);
             }
         });
         panelBase.setLayout(new java.awt.BorderLayout());
@@ -527,6 +586,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelLoadingStatus.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
         labelLoadingStatus.setText("Loading...");
         panelMenu.add(labelLoadingStatus);
+
+        progressBarDownload.setPreferredSize(new java.awt.Dimension(110, 19));
+        panelMenu.add(progressBarDownload);
+
+        labelPercentage.setText("0/0");
+        panelMenu.add(labelPercentage);
 
         panelContent.add(panelMenu, java.awt.BorderLayout.WEST);
 
@@ -848,7 +913,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         jLabel14.setText("Screenshot:");
         panelPaymentForm.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 190, 90, -1));
 
-        combobocMethodPayment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        combobocMethodPayment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Cash", "Transfer Bank" }));
         panelPaymentForm.add(combobocMethodPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 150, 160, -1));
 
         labelHidePaymentForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/left.png"))); // NOI18N
@@ -870,11 +935,22 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 buttonSavePaymentActionPerformed(evt);
             }
         });
-        panelPaymentForm.add(buttonSavePayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 370, 70, -1));
+        panelPaymentForm.add(buttonSavePayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 350, 70, -1));
 
         jLabel17.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/coin.png"))); // NOI18N
         jLabel17.setText("Amount:");
         panelPaymentForm.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 120, -1));
+
+        labelBrowseScreenshotPayment.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelBrowseScreenshotPayment.setForeground(new java.awt.Color(102, 0, 255));
+        labelBrowseScreenshotPayment.setText("Browse Picture");
+        labelBrowseScreenshotPayment.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelBrowseScreenshotPayment.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelBrowseScreenshotPaymentMouseClicked(evt);
+            }
+        });
+        panelPaymentForm.add(labelBrowseScreenshotPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 330, -1, -1));
 
         panelPayment.add(panelPaymentForm, java.awt.BorderLayout.WEST);
 
@@ -948,7 +1024,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelAddPaymentMouseExited(evt);
             }
         });
-        panelControllerPayment.add(labelAddPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 70, 30));
+        panelControllerPayment.add(labelAddPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 30, 70, 30));
+
+        labelRefreshPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh24.png"))); // NOI18N
+        labelRefreshPayment.setText("Refresh");
+        labelRefreshPayment.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelRefreshPayment.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelRefreshPaymentMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelRefreshPaymentMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelRefreshPaymentMouseExited(evt);
+            }
+        });
+        panelControllerPayment.add(labelRefreshPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 30, 80, 30));
 
         panelPaymentData.add(panelControllerPayment, java.awt.BorderLayout.PAGE_START);
 
@@ -969,14 +1061,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
             },
             new String [] {
-                "[ x ]", "Username", "Class", "Status", "Signature", "Date Created", "Date Modified"
+                "[ x ]", "Id", "Username", "Class", "Status", "Signature", "Date Created", "Date Modified"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                true, true, false, false, true, false, true
+                true, false, true, false, false, true, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -995,18 +1087,21 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             tableAttendanceData.getColumnModel().getColumn(1).setMinWidth(0);
             tableAttendanceData.getColumnModel().getColumn(1).setPreferredWidth(0);
             tableAttendanceData.getColumnModel().getColumn(1).setMaxWidth(0);
-            tableAttendanceData.getColumnModel().getColumn(2).setMinWidth(100);
-            tableAttendanceData.getColumnModel().getColumn(2).setPreferredWidth(100);
-            tableAttendanceData.getColumnModel().getColumn(3).setMinWidth(75);
-            tableAttendanceData.getColumnModel().getColumn(3).setPreferredWidth(75);
-            tableAttendanceData.getColumnModel().getColumn(4).setMinWidth(0);
-            tableAttendanceData.getColumnModel().getColumn(4).setPreferredWidth(0);
-            tableAttendanceData.getColumnModel().getColumn(4).setMaxWidth(0);
-            tableAttendanceData.getColumnModel().getColumn(5).setMinWidth(125);
-            tableAttendanceData.getColumnModel().getColumn(5).setPreferredWidth(125);
-            tableAttendanceData.getColumnModel().getColumn(6).setMinWidth(0);
-            tableAttendanceData.getColumnModel().getColumn(6).setPreferredWidth(0);
-            tableAttendanceData.getColumnModel().getColumn(6).setMaxWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(2).setMinWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(2).setPreferredWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(2).setMaxWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(3).setMinWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tableAttendanceData.getColumnModel().getColumn(4).setMinWidth(75);
+            tableAttendanceData.getColumnModel().getColumn(4).setPreferredWidth(75);
+            tableAttendanceData.getColumnModel().getColumn(5).setMinWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(5).setPreferredWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(5).setMaxWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(6).setMinWidth(125);
+            tableAttendanceData.getColumnModel().getColumn(6).setPreferredWidth(125);
+            tableAttendanceData.getColumnModel().getColumn(7).setMinWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(7).setPreferredWidth(0);
+            tableAttendanceData.getColumnModel().getColumn(7).setMaxWidth(0);
         }
 
         panelAttandanceAll.add(jScrollPane3, java.awt.BorderLayout.CENTER);
@@ -1036,7 +1131,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelShowAttendanceDataMouseExited(evt);
             }
         });
-        panelControllerAttendance.add(labelShowAttendanceData, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 30, 80, 30));
+        panelControllerAttendance.add(labelShowAttendanceData, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 30, 80, 30));
 
         labelShowAttendanceStatistic.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/stat.png"))); // NOI18N
         labelShowAttendanceStatistic.setText("Statistic");
@@ -1052,7 +1147,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelShowAttendanceStatisticMouseExited(evt);
             }
         });
-        panelControllerAttendance.add(labelShowAttendanceStatistic, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 80, 30));
+        panelControllerAttendance.add(labelShowAttendanceStatistic, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 30, 80, 30));
+
+        labelRefreshAttendance.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh24.png"))); // NOI18N
+        labelRefreshAttendance.setText("Refresh");
+        labelRefreshAttendance.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelRefreshAttendance.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelRefreshAttendanceMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelRefreshAttendanceMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelRefreshAttendanceMouseExited(evt);
+            }
+        });
+        panelControllerAttendance.add(labelRefreshAttendance, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 30, 80, 30));
 
         panelAttendanceData.add(panelControllerAttendance, java.awt.BorderLayout.PAGE_START);
 
@@ -1090,6 +1201,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             }
         });
         tableDocumentData.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        tableDocumentData.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableDocumentDataMouseClicked(evt);
+            }
+        });
         jScrollPane4.setViewportView(tableDocumentData);
         if (tableDocumentData.getColumnModel().getColumnCount() > 0) {
             tableDocumentData.getColumnModel().getColumn(0).setResizable(false);
@@ -1098,7 +1214,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             tableDocumentData.getColumnModel().getColumn(1).setPreferredWidth(0);
             tableDocumentData.getColumnModel().getColumn(1).setMaxWidth(0);
             tableDocumentData.getColumnModel().getColumn(2).setPreferredWidth(150);
-            tableDocumentData.getColumnModel().getColumn(3).setPreferredWidth(500);
+            tableDocumentData.getColumnModel().getColumn(3).setPreferredWidth(300);
             tableDocumentData.getColumnModel().getColumn(5).setMinWidth(0);
             tableDocumentData.getColumnModel().getColumn(5).setPreferredWidth(0);
             tableDocumentData.getColumnModel().getColumn(5).setMaxWidth(0);
@@ -1130,7 +1246,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelDocumentOpenMouseExited(evt);
             }
         });
-        panelControllerDocument.add(labelDocumentOpen, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 30, 80, 30));
+        panelControllerDocument.add(labelDocumentOpen, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 30, 80, 30));
 
         labelDocumentDownload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/download.png"))); // NOI18N
         labelDocumentDownload.setText("Download");
@@ -1146,7 +1262,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelDocumentDownloadMouseExited(evt);
             }
         });
-        panelControllerDocument.add(labelDocumentDownload, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 80, 30));
+        panelControllerDocument.add(labelDocumentDownload, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 30, 90, 30));
+
+        labelRefreshDocument.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh24.png"))); // NOI18N
+        labelRefreshDocument.setText("Refresh");
+        labelRefreshDocument.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelRefreshDocument.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelRefreshDocumentMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelRefreshDocumentMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelRefreshDocumentMouseExited(evt);
+            }
+        });
+        panelControllerDocument.add(labelRefreshDocument, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 30, 80, 30));
 
         panelDocumentData.add(panelControllerDocument, java.awt.BorderLayout.PAGE_START);
 
@@ -1181,7 +1313,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 .addComponent(labelNavHome)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(labelPanelViewName, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(982, Short.MAX_VALUE))
+                .addContainerGap(1084, Short.MAX_VALUE))
         );
         panelHeaderCenterLayout.setVerticalGroup(
             panelHeaderCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1369,7 +1501,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void buttonSavePaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSavePaymentActionPerformed
         showPaymentForm(false);
 
-        postDataPayment();
+        savePayment();
 
     }//GEN-LAST:event_buttonSavePaymentActionPerformed
 
@@ -1404,7 +1536,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_labelShowAttendanceStatisticMouseExited
 
     private void labelDocumentOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentOpenMouseClicked
-        // TODO add your handling code here:
+        ArrayList dataDoc = tabRender.getCheckedRows(tableDocumentData, 4);
+
+        if (dataDoc.isEmpty()) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing file name
+            for (Object f : dataDoc) {
+                PathReference.setDocumentFileName(f.toString());
+                File lokasiFile = new File(PathReference.DocumentFilePath);
+                if (lokasiFile.exists()) {
+                    CMDExecutor.openDocument(lokasiFile);
+                }
+            }
+
+        }
+
+
     }//GEN-LAST:event_labelDocumentOpenMouseClicked
 
     private void labelDocumentOpenMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentOpenMouseEntered
@@ -1417,16 +1565,48 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void labelDocumentDownloadMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseClicked
 
-        cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+        //cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+        // temporaryly
+        ArrayList dataDoc = tabRender.getCheckedRows(tableDocumentData, 6);
+        ArrayList dataDoc2 = tabRender.getCheckedRows(tableDocumentData, 4);
+
+        if (dataDoc.isEmpty()) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing url only
+            if (!progressBarDownload.isVisible()) {
+                showLoadingStatus();
+                progressBarDownload.setVisible(true);
+                labelPercentage.setVisible(true);
+                // download only the 1 one
+                downloadFile(dataDoc.get(0).toString(), dataDoc2.get(0).toString());
+            } else {
+                UIEffect.popup("Please wait until the download progress is completed!", this);
+            }
+        }
+
+
     }//GEN-LAST:event_labelDocumentDownloadMouseClicked
 
-    private void postDataPayment() {
+    private void savePayment() {
+        showLoadingStatus();
+        SWThreadWorker workPayment = new SWThreadWorker(this);
 
-        RupiahGenerator rp = new RupiahGenerator();
+        workPayment.setWork(SWTKey.WORK_PAYMENT_SAVE);
 
-        Payment data = new Payment();
-        data.setAmount(ABORT);
+        workPayment.addData("username", personLogged.getUsername());
+        workPayment.addData("method", combobocMethodPayment.getSelectedItem().toString());
+        workPayment.addData("amount", "" + rpGen.getIntNumber(textfieldAmountPayment.getText()));
 
+        // for screenshot we will post the data here
+        if (screenshotFile != null) {
+            workPayment.addFile("screenshot", screenshotFile);
+        }
+
+        prepareToken(workPayment);
+        executorService.schedule(workPayment, 1, TimeUnit.SECONDS);
+
+        buttonSavePayment.setEnabled(false);
     }
 
 
@@ -1447,7 +1627,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_labelReportBugsMouseExited
 
     private void labelMinimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelMinimizeMouseClicked
-        this.setState(Frame.ICONIFIED);
+        //this.setState(Frame.ICONIFIED);
+        this.setVisible(false);
+        try {
+            TrayMaker tm = new TrayMaker();
+            tm.setFrameRef(this);
+            
+            if(tm.isSupported()){
+                System.out.println("Tray created!");
+                tm.createTray();
+            }
+            
+             System.out.println("Tray done!");
+        } catch (Exception ex) {
+            UIEffect.popup("Warning! Unsupported Tray!", this);
+        }
+
+
     }//GEN-LAST:event_labelMinimizeMouseClicked
 
     private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
@@ -1517,34 +1713,134 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         enableUserFormSave();
     }//GEN-LAST:event_textareaAddressProfileKeyReleased
 
+    private void panelBaseMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelBaseMouseReleased
+        UIDragger.mouseReleased(evt);
+    }//GEN-LAST:event_panelBaseMouseReleased
+
+    private void labelRefreshPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshPaymentMouseClicked
+        refreshPayment();
+        labelRefreshPayment.setIcon(loadingImage);
+    }//GEN-LAST:event_labelRefreshPaymentMouseClicked
+
+    private void labelRefreshPaymentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshPaymentMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshPaymentMouseEntered
+
+    private void labelRefreshPaymentMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshPaymentMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshPaymentMouseExited
+
+    private void labelRefreshAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshAttendanceMouseClicked
+        refreshAttendance();
+        labelRefreshAttendance.setIcon(loadingImage);
+    }//GEN-LAST:event_labelRefreshAttendanceMouseClicked
+
+    private void labelRefreshAttendanceMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshAttendanceMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshAttendanceMouseEntered
+
+    private void labelRefreshAttendanceMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshAttendanceMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshAttendanceMouseExited
+
+    private void labelRefreshDocumentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshDocumentMouseClicked
+        refreshDocument();
+        labelRefreshDocument.setIcon(loadingImage);
+    }//GEN-LAST:event_labelRefreshDocumentMouseClicked
+
+    private void labelRefreshDocumentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshDocumentMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshDocumentMouseEntered
+
+    private void labelRefreshDocumentMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshDocumentMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshDocumentMouseExited
+
+    private void tableDocumentDataMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableDocumentDataMouseClicked
+
+        // check the existance of the file
+        // the file name is stored here
+        String fName = tabRender.getCheckedRowValue(tableDocumentData, 4);
+
+        if (fName != null) {
+
+            File n = new File(PathReference.getDocumentPath(fName));
+            labelDocumentOpen.setEnabled(n.exists());
+            labelDocumentDownload.setEnabled(!n.exists());
+
+        } else {
+            labelDocumentOpen.setEnabled(false);
+            labelDocumentDownload.setEnabled(true);
+        }
+
+    }//GEN-LAST:event_tableDocumentDataMouseClicked
+
+    private void labelBrowseScreenshotPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotPaymentMouseClicked
+        // browse the picture...
+        FileFilter imageFilter = new FileNameExtensionFilter(
+                "Image files", ImageIO.getReaderFileSuffixes());
+
+        fileChooser.setFileFilter(imageFilter);
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            // change accordingly
+            // copy the image to Local AppData path
+            // use it to Jlabel Propic
+            screenshotFile = fileChooser.getSelectedFile();
+
+            File dest = new File(PathReference.getScreenshotPath(screenshotFile.getName()));
+
+            try {
+                FileCopier.copyTo(screenshotFile, dest);
+                UIEffect.iconChanger(labelScreenshotPayment, dest.getAbsolutePath());
+
+                System.out.println("screenshot now is " + dest.getAbsolutePath());
+            } catch (Exception ex) {
+
+            }
+
+        } else {
+            screenshotFile = null;
+        }
+    }//GEN-LAST:event_labelBrowseScreenshotPaymentMouseClicked
+
     private void enableUserFormSave() {
 
-        boolean changes = false;
+        boolean allow = false;
 
-        if (!personLogged.getPass().equals(textfieldPasswordProfile.getText())) {
-            changes = true;
-        } else if (!personLogged.getMobile().equals(textfieldWhatsappProfile.getText())) {
-            changes = true;
-        } else if (!personLogged.getEmail().equals(textfieldEmailProfile.getText())) {
-            changes = true;
-        } else if (!personLogged.getAddress().equals(textareaAddressProfile.getText())) {
-            changes = true;
-        } else if (!personLogged.getTmv_id().equals(textfieldTeamviewerID.getText())) {
-            changes = true;
-        } else if (!personLogged.getTmv_pass().equals(textfieldTeamviewerPass.getText())) {
-            changes = true;
-        } else if (propicFile != null) {
-            if (!propicFile.getAbsolutePath().contains(personLogged.getPropic())) {
-                changes = true;
+        if (!UIEffect.isEmpty(textfieldPasswordProfile)) {
+
+            if (!UIEffect.isEmpty(textfieldEmailProfile)) {
+
+                if (!UIEffect.isEmpty(textfieldWhatsappProfile)) {
+
+                    if (!UIEffect.isEmpty(textfieldTeamviewerID)) {
+
+                        if (!UIEffect.isEmpty(textfieldTeamviewerPass)) {
+
+                            if (!UIEffect.isEmpty(textareaAddressProfile)) {
+                                allow = true;
+                            }
+
+                        }
+
+                    }
+                }
             }
         }
 
-        buttonSaveProfile.setEnabled(changes);
+        buttonSaveProfile.setEnabled(allow);
 
     }
 
     private void showLoadingStatus() {
         labelLoadingStatus.setText("Loading...");
+        labelLoadingStatus.setIcon(loadingImage);
+        labelLoadingStatus.setVisible(true);
+    }
+
+    private void showLoadingStatus(String message) {
+        labelLoadingStatus.setText(message + "...");
         labelLoadingStatus.setIcon(loadingImage);
         labelLoadingStatus.setVisible(true);
     }
@@ -1577,6 +1873,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         prepareToken(workUserEntity);
         executorService.schedule(workUserEntity, 2, TimeUnit.SECONDS);
 
+        buttonSaveProfile.setEnabled(false);
     }
 
     private void loadUserPictureLocally() {
@@ -1693,6 +1990,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JLabel labelAddPayment;
+    private javax.swing.JLabel labelBrowseScreenshotPayment;
     private javax.swing.JLabel labelClassRegistered;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelDocumentDownload;
@@ -1708,7 +2006,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelMinimize;
     private javax.swing.JLabel labelNavHome;
     private javax.swing.JLabel labelPanelViewName;
+    private javax.swing.JLabel labelPercentage;
     private javax.swing.JLabel labelPropicUser;
+    private javax.swing.JLabel labelRefreshAttendance;
+    private javax.swing.JLabel labelRefreshDocument;
+    private javax.swing.JLabel labelRefreshPayment;
     private javax.swing.JLabel labelReportBugs;
     private javax.swing.JLabel labelScheduleDay1;
     private javax.swing.JLabel labelScheduleDay2;
@@ -1748,6 +2050,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JPanel panelSchedule;
     private javax.swing.JPanel panelSettings;
     private javax.swing.JPanel panelTools;
+    private javax.swing.JProgressBar progressBarDownload;
     private javax.swing.JProgressBar progressBarTotalSession;
     private javax.swing.ButtonGroup radioButtonGroupNotifClass;
     private javax.swing.ButtonGroup radioButtonGroupNotifSessionLimit;
@@ -1800,7 +2103,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             String innerData = jchecker.getValueAsString("multi_data");
 
             //System.out.println(callingFromURL + " is valid " + b);
-            if (callingFromURL.equalsIgnoreCase(WebReference.UPDATE_USER)) {
+            if (callingFromURL.equalsIgnoreCase(WebReference.ADD_PAYMENT)) {
+
+                // success refreshing the table
+                refreshPayment();
+                hideLoadingStatus();
+
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.UPDATE_USER)) {
 
                 // success updating user profile
                 hideLoadingStatus();
@@ -1808,9 +2117,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
                 Document[] dataIn = objectG.fromJson(innerData, Document[].class);
                 tabRender.render(tableDocumentData, dataIn);
+
+                labelRefreshDocument.setIcon(refreshImage);
+
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
                 Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
                 tabRender.render(tableAttendanceData, dataIn);
+
+                labelRefreshAttendance.setIcon(refreshImage);
 
                 labelTotalSessionCompleted.setText("Total Session Completed: " + dataIn.length);
                 labelTotalSessionCompleted.setIcon(sessionIcon);
@@ -1826,6 +2140,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelLastPayment.setText("Last Payment : " + dataIn[dataIn.length - 1].getDate_created());
                 labelLastPayment.setIcon(coinIcon);
 
+                labelRefreshPayment.setIcon(refreshImage);
             } else if (callingFromURL.equalsIgnoreCase(WebReference.PROFILE_USER)) {
 
                 System.out.println("Obtaining Profile User data...");

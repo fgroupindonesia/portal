@@ -11,10 +11,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
+import java.net.*;
+import java.io.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import javax.imageio.ImageIO;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
 
 /**
  *
@@ -22,14 +25,62 @@ import javax.imageio.ImageIO;
  */
 public class FileCopier {
 
+    private static JProgressBar innerProgressBar;
+    // innerLabelBar is for percentage
+    private static JLabel innerLabelBar;
+    // labelLoading is for loadingicon
+    private static JLabel labelLoading;
+    
+
+    public static void setProgressBar(JProgressBar jp) {
+        innerProgressBar = jp;
+    }
+
+    public static void setProgressLabel(JLabel jb, JLabel jb2) {
+        innerLabelBar = jb;
+        labelLoading = jb2;
+        
+    }
+
     public static void downloadFromURL(URL urlCome, String savedPath) throws Exception {
 
         System.out.println("Downloading " + urlCome);
         System.out.println("Saving " + savedPath);
-        
-        ReadableByteChannel rbc = Channels.newChannel(urlCome.openStream());
-        FileOutputStream fos = new FileOutputStream(savedPath);
-        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+
+        URLConnection con = urlCome.openConnection();
+        long fileSize = con.getContentLength();
+        long fileSizeInKB = fileSize / 1024;
+        long fileSizeInMB = fileSizeInKB / 1024;
+
+        if (innerProgressBar != null) {
+            innerProgressBar.setMaximum((int) fileSize);
+        }
+
+        ReadableByteChannel rbc = Channels.newChannel(con.getInputStream());
+        ReadableConsumerByteChannel rcbc = new ReadableConsumerByteChannel(rbc, (int b) -> {
+
+            //double prc = (b * 100) / fileSize;
+            double prc = (b / 1024 / 1024);
+            String percentage =  prc + " Mb of " + fileSizeInMB + " Mb";
+
+            System.out.println("Read  " + b + "/" + fileSize);
+            if (innerProgressBar != null) {
+                innerProgressBar.setValue(b);
+            }
+
+            if (innerLabelBar != null) {
+                innerLabelBar.setText(percentage);
+            }
+            
+
+            if (b == fileSize) {
+                innerLabelBar.setVisible(false);
+                innerProgressBar.setVisible(false);
+                labelLoading.setVisible(false);
+            }
+        });
+        FileOutputStream fos = new FileOutputStream(new File(savedPath));
+        fos.getChannel().transferFrom(rcbc, 0, Long.MAX_VALUE);
 
     }
 

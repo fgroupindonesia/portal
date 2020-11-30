@@ -20,6 +20,52 @@ import javax.swing.table.DefaultTableModel;
  */
 public class TableRenderer {
 
+    public String getCheckedRowValue(JTable el, int column) {
+
+        String val = null;
+        int row = 0;
+
+        DefaultTableModel model = (DefaultTableModel) el.getModel();
+
+        int totalRow = model.getRowCount();
+        for (int x = 0; x < totalRow; x++) {
+            row = x;
+            // checked is always at the 0th index
+            boolean b = (Boolean) model.getValueAt(row, 0);
+
+            if (b) {
+                // the targeted column is exist here
+                val = model.getValueAt(row, column).toString();
+
+            }
+
+        }
+
+        return val;
+    }
+
+    public int getRowCountValue(JTable el, int column, String valTarget) {
+
+        int counted = 0;
+        int row = 0;
+
+        DefaultTableModel model = (DefaultTableModel) el.getModel();
+
+        int totalRow = model.getRowCount();
+        for (int x = 0; x < totalRow; x++) {
+            row = x;
+
+            // the targeted column is exist here
+            String val = model.getValueAt(row, column).toString();
+            if(val.equalsIgnoreCase(valTarget)){
+                counted++;
+            }
+
+        }
+
+        return counted;
+    }
+
     public ArrayList getCheckedRows(JTable el, int column) {
 
         ArrayList data = new ArrayList();

@@ -44,6 +44,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String name = null;
 
         switch (whatWork()) {
+
             case SWTKey.WORK_DELETE_SCREENSHOT_PAYMENT:
                 name = "delete_screenshot_payment";
                 break;
@@ -100,6 +101,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_DOCUMENT_DELETE:
                 name = "document_delete";
+                break;
+            case SWTKey.WORK_DOCUMENT_DOWNLOAD:
+                name = "document_download";
                 break;
             case SWTKey.WORK_REFRESH_SCHEDULE_BY_DAY:
                 name = "refresh_schedule_by_day";
@@ -224,6 +228,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_DOCUMENT_DELETE:
                 documentDelete();
+                break;
+            case SWTKey.WORK_DOCUMENT_DOWNLOAD:
+                documentDownload();
                 break;
             case SWTKey.WORK_DELETE_PICTURE:
                 pictureDelete();
@@ -384,6 +391,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void documentDelete() {
         urlExecutor.start(WebReference.DELETE_DOCUMENT, HttpCall.METHOD_POST);
     }
+    
+    private void documentDownload() {
+        String urlManual = UIEffect.decodeSafe(urlExecutor.getData("url"));
+        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+    }
 
     private void documentSave() {
         if (hasFile()) {
@@ -398,7 +410,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void documentUpdate() {
-        urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST_FILE);
+        if (hasFile()) {
+            urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST);
+        }
     }
 
     private boolean hasFile() {
@@ -408,17 +424,17 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void paymentDelete() {
         urlExecutor.start(WebReference.DELETE_PAYMENT, HttpCall.METHOD_POST);
     }
-    
+
     // this is for user picture
     private void pictureDelete() {
         urlExecutor.start(WebReference.DELETE_PICTURE, HttpCall.METHOD_POST);
     }
-    
+
     // this is for payment picture
     private void screenshotDelete() {
         urlExecutor.start(WebReference.DELETE_SCREENSHOT, HttpCall.METHOD_POST);
     }
-    
+
     // this is for attendance picture
     private void signatureDelete() {
         urlExecutor.start(WebReference.DELETE_SIGNATURE, HttpCall.METHOD_POST);

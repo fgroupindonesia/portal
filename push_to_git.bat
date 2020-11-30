@@ -1,5 +1,5 @@
 git add .
-git commit -m "SQL for data_user added for tmv_id, and tmv_pass entries."
+git commit -m "Dragging effect for Admin, Client, and Login Frames applied! Adding TrayIcons. All Managements are done!"
 git push origin main
 git gc --prune
 git pull
