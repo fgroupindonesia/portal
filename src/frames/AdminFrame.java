@@ -20,6 +20,7 @@ import helper.RupiahGenerator;
 import helper.SWTKey;
 import helper.SWThreadWorker;
 import helper.TableRenderer;
+import helper.TrayMaker;
 import helper.UIDragger;
 import helper.UIEffect;
 import helper.WebReference;
@@ -58,6 +59,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     ImageIcon refreshImage = new ImageIcon(getClass().getResource("/images/refresh16.png"));
     ImageIcon defaultUser = new ImageIcon(getClass().getResource("/images/user.png"));
 
+    TrayMaker tm = new TrayMaker();
+
+    
     // for form checking before save mechanism
     User userEdited;
     Attendance attendanceEdited;
@@ -78,6 +82,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     public AdminFrame(LoginFrame lg) {
         initComponents();
 
+         //prepare the tray usage
+        tm.setFrameRef(this);
+        
         loginFrame = lg;
         cardLayoutInnerCenter = (CardLayout) panelInnerCenter.getLayout();
 
@@ -1877,20 +1884,36 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }// </editor-fold>//GEN-END:initComponents
 
     private void labelCloseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelCloseMouseClicked
-        UIEffect.stopTimeEffect();
+        
         logout();
     }//GEN-LAST:event_labelCloseMouseClicked
 
     private void logout() {
-
+UIEffect.stopTimeEffect();
         loginFrame.show();
         this.dispose();
     }
 
     private void labelMinimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelMinimizeMouseClicked
-        this.setState(Frame.ICONIFIED);
+          toggleTray();
     }//GEN-LAST:event_labelMinimizeMouseClicked
 
+    private void toggleTray(){
+        this.setVisible(false);
+        try {
+            
+            
+            if(tm.isSupported()){
+                System.out.println("Tray created!");
+                tm.createTray();
+            }
+            
+             System.out.println("Tray done!");
+        } catch (Exception ex) {
+            UIEffect.popup("Warning! Unsupported Tray!", this);
+        }
+    }
+    
     private void buttonUserManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUserManagementActionPerformed
         cardLayoutInnerCenter.show(panelInnerCenter, "panelUser");
         cardLayoutEntity = (CardLayout) panelUser.getLayout();

@@ -1,0 +1,118 @@
+/*
+ *  This is a Supplemental File from the Main Project used
+ *  in Java Programming Core Fundamental II
+ *  with FGroupIndonesia team.
+ */
+package helper;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ *
+ * @author ASUS
+ */
+public class ScheduleObserver {
+
+    String dayOrder[] = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
+    int indexFound = -1;
+    int manyDays = 0;
+    String timeSet;
+    String nowDaySet, daySet, todaySet, estimatedNextDate;
+    int hour, minute;
+    String hourText, minuteText;
+    Date realDate, nowDate;
+
+    // using mysql format 
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat formatterComplete = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    SimpleDateFormat dayOnlyformatter = new SimpleDateFormat("EEEE");
+
+    public ScheduleObserver() {
+
+    }
+
+    public void setDate(String formattedDate) {
+        // input is DAY <space> TIME, for example
+        // monday 12:00
+
+        String dataRaw[] = formattedDate.split(" ");
+        daySet = dataRaw[0];
+        // additional for measuring differences later with precision
+        timeSet = dataRaw[1] + ":00";
+
+        String dataRaw2[] = dataRaw[1].split(":");
+        hourText = dataRaw2[0];
+        minuteText = dataRaw2[1];
+
+        hour = Integer.parseInt(hourText);
+        minute = Integer.parseInt(minuteText);
+
+        nowDate = new Date();
+        nowDaySet = dayOnlyformatter.format(nowDate).toLowerCase();
+
+        manyDays = countDifferenceDay(nowDaySet, daySet);
+
+        System.out.println("looking for " + nowDaySet + " to " + daySet + " found " + manyDays);
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(nowDate); // Now use today date.
+        c.add(Calendar.DATE, manyDays); // Adding 5 days
+
+        estimatedNextDate = formatter.format(c.getTime()) + " " + timeSet;
+        //UIEffect.popup(estimatedNextDate, null);
+
+    }
+
+    private int getIndexOf(String dayFind) {
+
+        int val = -1;
+        indexFound = -1;
+        // search once more
+        for (String name : dayOrder) {
+            indexFound++;
+            if (name.equalsIgnoreCase(dayFind)) {
+                val = indexFound;
+                break;
+            }
+        }
+
+        return val;
+    }
+
+    private int countDifferenceDay(String todayDay, String nextDay) {
+        int val = 0;
+        int indexToday = 0, indexNextDay = 0;
+
+        indexNextDay = getIndexOf(nextDay);
+        indexToday = getIndexOf(todayDay);
+
+        // if they're in the same position
+        // no difference day
+        if (indexNextDay == indexToday) {
+            val = 0;
+            System.out.println("Same day");
+        } else if (indexNextDay < indexToday) {
+            val = 7 - (indexToday - indexNextDay);
+            System.out.println("next day is on next week");
+        } else if (indexNextDay > indexToday) {
+            val = indexNextDay - indexToday;
+            System.out.println("next day is on the same week");
+        }
+
+        return val;
+    }
+
+    public Date getDate() {
+        Date foundDate = null;
+        try {
+            foundDate = formatterComplete.parse(estimatedNextDate);
+
+        } catch (Exception e) {
+
+        }
+
+        return foundDate;
+    }
+}

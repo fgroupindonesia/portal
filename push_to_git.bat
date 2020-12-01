@@ -1,5 +1,5 @@
 git add .
-git commit -m "Dragging effect for Admin, Client, and Login Frames applied! Adding TrayIcons. All Managements are done!"
+git commit -m "Timer Notification Class started applied successfully!"
 git push origin main
 git gc --prune
 git pull

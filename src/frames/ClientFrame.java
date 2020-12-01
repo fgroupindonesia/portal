@@ -13,6 +13,7 @@ import beans.Schedule;
 import beans.User;
 import com.google.gson.Gson;
 import com.teamdev.jxbrowser.chromium.Browser;
+import helper.AudioPlayer;
 import helper.CMDExecutor;
 import helper.ChartGenerator;
 import helper.FileCopier;
@@ -23,6 +24,7 @@ import helper.RegistryObtainer;
 import helper.RupiahGenerator;
 import helper.SWTKey;
 import helper.SWThreadWorker;
+import helper.ScheduleObserver;
 import helper.TableRenderer;
 import helper.TrayMaker;
 import helper.preferences.SettingPreference;
@@ -32,14 +34,11 @@ import helper.WebReference;
 import helper.preferences.Keys;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Frame;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -49,9 +48,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
-import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.CategoryDataset;
 
 /**
@@ -75,6 +71,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     File propicFile;
     File screenshotFile;
 
+    TrayMaker tm = new TrayMaker();
+
     ImageIcon loadingImage = new ImageIcon(getClass().getResource("/images/loadingprel.gif"));
     ImageIcon okImage = new ImageIcon(getClass().getResource("/images/ok16.png"));
     ImageIcon refreshImage = new ImageIcon(getClass().getResource("/images/refresh24.png"));
@@ -93,6 +91,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void processNicely() {
         initComponents();
+
+        //prepare the tray usage
+        tm.setFrameRef(this);
 
         //hide the ui effect
         progressBarDownload.setVisible(false);
@@ -323,6 +324,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         jLabel3 = new javax.swing.JLabel();
         labelTime = new javax.swing.JLabel();
         labelMinimize = new javax.swing.JLabel();
+        labelTimeIntervalSchedule = new javax.swing.JLabel();
         panelContent = new javax.swing.JPanel();
         panelMenu = new javax.swing.JPanel();
         labelPropicUser = new javax.swing.JLabel();
@@ -487,6 +489,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             }
         });
         panelHeader.add(labelMinimize, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 10, -1, 28));
+
+        labelTimeIntervalSchedule.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
+        labelTimeIntervalSchedule.setForeground(new java.awt.Color(255, 255, 255));
+        labelTimeIntervalSchedule.setText("time is here");
+        panelHeader.add(labelTimeIntervalSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(186, 20, 280, -1));
 
         panelBase.add(panelHeader, java.awt.BorderLayout.PAGE_START);
 
@@ -783,18 +790,22 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         radioButtonGroupNotifClass.add(radioNotifClass1DaySetting);
         radioNotifClass1DaySetting.setText("1 Day before");
+        radioNotifClass1DaySetting.setActionCommand(radioNotifClass1DaySetting.getText().toLowerCase());
         panelSettings.add(radioNotifClass1DaySetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 100, -1, -1));
 
         radioButtonGroupNotifClass.add(radioNotifClass1HourSetting);
         radioNotifClass1HourSetting.setText("1 Hour before");
+        radioNotifClass1HourSetting.setActionCommand(radioNotifClass1HourSetting.getText().toLowerCase());
         panelSettings.add(radioNotifClass1HourSetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, -1, -1));
 
         radioButtonGroupNotifSessionLimit.add(radioNotifSessionAtLeast1Setting);
         radioNotifSessionAtLeast1Setting.setText("At least 1");
+        radioNotifSessionAtLeast1Setting.setActionCommand(radioNotifSessionAtLeast1Setting.getText().toLowerCase());
         panelSettings.add(radioNotifSessionAtLeast1Setting, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 80, -1, -1));
 
         radioButtonGroupNotifSessionLimit.add(radioNotifSessionLessThan3Setting);
         radioNotifSessionLessThan3Setting.setText("Less than 3");
+        radioNotifSessionLessThan3Setting.setActionCommand(radioNotifSessionLessThan3Setting.getText().toLowerCase());
         panelSettings.add(radioNotifSessionLessThan3Setting, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 100, -1, -1));
 
         jLabel10.setText("Notify when sessions limit reach?");
@@ -1340,7 +1351,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }// </editor-fold>//GEN-END:initComponents
 
     private void labelCloseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelCloseMouseClicked
-        UIEffect.stopTimeEffect();
+
         logout();
     }//GEN-LAST:event_labelCloseMouseClicked
 
@@ -1628,23 +1639,25 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void labelMinimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelMinimizeMouseClicked
         //this.setState(Frame.ICONIFIED);
-        this.setVisible(false);
-        try {
-            TrayMaker tm = new TrayMaker();
-            tm.setFrameRef(this);
-            
-            if(tm.isSupported()){
-                System.out.println("Tray created!");
-                tm.createTray();
-            }
-            
-             System.out.println("Tray done!");
-        } catch (Exception ex) {
-            UIEffect.popup("Warning! Unsupported Tray!", this);
-        }
+        toggleTray();
 
 
     }//GEN-LAST:event_labelMinimizeMouseClicked
+
+    private void toggleTray() {
+        this.setVisible(false);
+        try {
+
+            if (tm.isSupported()) {
+                System.out.println("Tray created!");
+                tm.createTray();
+            }
+
+            System.out.println("Tray done!");
+        } catch (Exception ex) {
+            UIEffect.popup("Warning! Unsupported Tray!", this);
+        }
+    }
 
     private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
         browser.loadURL("http://bing.com");
@@ -1914,7 +1927,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     private void logout() {
-
+        UIEffect.stopTimeEffect();
         loginFrame.show();
         this.dispose();
     }
@@ -2019,6 +2032,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelShowAttendanceData;
     private javax.swing.JLabel labelShowAttendanceStatistic;
     private javax.swing.JLabel labelTime;
+    private javax.swing.JLabel labelTimeIntervalSchedule;
     private javax.swing.JLabel labelTotalSessionCompleted;
     private javax.swing.JLabel labelWelcomeUser;
     private javax.swing.JPanel panelAttandanceAll;
@@ -2203,6 +2217,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelClassRegistered.setText("Class Registered : " + className);
                 labelClassRegistered.setIcon(classIcon);
 
+                // schedule helper to calculate and animate time interval before class started
+                String schedText = dataIn[0].getDay_schedule() + " " + dataIn[0].getTime_schedule();
+                ScheduleObserver schedObs = new ScheduleObserver();
+                schedObs.setDate(schedText);
+
+                UIEffect.setFrameRef(this);
+                UIEffect.playIntervalTimeEffect(labelTimeIntervalSchedule, schedObs.getDate());
+
                 switch (dataIn.length) {
                     case 3:
                         labelScheduleDay3.setText(" " + dataIn[2].getDay_schedule() + " " + dataIn[2].getTime_schedule());
@@ -2247,6 +2269,29 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void hidePaymentData() {
         labelLastPayment.setVisible(false);
+    }
+
+    public boolean isNotifHourBefore() {
+        boolean stat = false;
+
+        stat = configuration.getStringValue(Keys.NOTIF_CLASS_START).contains("hour");
+
+        return stat;
+    }
+
+    public void playNotifSound() {
+        AudioPlayer wmp = new AudioPlayer();
+        wmp.play();
+        UIEffect.popup("Class started now!", this);
+
+    }
+
+    public boolean isNotifDayBefore() {
+        boolean stat = false;
+
+        stat = configuration.getStringValue(Keys.NOTIF_CLASS_START).contains("day");
+
+        return stat;
     }
 
 }
