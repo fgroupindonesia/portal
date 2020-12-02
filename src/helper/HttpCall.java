@@ -251,6 +251,8 @@ public class HttpCall {
                 }else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT)) {
                     PathReference.setScreenshotPaymentFileName(getData("screenshot"));
                     fileName = PathReference.ScreenshotPaymentPath;
+                }else if (urlTarget.contains(WebReference.DOWNLOAD_TOOLS)) {
+                    fileName = PathReference.TeamviewerPath;
                 }else {
                     // this is for downloading manual
                     PathReference.setDocumentFileName(getData("filename"));

@@ -28,10 +28,12 @@ public class SettingPreference {
 
         if (!nodeExist) {
 
+            // this is the default
+            this.setValue(Keys.TEAMVIEWER_VERSION, "15.9.4.0");
             this.setValue(Keys.AUTO_UPDATE_TOOLS, false);
-            this.setValue(Keys.SYSTEM_LANGUAGE, "English (default)");
-            this.setValue(Keys.NOTIF_CLASS_START, "1 Hour before");
-            this.setValue(Keys.NOTIF_SESSION_LIMIT, "At least 1");
+            this.setValue(Keys.SYSTEM_LANGUAGE, "English (default)".toLowerCase());
+            this.setValue(Keys.NOTIF_CLASS_START, "1 Hour before".toLowerCase());
+            this.setValue(Keys.NOTIF_SESSION_LIMIT, "At least 1".toLowerCase());
             this.setValue(Keys.USER_PROPIC, "default");
 
         }

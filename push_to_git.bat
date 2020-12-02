@@ -1,5 +1,5 @@
 git add .
-git commit -m "Timer Notification Class started applied successfully!"
+git commit -m "Language Switcher bugs fixed, overall progress 95%."
 git push origin main
 git gc --prune
 git pull

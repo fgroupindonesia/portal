@@ -11,6 +11,7 @@ package helper.preferences;
  */
 public class Keys {
 
+    public static final String TEAMVIEWER_VERSION = "teamviewer_version";
     public static final String NOTIF_CLASS_START = "notif_class_start";
     public static final String DEFAULT_NOTIF_CLASS_START = "1 Hour before";
     

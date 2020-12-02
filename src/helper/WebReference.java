@@ -22,6 +22,9 @@ public class WebReference {
     public static final String LAST_HISTORY = REMOTE + "history/last";
     public static final String LAST_PAYMENT = REMOTE + "payment/last";
     
+    public static final String CHECK_TOOLS = REMOTE + "tools/check";
+    public static final String DOWNLOAD_TOOLS = REMOTE + "tools/download";
+    
     public static final String PICTURE_USER = REMOTE + "user/picture";
     public static final String SIGNATURE_ATTENDANCE = REMOTE + "attendance/signature";
     public static final String SCREENSHOT_PAYMENT = REMOTE + "payment/screenshot";

@@ -30,19 +30,23 @@ public class FileCopier {
     private static JLabel innerLabelBar;
     // labelLoading is for loadingicon
     private static JLabel labelLoading;
-    
 
     public static void setProgressBar(JProgressBar jp) {
         innerProgressBar = jp;
+
     }
 
     public static void setProgressLabel(JLabel jb, JLabel jb2) {
         innerLabelBar = jb;
         labelLoading = jb2;
-        
+
     }
 
     public static void downloadFromURL(URL urlCome, String savedPath) throws Exception {
+
+        innerLabelBar.setVisible(true);
+        innerProgressBar.setVisible(true);
+        labelLoading.setVisible(true);
 
         System.out.println("Downloading " + urlCome);
         System.out.println("Saving " + savedPath);
@@ -61,7 +65,7 @@ public class FileCopier {
 
             //double prc = (b * 100) / fileSize;
             double prc = (b / 1024 / 1024);
-            String percentage =  prc + " Mb of " + fileSizeInMB + " Mb";
+            String percentage = prc + " Mb of " + fileSizeInMB + " Mb";
 
             System.out.println("Read  " + b + "/" + fileSize);
             if (innerProgressBar != null) {
@@ -71,17 +75,24 @@ public class FileCopier {
             if (innerLabelBar != null) {
                 innerLabelBar.setText(percentage);
             }
-            
 
             if (b == fileSize) {
-                innerLabelBar.setVisible(false);
-                innerProgressBar.setVisible(false);
-                labelLoading.setVisible(false);
+                if (innerLabelBar != null) {
+                    innerLabelBar.setVisible(false);
+                    innerProgressBar.setVisible(false);
+                    labelLoading.setVisible(false);
+                }
             }
         });
         FileOutputStream fos = new FileOutputStream(new File(savedPath));
         fos.getChannel().transferFrom(rcbc, 0, Long.MAX_VALUE);
-
+        
+        // manual for releasing memory
+        fos.flush();
+        fos.close();
+        fos = null;
+        System.gc();
+        
     }
 
     public static void downloadImageFromURL(URL urlCome, String pathSave) throws Exception {

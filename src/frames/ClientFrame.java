@@ -10,6 +10,7 @@ import beans.Document;
 import beans.History;
 import beans.Payment;
 import beans.Schedule;
+import beans.Tool;
 import beans.User;
 import com.google.gson.Gson;
 import com.teamdev.jxbrowser.chromium.Browser;
@@ -31,11 +32,16 @@ import helper.preferences.SettingPreference;
 import helper.UIDragger;
 import helper.UIEffect;
 import helper.WebReference;
+import helper.language.Comp;
+import helper.language.LanguageSwitcher;
 import helper.preferences.Keys;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +60,7 @@ import org.jfree.data.category.CategoryDataset;
  *
  * @author ASUS
  */
-public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProcess {
+public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProcess, UIEffect.PopupAction {
 
     /**
      * Creates new form MainFrame
@@ -67,6 +73,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     RupiahGenerator rpGen = new RupiahGenerator();
     //   ExecutorService executorService = Executors.newFixedThreadPool(28);
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(28);
+
+    LanguageSwitcher languageHelper;
 
     File propicFile;
     File screenshotFile;
@@ -91,6 +99,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void processNicely() {
         initComponents();
+
+        // rendering UI based upon its language
+        applyLanguageUI();
+
+        // checkin autoupdate tools
+        autoUpdateTools();
 
         //prepare the tray usage
         tm.setFrameRef(this);
@@ -375,16 +389,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         jLabel16 = new javax.swing.JLabel();
         textfieldTeamviewerPass = new javax.swing.JTextField();
         panelSettings = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        radioNotifClass1DaySetting = new javax.swing.JRadioButton();
-        radioNotifClass1HourSetting = new javax.swing.JRadioButton();
-        radioNotifSessionAtLeast1Setting = new javax.swing.JRadioButton();
-        radioNotifSessionLessThan3Setting = new javax.swing.JRadioButton();
-        jLabel10 = new javax.swing.JLabel();
-        checkboxAutoupdateToolsSetting = new javax.swing.JCheckBox();
+        labelNotifClassSettings = new javax.swing.JLabel();
+        radioNotifClass1DaySettings = new javax.swing.JRadioButton();
+        radioNotifClass1HourSettings = new javax.swing.JRadioButton();
+        radioNotifSessionAtLeast1Settings = new javax.swing.JRadioButton();
+        radioNotifSessionLessThan3Settings = new javax.swing.JRadioButton();
+        labelNotifSessionSettings = new javax.swing.JLabel();
+        checkboxAutoupdateToolsSettings = new javax.swing.JCheckBox();
         buttonSaveSettings = new javax.swing.JButton();
         comboboxSystemLanguage = new javax.swing.JComboBox<>();
-        jLabel9 = new javax.swing.JLabel();
+        labelSystemLanguagesSettings = new javax.swing.JLabel();
         panelTools = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         buttonTerminateTmv = new javax.swing.JButton();
@@ -658,7 +672,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         labelLastPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
         labelLastPayment.setText("Last Payment : loading...");
-        panelHome.add(labelLastPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 240, 230, -1));
+        panelHome.add(labelLastPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 240, 250, -1));
 
         panelHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("History"));
         panelHistory.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
@@ -785,35 +799,35 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelSettings.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setText("Notify when class started?");
-        panelSettings.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(69, 58, 140, -1));
+        labelNotifClassSettings.setText("Notify when class started?");
+        panelSettings.add(labelNotifClassSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(69, 58, 170, -1));
 
-        radioButtonGroupNotifClass.add(radioNotifClass1DaySetting);
-        radioNotifClass1DaySetting.setText("1 Day before");
-        radioNotifClass1DaySetting.setActionCommand(radioNotifClass1DaySetting.getText().toLowerCase());
-        panelSettings.add(radioNotifClass1DaySetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 100, -1, -1));
+        radioButtonGroupNotifClass.add(radioNotifClass1DaySettings);
+        radioNotifClass1DaySettings.setText("1 Day before");
+        radioNotifClass1DaySettings.setActionCommand(radioNotifClass1DaySettings.getText().toLowerCase());
+        panelSettings.add(radioNotifClass1DaySettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 100, -1, -1));
 
-        radioButtonGroupNotifClass.add(radioNotifClass1HourSetting);
-        radioNotifClass1HourSetting.setText("1 Hour before");
-        radioNotifClass1HourSetting.setActionCommand(radioNotifClass1HourSetting.getText().toLowerCase());
-        panelSettings.add(radioNotifClass1HourSetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, -1, -1));
+        radioButtonGroupNotifClass.add(radioNotifClass1HourSettings);
+        radioNotifClass1HourSettings.setText("1 Hour before");
+        radioNotifClass1HourSettings.setActionCommand(radioNotifClass1HourSettings.getText().toLowerCase());
+        panelSettings.add(radioNotifClass1HourSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, -1, -1));
 
-        radioButtonGroupNotifSessionLimit.add(radioNotifSessionAtLeast1Setting);
-        radioNotifSessionAtLeast1Setting.setText("At least 1");
-        radioNotifSessionAtLeast1Setting.setActionCommand(radioNotifSessionAtLeast1Setting.getText().toLowerCase());
-        panelSettings.add(radioNotifSessionAtLeast1Setting, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 80, -1, -1));
+        radioButtonGroupNotifSessionLimit.add(radioNotifSessionAtLeast1Settings);
+        radioNotifSessionAtLeast1Settings.setText("At least 1");
+        radioNotifSessionAtLeast1Settings.setActionCommand(radioNotifSessionAtLeast1Settings.getText().toLowerCase());
+        panelSettings.add(radioNotifSessionAtLeast1Settings, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 80, -1, -1));
 
-        radioButtonGroupNotifSessionLimit.add(radioNotifSessionLessThan3Setting);
-        radioNotifSessionLessThan3Setting.setText("Less than 3");
-        radioNotifSessionLessThan3Setting.setActionCommand(radioNotifSessionLessThan3Setting.getText().toLowerCase());
-        panelSettings.add(radioNotifSessionLessThan3Setting, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 100, -1, -1));
+        radioButtonGroupNotifSessionLimit.add(radioNotifSessionLessThan3Settings);
+        radioNotifSessionLessThan3Settings.setText("Less than 3");
+        radioNotifSessionLessThan3Settings.setActionCommand(radioNotifSessionLessThan3Settings.getText().toLowerCase());
+        panelSettings.add(radioNotifSessionLessThan3Settings, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 100, -1, -1));
 
-        jLabel10.setText("Notify when sessions limit reach?");
-        panelSettings.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 60, 160, -1));
+        labelNotifSessionSettings.setText("Notify when sessions limit reach?");
+        panelSettings.add(labelNotifSessionSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 60, 210, -1));
 
-        checkboxAutoupdateToolsSetting.setSelected(true);
-        checkboxAutoupdateToolsSetting.setText("Autoupdate Tools");
-        panelSettings.add(checkboxAutoupdateToolsSetting, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 160, -1, -1));
+        checkboxAutoupdateToolsSettings.setSelected(true);
+        checkboxAutoupdateToolsSettings.setText("Autoupdate Tools");
+        panelSettings.add(checkboxAutoupdateToolsSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 160, -1, -1));
 
         buttonSaveSettings.setText("Save");
         buttonSaveSettings.addActionListener(new java.awt.event.ActionListener() {
@@ -823,11 +837,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelSettings.add(buttonSaveSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 300, 80, 30));
 
-        comboboxSystemLanguage.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "English (default)", "Bahasa Indonesia", "Arabic" }));
+        comboboxSystemLanguage.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "english (default)", "bahasa indonesia", "arabic" }));
         panelSettings.add(comboboxSystemLanguage, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 180, 150, -1));
 
-        jLabel9.setText("System Languages:");
-        panelSettings.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 160, -1, -1));
+        labelSystemLanguagesSettings.setText("System Languages:");
+        panelSettings.add(labelSystemLanguagesSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 160, -1, -1));
 
         panelContentCenter.add(panelSettings, "panelSettings");
 
@@ -1457,7 +1471,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_labelNavHomeMouseClicked
 
     private void buttonSaveSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveSettingsActionPerformed
-        configuration.setValue(Keys.AUTO_UPDATE_TOOLS, checkboxAutoupdateToolsSetting.isSelected());
+        configuration.setValue(Keys.AUTO_UPDATE_TOOLS, checkboxAutoupdateToolsSettings.isSelected());
 
         String notifClass = radioButtonGroupNotifClass.getSelection().getActionCommand();
         configuration.setValue(Keys.NOTIF_CLASS_START, notifClass);
@@ -1465,9 +1479,72 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         String notifSession = radioButtonGroupNotifSessionLimit.getSelection().getActionCommand();
         configuration.setValue(Keys.NOTIF_SESSION_LIMIT, notifSession);
 
-        configuration.setValue(Keys.SYSTEM_LANGUAGE, comboboxSystemLanguage.getSelectedItem().toString());
+        configuration.setValue(Keys.SYSTEM_LANGUAGE, comboboxSystemLanguage.getSelectedItem().toString().toLowerCase());
+
 
     }//GEN-LAST:event_buttonSaveSettingsActionPerformed
+
+    private void autoUpdateTools() {
+
+        boolean checked = configuration.getBooleanValue(Keys.AUTO_UPDATE_TOOLS);
+        System.out.println("Autoupdate is " + checked);
+
+        if (checked) {
+            System.out.println("Autoupdate is enabled!");
+            // check certain hours
+            String timeMust[] = {"08:00", "12:00", "18:00", "22:00"};
+
+            Date n = new Date();
+            SimpleDateFormat sdp = new SimpleDateFormat("HH:mm");
+            String timeNow = sdp.format(n);
+
+            System.out.println("Now is " + timeNow);
+
+            for (String singleTime : timeMust) {
+                if (singleTime.equalsIgnoreCase(timeNow)) {
+                    System.out.println("Time for checking...!");
+                    checkAutoUpdateTools();
+                    break;
+                }
+
+            }
+
+        }
+    }
+
+    private void checkAutoUpdateTools() {
+
+        SWThreadWorker workCheck = new SWThreadWorker(this);
+        workCheck.setWork(SWTKey.WORK_CHECK_TOOLS);
+        workCheck.addData("app_name", "teamviewer");
+
+        prepareToken(workCheck);
+        //executorService.submit(workPay);
+        executorService.schedule(workCheck, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void downloadTools() {
+
+        // rename first the old one
+        CMDExecutor.backupOldTeamviewer();
+
+        SWThreadWorker workCheck = new SWThreadWorker(this);
+        workCheck.setWork(SWTKey.WORK_DOWNLOAD_TOOLS);
+        workCheck.writeMode(true);
+        workCheck.addData("app_name", "teamviewer");
+
+        prepareToken(workCheck);
+
+        // optional for showing the effect
+        FileCopier.setProgressBar(progressBarDownload);
+        FileCopier.setProgressLabel(labelPercentage, labelLoadingStatus);
+
+        showLoadingStatus("Download");
+
+        executorService.schedule(workCheck, 2, TimeUnit.SECONDS);
+
+    }
 
     private void buttonTerminateTmvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonTerminateTmvActionPerformed
         CMDExecutor.killTeamviewer();
@@ -1909,19 +1986,19 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         loadUserPictureLocally();
         //System.out.println(propic);
 
-        checkboxAutoupdateToolsSetting.setSelected(configuration.getBooleanValue(Keys.AUTO_UPDATE_TOOLS));
+        checkboxAutoupdateToolsSettings.setSelected(configuration.getBooleanValue(Keys.AUTO_UPDATE_TOOLS));
         comboboxSystemLanguage.setSelectedItem(configuration.getStringValue(Keys.SYSTEM_LANGUAGE));
 
         if (configuration.getStringValue(Keys.NOTIF_CLASS_START).equalsIgnoreCase(Keys.DEFAULT_NOTIF_CLASS_START)) {
-            radioNotifClass1HourSetting.setSelected(true);
+            radioNotifClass1HourSettings.setSelected(true);
         } else {
-            radioNotifClass1HourSetting.setSelected(false);
+            radioNotifClass1HourSettings.setSelected(false);
         }
 
         if (configuration.getStringValue(Keys.NOTIF_SESSION_LIMIT).equalsIgnoreCase(Keys.DEFAULT_NOTIF_SESSION_LIMIT)) {
-            radioNotifSessionAtLeast1Setting.setSelected(true);
+            radioNotifSessionAtLeast1Settings.setSelected(true);
         } else {
-            radioNotifSessionAtLeast1Setting.setSelected(false);
+            radioNotifSessionAtLeast1Settings.setSelected(false);
         }
 
     }
@@ -1976,12 +2053,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JButton buttonTools;
     private javax.swing.JButton buttonVisitChrome;
     private javax.swing.JButton buttonVisitWhatsapp;
-    private javax.swing.JCheckBox checkboxAutoupdateToolsSetting;
+    private javax.swing.JCheckBox checkboxAutoupdateToolsSettings;
     private javax.swing.JComboBox<String> combobocMethodPayment;
     private javax.swing.JComboBox<String> comboboxSystemLanguage;
     private javax.swing.JFileChooser fileChooser;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
@@ -1997,7 +2072,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -2018,6 +2092,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelLoadingStatus;
     private javax.swing.JLabel labelMinimize;
     private javax.swing.JLabel labelNavHome;
+    private javax.swing.JLabel labelNotifClassSettings;
+    private javax.swing.JLabel labelNotifSessionSettings;
     private javax.swing.JLabel labelPanelViewName;
     private javax.swing.JLabel labelPercentage;
     private javax.swing.JLabel labelPropicUser;
@@ -2031,6 +2107,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelScreenshotPayment;
     private javax.swing.JLabel labelShowAttendanceData;
     private javax.swing.JLabel labelShowAttendanceStatistic;
+    private javax.swing.JLabel labelSystemLanguagesSettings;
     private javax.swing.JLabel labelTime;
     private javax.swing.JLabel labelTimeIntervalSchedule;
     private javax.swing.JLabel labelTotalSessionCompleted;
@@ -2068,10 +2145,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JProgressBar progressBarTotalSession;
     private javax.swing.ButtonGroup radioButtonGroupNotifClass;
     private javax.swing.ButtonGroup radioButtonGroupNotifSessionLimit;
-    private javax.swing.JRadioButton radioNotifClass1DaySetting;
-    private javax.swing.JRadioButton radioNotifClass1HourSetting;
-    private javax.swing.JRadioButton radioNotifSessionAtLeast1Setting;
-    private javax.swing.JRadioButton radioNotifSessionLessThan3Setting;
+    private javax.swing.JRadioButton radioNotifClass1DaySettings;
+    private javax.swing.JRadioButton radioNotifClass1HourSettings;
+    private javax.swing.JRadioButton radioNotifSessionAtLeast1Settings;
+    private javax.swing.JRadioButton radioNotifSessionLessThan3Settings;
     private javax.swing.JTable tableAttendanceData;
     private javax.swing.JTable tableDocumentData;
     private javax.swing.JTable tablePaymentData;
@@ -2097,6 +2174,22 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelHistoryLast3.setVisible(false);
         labelHistoryLast4.setVisible(false);
         labelHistoryLast5.setVisible(false);
+    }
+
+    private boolean checkDiffVersion(String ver1, String ver2) {
+
+        System.out.println("First ver " + ver1 + " and Second ver " + ver2);
+
+        boolean stat = false;
+
+        if (!ver1.equalsIgnoreCase(ver2)) {
+            stat = true;
+            //set the new version because we will download it here
+            configuration.setValue(Keys.TEAMVIEWER_VERSION, ver2);
+        }
+
+        return stat;
+
     }
 
     @Override
@@ -2142,6 +2235,26 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
                 labelTotalSessionCompleted.setText("Total Session Completed: " + dataIn.length);
                 labelTotalSessionCompleted.setIcon(sessionIcon);
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.CHECK_TOOLS)) {
+
+                Tool dataIn = objectG.fromJson(innerData, Tool.class);
+
+                // checking versioning
+                // this is forcing the version to be saved on configuration
+                //configuration.setValue(Keys.TEAMVIEWER_VERSION, "15.9.4.0");
+                String curVer = configuration.getStringValue(Keys.TEAMVIEWER_VERSION);
+                boolean diff = checkDiffVersion(curVer, dataIn.getApp_ver());
+
+                if (diff) {
+                    System.out.println("We have to download new tools one!");
+                    // kill any instance first
+                    UIEffect.setPopupListener(this);
+                    UIEffect.popupConfirm("New version for Tools (TeamViewer) is now available. Are you ready to download this update?", this);
+                    // it will jump to actionYES or actionNO below
+                } else {
+                    System.out.println("No new updates for the tools...");
+                }
+
             } else if (callingFromURL.contains(WebReference.PICTURE_USER)) {
 
                 System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
@@ -2292,6 +2405,56 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         stat = configuration.getStringValue(Keys.NOTIF_CLASS_START).contains("day");
 
         return stat;
+    }
+
+    @Override
+    public void actionYes() {
+        // this is when popup say YES
+        UIEffect.popup("yes we do!", this);
+        CMDExecutor.killTeamviewer();
+        downloadTools();
+
+    }
+
+    private void applyLanguageUI() {
+
+        languageHelper = new LanguageSwitcher(configuration);
+
+        // front page @Home
+        languageHelper.apply(buttonProfile, "buttonProfile", Comp.BUTTON);
+        languageHelper.apply(buttonTools, "buttonTools", Comp.BUTTON);
+        languageHelper.apply(buttonDocument, "buttonDocument", Comp.BUTTON);
+        languageHelper.apply(buttonAttendance, "buttonAttendance", Comp.BUTTON);
+        languageHelper.apply(buttonPayment, "buttonPayment", Comp.BUTTON);
+        languageHelper.apply(buttonSettings, "buttonSettings", Comp.BUTTON);
+        languageHelper.apply(buttonLogout, "buttonLogout", Comp.BUTTON);
+        languageHelper.apply(labelPanelViewName, "labelPanelViewName", Comp.LABEL);
+        languageHelper.apply(labelWelcomeUser, "labelWelcomeUser", Comp.LABEL);
+        languageHelper.apply(labelReportBugs, "labelReportBugs", Comp.LABEL);
+        languageHelper.apply(labelTotalSessionCompleted, "labelTotalSessionCompleted", Comp.LABEL);
+        languageHelper.apply(labelClassRegistered, "labelClassRegistered", Comp.LABEL);
+        languageHelper.apply(labelLastPayment, "labelLastPayment", Comp.LABEL);
+
+        // inner page @Settings
+        languageHelper.apply(buttonSaveSettings, "buttonSaveSettings", Comp.BUTTON);
+        languageHelper.apply(labelSystemLanguagesSettings, "labelSystemLanguagesSettings", Comp.LABEL);
+        languageHelper.apply(radioNotifSessionLessThan3Settings, "radioNotifSessionLessThan3Settings", Comp.RADIO_BUTTON);
+        languageHelper.apply(radioNotifSessionAtLeast1Settings, "radioNotifSessionAtLeast1Settings", Comp.RADIO_BUTTON);
+        languageHelper.apply(labelNotifSessionSettings, "labelNotifSessionSettings", Comp.LABEL);
+        languageHelper.apply(radioNotifClass1DaySettings, "radioNotifClass1DaySettings", Comp.RADIO_BUTTON);
+        languageHelper.apply(radioNotifClass1HourSettings, "radioNotifClass1HourSettings", Comp.RADIO_BUTTON);
+        languageHelper.apply(labelNotifClassSettings, "labelNotifClassSettings", Comp.LABEL);
+        languageHelper.apply(checkboxAutoupdateToolsSettings, "checkboxAutoupdateToolsSettings", Comp.CHECKBOX);
+        
+        // for animation time
+        UIEffect.setLanguageHelper(languageHelper);
+        
+    }
+
+    @Override
+    public void actionNo() {
+        // this is when popup say NO
+        UIEffect.popup("Download cancelled and Tools will be updated later...", this);
     }
 
 }

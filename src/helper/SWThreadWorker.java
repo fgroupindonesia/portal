@@ -44,7 +44,12 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String name = null;
 
         switch (whatWork()) {
-
+            case SWTKey.WORK_DOWNLOAD_TOOLS:
+                name = "download_tools";
+                break;
+            case SWTKey.WORK_CHECK_TOOLS:
+                name = "check_tools";
+                break;
             case SWTKey.WORK_DELETE_SCREENSHOT_PAYMENT:
                 name = "delete_screenshot_payment";
                 break;
@@ -172,6 +177,12 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         System.out.println("I am working on " + whatWorkAsString());
 
         switch (whatWork()) {
+            case SWTKey.WORK_DOWNLOAD_TOOLS:
+                downloadTools();
+                break;
+            case SWTKey.WORK_CHECK_TOOLS:
+                checkTools();
+                break;
             case SWTKey.WORK_DELETE_SCREENSHOT_PAYMENT:
                 screenshotDelete();
                 break;
@@ -391,7 +402,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void documentDelete() {
         urlExecutor.start(WebReference.DELETE_DOCUMENT, HttpCall.METHOD_POST);
     }
-    
+
     private void documentDownload() {
         String urlManual = UIEffect.decodeSafe(urlExecutor.getData("url"));
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
@@ -512,6 +523,17 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
 
+    private void checkTools() {
+        urlExecutor.start(WebReference.CHECK_TOOLS, HttpCall.METHOD_POST);
+    }
+    
+    private void downloadTools() {
+
+        // the url is manually defined here
+        String urlManual = WebReference.DOWNLOAD_TOOLS + "?app_name=" + urlExecutor.getData("app_name");
+        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+    }
+    
     private void refreshScreenshotPaymentData() {
 
         // the url is manually defined here

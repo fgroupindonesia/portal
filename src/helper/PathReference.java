@@ -14,6 +14,7 @@ public class PathReference {
     public static String SystemName = "Portal";
     public static String DirName = System.getenv("LOCALAPPDATA") + "\\" + SystemName;
     public static String ToolsDirName = DirName + "\\tools";
+    public static String LanguagesDirName = DirName + "\\languages";
     public static String DocumentDirName = DirName + "\\documents";
     public static String ScreenshotPaymentDirName = DirName + "\\screenshots";
     public static String JXBrowserDirName = DirName + "\\jxbrowser";
@@ -49,4 +50,10 @@ public class PathReference {
         return ScreenshotPaymentDirName + "\\" + fname;
     }
 
+    public static String getToolsPath(String fname) {
+        return ToolsDirName + "\\" + fname;
+    }
+    public static String getLanguagePath(String fname) {
+        return LanguagesDirName + "\\" + fname;
+    }
 }

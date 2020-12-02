@@ -6,6 +6,8 @@
 package helper;
 
 import frames.ClientFrame;
+import helper.language.LanguageSwitcher;
+
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -36,6 +38,11 @@ public class UIEffect {
     private static Timer timer, scheduleTimer;
     private static Date scheduleDate, nowDate;
     protected static ClientFrame frameRef;
+    private static LanguageSwitcher langHelper;
+
+    public static void setLanguageHelper(LanguageSwitcher lgs) {
+        langHelper = lgs;
+    }
 
     //this is for client Frame 
     public static void setFrameRef(ClientFrame aF) {
@@ -136,13 +143,69 @@ public class UIEffect {
 
         if (diffDays != -1) {
 
+            StringBuffer stb = new StringBuffer();
+            StringBuffer stb2 = new StringBuffer();
+
             if (labelInterval != null) {
                 if (diffDays > 0) {
-                    labelInterval.setText("Next Class : " + diffDays + " hari, " + diffHours + " jam, " + diffMinutes + " menit, " + diffSeconds + " detik.");
+                    stb.append("labelIntervalNextClass").append(" ");
+                    stb.append("labelIntervalDay").append(" ");
+                    stb.append("labelIntervalHour").append(" ");
+                    stb.append("labelIntervalMinute").append(" ");
+                    stb.append("labelIntervalSecond");
+
+                    stb2.append("1A").append(" ");
+                    stb2.append("1B").append(" ");
+                    stb2.append("1C").append(" ");
+                    stb2.append("1D").append(" ");
+                    stb2.append("1E");
+
+                    //labelInterval.setText("Next Class : " + diffDays + " hari, " + diffHours + " jam, " + diffMinutes + " menit, " + diffSeconds + " detik.");
+                    labelInterval.setText("1A : " + diffDays + " 1B, "
+                            + diffHours + " 1C, "
+                            + diffMinutes + " 1D, "
+                            + diffSeconds + " 1E.");
+
                 } else if (diffHours > 0) {
-                    labelInterval.setText("Next Class : hari ini, " + diffHours + " jam, " + diffMinutes + " menit, " + diffSeconds + " detik.");
+                    stb.append("labelIntervalNextClass").append(" ");
+                    stb.append("labelIntervalToday").append(" ");
+                    stb.append("labelIntervalHour").append(" ");
+                    stb.append("labelIntervalMinute").append(" ");
+                    stb.append("labelIntervalSecond");
+
+                    stb2.append("1A").append(" ");
+                    stb2.append("1B").append(" ");
+                    stb2.append("1C").append(" ");
+                    stb2.append("1D").append(" ");
+                    stb2.append("1E");
+
+                    labelInterval.setText("1A : 1B, "
+                            + diffHours + " 1C, "
+                            + diffMinutes + " 1D, "
+                            + diffSeconds + " 1E.");
                 } else if (diffHours == 0) {
-                    labelInterval.setText("Next Class : hari ini, " + diffMinutes + " menit, " + diffSeconds + " detik.");
+                    stb.append("labelIntervalNextClass").append(" ");
+                    stb.append("labelIntervalToday").append(" ");
+                    stb.append("labelIntervalMinute").append(" ");
+                    stb.append("labelIntervalSecond");
+
+                    stb2.append("1A").append(" ");
+                    stb2.append("1B").append(" ");
+                    stb2.append("1C").append(" ");
+                    stb2.append("1D");
+
+                    labelInterval.setText("1A : 1B, "
+                            + diffMinutes + " 1C, "
+                            + diffSeconds + " 1D.");
+                }
+
+                String dataOrdered[] = stb.toString().split(" ");
+                String dataLetter[] = stb2.toString().split(" ");
+                
+                System.out.println("data ui interval is " + labelInterval.getText());
+                
+                if (langHelper != null) {
+                    langHelper.apply(labelInterval, dataOrdered, dataLetter);
                 }
             }
 
@@ -184,6 +247,30 @@ public class UIEffect {
     public static void popup(String message, JFrame ref) {
 
         JOptionPane.showMessageDialog(ref, message);
+
+    }
+
+    public interface PopupAction {
+
+        void actionYes();
+
+        void actionNo();
+    }
+
+    private static PopupAction listener;
+
+    public static void setPopupListener(PopupAction p) {
+        listener = p;
+    }
+
+    public static void popupConfirm(String message, JFrame ref) {
+
+        int reply = JOptionPane.showConfirmDialog(ref, message, "confirm", JOptionPane.YES_NO_OPTION);
+        if (reply == JOptionPane.YES_OPTION) {
+            listener.actionYes();
+        } else {
+            listener.actionNo();
+        }
 
     }
 

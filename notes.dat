@@ -1,0 +1,9 @@
+
+AutoUpdate Tool procedures:
+- run at certain hours: 08:00 / 12:00 / 18:00 / 22:00
+- comparing local version with server version
+- download from fixed location 
+    https://fgroupindonesia.com/downloadable/fgitools/TeamViewer_Setup.exe
+- close any running instance while downloading
+- rename the old version -> TeamViewer_Setup_20201203.bak
+

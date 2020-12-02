@@ -687,7 +687,7 @@
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="320" y="240" width="230" height="-1"/>
+                              <AbsoluteConstraints x="320" y="240" width="250" height="-1"/>
                             </Constraint>
                           </Constraints>
                         </Component>
@@ -975,17 +975,17 @@
                         <Property name="useNullLayout" type="boolean" value="false"/>
                       </Layout>
                       <SubComponents>
-                        <Component class="javax.swing.JLabel" name="jLabel1">
+                        <Component class="javax.swing.JLabel" name="labelNotifClassSettings">
                           <Properties>
                             <Property name="text" type="java.lang.String" value="Notify when class started?"/>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="69" y="58" width="140" height="-1"/>
+                              <AbsoluteConstraints x="69" y="58" width="170" height="-1"/>
                             </Constraint>
                           </Constraints>
                         </Component>
-                        <Component class="javax.swing.JRadioButton" name="radioNotifClass1DaySetting">
+                        <Component class="javax.swing.JRadioButton" name="radioNotifClass1DaySettings">
                           <Properties>
                             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                               <ComponentRef name="radioButtonGroupNotifClass"/>
@@ -993,7 +993,7 @@
                             <Property name="text" type="java.lang.String" value="1 Day before"/>
                           </Properties>
                           <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="radioNotifClass1DaySetting.setActionCommand(radioNotifClass1DaySetting.getText().toLowerCase());"/>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="radioNotifClass1DaySettings.setActionCommand(radioNotifClass1DaySettings.getText().toLowerCase());"/>
                           </AuxValues>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -1001,7 +1001,7 @@
                             </Constraint>
                           </Constraints>
                         </Component>
-                        <Component class="javax.swing.JRadioButton" name="radioNotifClass1HourSetting">
+                        <Component class="javax.swing.JRadioButton" name="radioNotifClass1HourSettings">
                           <Properties>
                             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                               <ComponentRef name="radioButtonGroupNotifClass"/>
@@ -1009,7 +1009,7 @@
                             <Property name="text" type="java.lang.String" value="1 Hour before"/>
                           </Properties>
                           <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="radioNotifClass1HourSetting.setActionCommand(radioNotifClass1HourSetting.getText().toLowerCase());"/>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="radioNotifClass1HourSettings.setActionCommand(radioNotifClass1HourSettings.getText().toLowerCase());"/>
                           </AuxValues>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
@@ -1017,7 +1017,7 @@
                             </Constraint>
                           </Constraints>
                         </Component>
-                        <Component class="javax.swing.JRadioButton" name="radioNotifSessionAtLeast1Setting">
+                        <Component class="javax.swing.JRadioButton" name="radioNotifSessionAtLeast1Settings">
                           <Properties>
                             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                               <ComponentRef name="radioButtonGroupNotifSessionLimit"/>
@@ -1025,15 +1025,15 @@
                             <Property name="text" type="java.lang.String" value="At least 1"/>
                           </Properties>
                           <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="radioNotifSessionAtLeast1Setting.setActionCommand(radioNotifSessionAtLeast1Setting.getText().toLowerCase());"/>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="radioNotifSessionAtLeast1Settings.setActionCommand(radioNotifSessionAtLeast1Settings.getText().toLowerCase());"/>
                           </AuxValues>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="250" y="80" width="-1" height="-1"/>
+                              <AbsoluteConstraints x="280" y="80" width="-1" height="-1"/>
                             </Constraint>
                           </Constraints>
                         </Component>
-                        <Component class="javax.swing.JRadioButton" name="radioNotifSessionLessThan3Setting">
+                        <Component class="javax.swing.JRadioButton" name="radioNotifSessionLessThan3Settings">
                           <Properties>
                             <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                               <ComponentRef name="radioButtonGroupNotifSessionLimit"/>
@@ -1041,25 +1041,25 @@
                             <Property name="text" type="java.lang.String" value="Less than 3"/>
                           </Properties>
                           <AuxValues>
-                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="radioNotifSessionLessThan3Setting.setActionCommand(radioNotifSessionLessThan3Setting.getText().toLowerCase());"/>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="radioNotifSessionLessThan3Settings.setActionCommand(radioNotifSessionLessThan3Settings.getText().toLowerCase());"/>
                           </AuxValues>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="250" y="100" width="-1" height="-1"/>
+                              <AbsoluteConstraints x="280" y="100" width="-1" height="-1"/>
                             </Constraint>
                           </Constraints>
                         </Component>
-                        <Component class="javax.swing.JLabel" name="jLabel10">
+                        <Component class="javax.swing.JLabel" name="labelNotifSessionSettings">
                           <Properties>
                             <Property name="text" type="java.lang.String" value="Notify when sessions limit reach?"/>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-                              <AbsoluteConstraints x="250" y="60" width="160" height="-1"/>
+                              <AbsoluteConstraints x="280" y="60" width="210" height="-1"/>
                             </Constraint>
                           </Constraints>
                         </Component>
-                        <Component class="javax.swing.JCheckBox" name="checkboxAutoupdateToolsSetting">
+                        <Component class="javax.swing.JCheckBox" name="checkboxAutoupdateToolsSettings">
                           <Properties>
                             <Property name="selected" type="boolean" value="true"/>
                             <Property name="text" type="java.lang.String" value="Autoupdate Tools"/>
@@ -1087,9 +1087,9 @@
                           <Properties>
                             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                               <StringArray count="3">
-                                <StringItem index="0" value="English (default)"/>
-                                <StringItem index="1" value="Bahasa Indonesia"/>
-                                <StringItem index="2" value="Arabic"/>
+                                <StringItem index="0" value="english (default)"/>
+                                <StringItem index="1" value="bahasa indonesia"/>
+                                <StringItem index="2" value="arabic"/>
                               </StringArray>
                             </Property>
                           </Properties>
@@ -1102,7 +1102,7 @@
                             </Constraint>
                           </Constraints>
                         </Component>
-                        <Component class="javax.swing.JLabel" name="jLabel9">
+                        <Component class="javax.swing.JLabel" name="labelSystemLanguagesSettings">
                           <Properties>
                             <Property name="text" type="java.lang.String" value="System Languages:"/>
                           </Properties>

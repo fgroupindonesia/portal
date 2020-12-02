@@ -10,8 +10,10 @@ import beans.User;
 
 import com.google.gson.Gson;
 import helper.BarcodeGenerator;
+import helper.language.Comp;
 import helper.HttpCall;
 import helper.JSONChecker;
+import helper.language.LanguageSwitcher;
 import helper.SWTKey;
 import helper.SWThreadWorker;
 import helper.UIDragger;
@@ -38,6 +40,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     Point initialClick;
     CardLayout cardLayouter;
     boolean internetExist, formCompleted;
+    LanguageSwitcher languageHelper;
 
     public LoginFrame() {
         initComponents();
@@ -48,6 +51,20 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelSpacing.setText("");
         labelLoading.setVisible(false);
         cardLayouter = (CardLayout) (panelBase.getLayout());
+
+        applyLanguageUI();
+    }
+
+    private void applyLanguageUI() {
+
+        languageHelper = new LanguageSwitcher(configuration);
+        
+        languageHelper.apply(labelTitleLogin, "labelTitleLogin", Comp.LABEL);
+        languageHelper.apply(labelUsernameLogin, "labelUsernameLogin", Comp.LABEL);
+        languageHelper.apply(labelPasswordLogin, "labelPasswordLogin", Comp.LABEL);
+        languageHelper.apply(labelLinkLoginPhone, "labelLinkLoginPhone", Comp.LABEL);
+        languageHelper.apply(buttonLogin, "buttonLogin", Comp.BUTTON);
+
     }
 
     /**
@@ -61,14 +78,14 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelBase = new javax.swing.JPanel();
         panelLogin = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        labelUsernameLogin = new javax.swing.JLabel();
         textfieldUsername = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
+        labelPasswordLogin = new javax.swing.JLabel();
         buttonLogin = new javax.swing.JButton();
         labelLinkLoginPhone = new javax.swing.JLabel();
         panelHeader = new javax.swing.JPanel();
         labelClose = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        labelTitleLogin = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         textfieldPass = new javax.swing.JPasswordField();
         labelSpacing = new javax.swing.JLabel();
@@ -105,8 +122,8 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelLogin.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setText("Username:");
-        panelLogin.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 70, 150, -1));
+        labelUsernameLogin.setText("Username:");
+        panelLogin.add(labelUsernameLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 70, 150, -1));
 
         textfieldUsername.setText("udin");
         textfieldUsername.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -135,8 +152,8 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         });
         panelLogin.add(textfieldUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 90, 250, -1));
 
-        jLabel2.setText("Password:");
-        panelLogin.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 130, 150, -1));
+        labelPasswordLogin.setText("Password:");
+        panelLogin.add(labelPasswordLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 130, 150, -1));
 
         buttonLogin.setText("Login");
         buttonLogin.addActionListener(new java.awt.event.ActionListener() {
@@ -144,9 +161,10 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonLoginActionPerformed(evt);
             }
         });
-        panelLogin.add(buttonLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 200, 80, 30));
+        panelLogin.add(buttonLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 200, 100, 30));
 
         labelLinkLoginPhone.setForeground(new java.awt.Color(0, 102, 255));
+        labelLinkLoginPhone.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelLinkLoginPhone.setText("<html><u>Logging in By Phone</u></html>");
         labelLinkLoginPhone.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         labelLinkLoginPhone.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -154,7 +172,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 labelLinkLoginPhoneMouseClicked(evt);
             }
         });
-        panelLogin.add(labelLinkLoginPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 200, 120, 30));
+        panelLogin.add(labelLinkLoginPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 200, 170, 30));
 
         panelHeader.setBackground(new java.awt.Color(255, 0, 0));
 
@@ -166,9 +184,9 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             }
         });
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel3.setText("Portal Access");
+        labelTitleLogin.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        labelTitleLogin.setForeground(new java.awt.Color(255, 255, 255));
+        labelTitleLogin.setText("Portal Access");
 
         javax.swing.GroupLayout panelHeaderLayout = new javax.swing.GroupLayout(panelHeader);
         panelHeader.setLayout(panelHeaderLayout);
@@ -176,7 +194,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             panelHeaderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelHeaderLayout.createSequentialGroup()
                 .addGap(18, 18, 18)
-                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(labelTitleLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 208, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 117, Short.MAX_VALUE)
                 .addComponent(labelClose)
                 .addGap(33, 33, 33))
@@ -187,7 +205,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 .addContainerGap()
                 .addGroup(panelHeaderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(labelClose, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(labelTitleLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -460,16 +478,16 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonLogin;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel labelBarcode;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelLinkLoginPhone;
     private javax.swing.JLabel labelLinkNormalLogin;
     private javax.swing.JLabel labelLoading;
+    private javax.swing.JLabel labelPasswordLogin;
     private javax.swing.JLabel labelSpacing;
+    private javax.swing.JLabel labelTitleLogin;
+    private javax.swing.JLabel labelUsernameLogin;
     private javax.swing.JPanel panelBase;
     private javax.swing.JPanel panelHeader;
     private javax.swing.JPanel panelLogin;
