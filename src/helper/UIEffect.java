@@ -39,6 +39,8 @@ public class UIEffect {
     private static Date scheduleDate, nowDate;
     protected static ClientFrame frameRef;
     private static LanguageSwitcher langHelper;
+    private static StringBuffer stringMainHolder = new StringBuffer();
+    private static StringBuffer stringSecondHolder = new StringBuffer();
 
     public static void setLanguageHelper(LanguageSwitcher lgs) {
         langHelper = lgs;
@@ -143,22 +145,19 @@ public class UIEffect {
 
         if (diffDays != -1) {
 
-            StringBuffer stb = new StringBuffer();
-            StringBuffer stb2 = new StringBuffer();
-
             if (labelInterval != null) {
                 if (diffDays > 0) {
-                    stb.append("labelIntervalNextClass").append(" ");
-                    stb.append("labelIntervalDay").append(" ");
-                    stb.append("labelIntervalHour").append(" ");
-                    stb.append("labelIntervalMinute").append(" ");
-                    stb.append("labelIntervalSecond");
+                    stringMainHolder.append("labelIntervalNextClass").append(" ");
+                    stringMainHolder.append("labelIntervalDay").append(" ");
+                    stringMainHolder.append("labelIntervalHour").append(" ");
+                    stringMainHolder.append("labelIntervalMinute").append(" ");
+                    stringMainHolder.append("labelIntervalSecond");
 
-                    stb2.append("1A").append(" ");
-                    stb2.append("1B").append(" ");
-                    stb2.append("1C").append(" ");
-                    stb2.append("1D").append(" ");
-                    stb2.append("1E");
+                    stringSecondHolder.append("1A").append(" ");
+                    stringSecondHolder.append("1B").append(" ");
+                    stringSecondHolder.append("1C").append(" ");
+                    stringSecondHolder.append("1D").append(" ");
+                    stringSecondHolder.append("1E");
 
                     //labelInterval.setText("Next Class : " + diffDays + " hari, " + diffHours + " jam, " + diffMinutes + " menit, " + diffSeconds + " detik.");
                     labelInterval.setText("1A : " + diffDays + " 1B, "
@@ -167,43 +166,47 @@ public class UIEffect {
                             + diffSeconds + " 1E.");
 
                 } else if (diffHours > 0) {
-                    stb.append("labelIntervalNextClass").append(" ");
-                    stb.append("labelIntervalToday").append(" ");
-                    stb.append("labelIntervalHour").append(" ");
-                    stb.append("labelIntervalMinute").append(" ");
-                    stb.append("labelIntervalSecond");
+                    stringMainHolder.append("labelIntervalNextClass").append(" ");
+                    stringMainHolder.append("labelIntervalToday").append(" ");
+                    stringMainHolder.append("labelIntervalHour").append(" ");
+                    stringMainHolder.append("labelIntervalMinute").append(" ");
+                    stringMainHolder.append("labelIntervalSecond");
 
-                    stb2.append("1A").append(" ");
-                    stb2.append("1B").append(" ");
-                    stb2.append("1C").append(" ");
-                    stb2.append("1D").append(" ");
-                    stb2.append("1E");
+                    stringSecondHolder.append("1A").append(" ");
+                    stringSecondHolder.append("1B").append(" ");
+                    stringSecondHolder.append("1C").append(" ");
+                    stringSecondHolder.append("1D").append(" ");
+                    stringSecondHolder.append("1E");
 
                     labelInterval.setText("1A : 1B, "
                             + diffHours + " 1C, "
                             + diffMinutes + " 1D, "
                             + diffSeconds + " 1E.");
                 } else if (diffHours == 0) {
-                    stb.append("labelIntervalNextClass").append(" ");
-                    stb.append("labelIntervalToday").append(" ");
-                    stb.append("labelIntervalMinute").append(" ");
-                    stb.append("labelIntervalSecond");
+                    stringMainHolder.append("labelIntervalNextClass").append(" ");
+                    stringMainHolder.append("labelIntervalToday").append(" ");
+                    stringMainHolder.append("labelIntervalMinute").append(" ");
+                    stringMainHolder.append("labelIntervalSecond");
 
-                    stb2.append("1A").append(" ");
-                    stb2.append("1B").append(" ");
-                    stb2.append("1C").append(" ");
-                    stb2.append("1D");
+                    stringSecondHolder.append("1A").append(" ");
+                    stringSecondHolder.append("1B").append(" ");
+                    stringSecondHolder.append("1C").append(" ");
+                    stringSecondHolder.append("1D");
 
                     labelInterval.setText("1A : 1B, "
                             + diffMinutes + " 1C, "
                             + diffSeconds + " 1D.");
                 }
 
-                String dataOrdered[] = stb.toString().split(" ");
-                String dataLetter[] = stb2.toString().split(" ");
+                String dataOrdered[] = stringMainHolder.toString().split(" ");
+                String dataLetter[] = stringSecondHolder.toString().split(" ");
+
+                //clearing string buffer
+                stringMainHolder.delete(0, stringMainHolder.length());
+                stringSecondHolder.delete(0, stringSecondHolder.length());
                 
-                System.out.println("data ui interval is " + labelInterval.getText());
-                
+                //System.out.println("data ui interval is " + labelInterval.getText());
+
                 if (langHelper != null) {
                     langHelper.apply(labelInterval, dataOrdered, dataLetter);
                 }

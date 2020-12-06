@@ -5,12 +5,12 @@
             <url>src/frames/ClientFrame.java</url>
             <bookmark id="8">
                 <name/>
-                <line>1494</line>
+                <line>1505</line>
                 <key/>
             </bookmark>
             <bookmark id="5">
                 <name/>
-                <line>2162</line>
+                <line>2173</line>
                 <key/>
             </bookmark>
         </file>
@@ -26,9 +26,6 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/java/desktop/Portal/src/frames/ClientFrame.java</file>
-            <file>file:/D:/java/desktop/Portal/notes.dat</file>
-            <file>file:/D:/java/desktop/Portal/src/helper/language/LanguageSwitcher.java</file>
-            <file>file:/D:/java/desktop/Portal/src/helper/UIEffect.java</file>
         </group>
     </open-files>
 </project-private>

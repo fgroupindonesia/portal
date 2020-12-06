@@ -373,20 +373,20 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelHistoryLast5 = new javax.swing.JLabel();
         panelProfile = new javax.swing.JPanel();
         textfieldUsernameProfile = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
+        labelPasswordProfile = new javax.swing.JLabel();
         textfieldPasswordProfile = new javax.swing.JPasswordField();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
+        labelUsernameProfile = new javax.swing.JLabel();
+        labelEmailProfile = new javax.swing.JLabel();
         textfieldEmailProfile = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
+        labelWhatsappProfile = new javax.swing.JLabel();
         textfieldWhatsappProfile = new javax.swing.JTextField();
-        jLabel7 = new javax.swing.JLabel();
+        labelAddressProfile = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         textareaAddressProfile = new javax.swing.JTextArea();
         buttonSaveProfile = new javax.swing.JButton();
-        jLabel8 = new javax.swing.JLabel();
+        labelTmvIDProfile = new javax.swing.JLabel();
         textfieldTeamviewerID = new javax.swing.JTextField();
-        jLabel16 = new javax.swing.JLabel();
+        labelTmvPassProfile = new javax.swing.JLabel();
         textfieldTeamviewerPass = new javax.swing.JTextField();
         panelSettings = new javax.swing.JPanel();
         labelNotifClassSettings = new javax.swing.JLabel();
@@ -409,16 +409,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonVisitWhatsapp = new javax.swing.JButton();
         panelPayment = new javax.swing.JPanel();
         panelPaymentForm = new javax.swing.JPanel();
-        jLabel12 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
+        labelPaymentForm = new javax.swing.JLabel();
+        labelMethodPaymentForm = new javax.swing.JLabel();
         textfieldAmountPayment = new javax.swing.JTextField();
-        jLabel14 = new javax.swing.JLabel();
+        labelScreenshotPaymentForm = new javax.swing.JLabel();
         combobocMethodPayment = new javax.swing.JComboBox<>();
         labelHidePaymentForm = new javax.swing.JLabel();
         labelScreenshotPayment = new javax.swing.JLabel();
         buttonSavePayment = new javax.swing.JButton();
-        jLabel17 = new javax.swing.JLabel();
-        labelBrowseScreenshotPayment = new javax.swing.JLabel();
+        labelAmountPaymentForm = new javax.swing.JLabel();
+        labelBrowseScreenshotPaymentForm = new javax.swing.JLabel();
         panelPaymentData = new javax.swing.JPanel();
         panelPaymentTable = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -453,7 +453,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
-        setPreferredSize(new java.awt.Dimension(750, 500));
+        setPreferredSize(new java.awt.Dimension(800, 500));
 
         panelBase.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         panelBase.setPreferredSize(new java.awt.Dimension(750, 439));
@@ -483,7 +483,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelCloseMouseClicked(evt);
             }
         });
-        panelHeader.add(labelClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 10, -1, 28));
+        panelHeader.add(labelClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 10, -1, 28));
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
@@ -493,7 +493,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelTime.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
         labelTime.setForeground(new java.awt.Color(255, 255, 255));
         labelTime.setText("time is here");
-        panelHeader.add(labelTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 20, 166, -1));
+        panelHeader.add(labelTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 20, 170, -1));
 
         labelMinimize.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/minimize.png"))); // NOI18N
         labelMinimize.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -502,12 +502,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelMinimizeMouseClicked(evt);
             }
         });
-        panelHeader.add(labelMinimize, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 10, -1, 28));
+        panelHeader.add(labelMinimize, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 10, -1, 28));
 
         labelTimeIntervalSchedule.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
         labelTimeIntervalSchedule.setForeground(new java.awt.Color(255, 255, 255));
         labelTimeIntervalSchedule.setText("time is here");
-        panelHeader.add(labelTimeIntervalSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(186, 20, 280, -1));
+        panelHeader.add(labelTimeIntervalSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(166, 20, 340, -1));
 
         panelBase.add(panelHeader, java.awt.BorderLayout.PAGE_START);
 
@@ -622,7 +622,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelHome.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        panelSchedule.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule"));
+        panelSchedule.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createTitledBorder("Schedule"), javax.swing.BorderFactory.createEmptyBorder(0, 15, 0, 15)));
         panelSchedule.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
 
         labelScheduleDay1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
@@ -637,7 +637,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelScheduleDay3.setText("schedule day 3");
         panelSchedule.add(labelScheduleDay3);
 
-        panelHome.add(panelSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 110, 190, 100));
+        panelHome.add(panelSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 110, 210, 100));
         panelSchedule.getAccessibleContext().setAccessibleName("History");
 
         panelHome.add(progressBarTotalSession, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 260, 190, -1));
@@ -674,7 +674,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelLastPayment.setText("Last Payment : loading...");
         panelHome.add(labelLastPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 240, 250, -1));
 
-        panelHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("History"));
+        panelHistory.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createTitledBorder("History"), javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 5)));
         panelHistory.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
 
         labelHistoryLast1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
@@ -711,9 +711,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelProfile.add(textfieldUsernameProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 40, 220, -1));
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock16.png"))); // NOI18N
-        jLabel2.setText("Password :");
-        panelProfile.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 70, -1, -1));
+        labelPasswordProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock16.png"))); // NOI18N
+        labelPasswordProfile.setText("Password :");
+        panelProfile.add(labelPasswordProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 70, -1, -1));
 
         textfieldPasswordProfile.setText("jPasswordField1");
         textfieldPasswordProfile.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -723,13 +723,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelProfile.add(textfieldPasswordProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 90, 220, -1));
 
-        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/edit.png"))); // NOI18N
-        jLabel4.setText("Username :");
-        panelProfile.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 20, -1, -1));
+        labelUsernameProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/edit.png"))); // NOI18N
+        labelUsernameProfile.setText("Username :");
+        panelProfile.add(labelUsernameProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 20, -1, -1));
 
-        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/email.png"))); // NOI18N
-        jLabel5.setText("Email : ");
-        panelProfile.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 120, -1, -1));
+        labelEmailProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/email.png"))); // NOI18N
+        labelEmailProfile.setText("Email : ");
+        panelProfile.add(labelEmailProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 120, -1, -1));
 
         textfieldEmailProfile.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -738,9 +738,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelProfile.add(textfieldEmailProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 140, 220, -1));
 
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/whatsapp.png"))); // NOI18N
-        jLabel6.setText("Whatsapp Contact:");
-        panelProfile.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, -1, -1));
+        labelWhatsappProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/whatsapp.png"))); // NOI18N
+        labelWhatsappProfile.setText("Whatsapp Contact:");
+        panelProfile.add(labelWhatsappProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, -1, -1));
 
         textfieldWhatsappProfile.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -749,9 +749,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelProfile.add(textfieldWhatsappProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 200, 150, -1));
 
-        jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/text.png"))); // NOI18N
-        jLabel7.setText("Address:");
-        panelProfile.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 180, -1, -1));
+        labelAddressProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/text.png"))); // NOI18N
+        labelAddressProfile.setText("Address:");
+        panelProfile.add(labelAddressProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 180, -1, -1));
 
         textareaAddressProfile.setColumns(20);
         textareaAddressProfile.setFont(new java.awt.Font("Tahoma", 0, 11)); // NOI18N
@@ -773,9 +773,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelProfile.add(buttonSaveProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 300, 80, 30));
 
-        jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/teamviewer16.png"))); // NOI18N
-        jLabel8.setText("TeamViewer ID");
-        panelProfile.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
+        labelTmvIDProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/teamviewer16.png"))); // NOI18N
+        labelTmvIDProfile.setText("TeamViewer ID");
+        panelProfile.add(labelTmvIDProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
 
         textfieldTeamviewerID.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -784,9 +784,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelProfile.add(textfieldTeamviewerID, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 90, 150, -1));
 
-        jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/key.png"))); // NOI18N
-        jLabel16.setText("TeamViewer Password");
-        panelProfile.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, -1, -1));
+        labelTmvPassProfile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/key.png"))); // NOI18N
+        labelTmvPassProfile.setText("TeamViewer Password");
+        panelProfile.add(labelTmvPassProfile, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, -1, -1));
 
         textfieldTeamviewerPass.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -863,7 +863,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 buttonTerminateTmvActionPerformed(evt);
             }
         });
-        panelTools.add(buttonTerminateTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 110, 110, -1));
+        panelTools.add(buttonTerminateTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 110, 130, -1));
 
         buttonRunTmv.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/play.png"))); // NOI18N
         buttonRunTmv.setText("Run Now");
@@ -873,7 +873,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 buttonRunTmvActionPerformed(evt);
             }
         });
-        panelTools.add(buttonRunTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 70, 110, -1));
+        panelTools.add(buttonRunTmv, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 70, 130, -1));
 
         jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/chrome.png"))); // NOI18N
@@ -890,7 +890,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 buttonVisitChromeActionPerformed(evt);
             }
         });
-        panelTools.add(buttonVisitChrome, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 210, 110, -1));
+        panelTools.add(buttonVisitChrome, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 210, 130, -1));
 
         jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/whatsapp64.png"))); // NOI18N
@@ -907,7 +907,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 buttonVisitWhatsappActionPerformed(evt);
             }
         });
-        panelTools.add(buttonVisitWhatsapp, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 70, 110, -1));
+        panelTools.add(buttonVisitWhatsapp, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 70, 130, -1));
 
         panelContentCenter.add(panelTools, "panelTools");
 
@@ -916,13 +916,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelPaymentForm.setPreferredSize(new java.awt.Dimension(200, 371));
         panelPaymentForm.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel12.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel12.setText("Payment Form");
-        panelPaymentForm.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 31, 102, 30));
+        labelPaymentForm.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        labelPaymentForm.setText("Payment Form");
+        panelPaymentForm.add(labelPaymentForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 31, 102, 30));
 
-        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/calc.png"))); // NOI18N
-        jLabel13.setText("Method:");
-        panelPaymentForm.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 130, 120, -1));
+        labelMethodPaymentForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/calc.png"))); // NOI18N
+        labelMethodPaymentForm.setText("Method:");
+        panelPaymentForm.add(labelMethodPaymentForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 130, 120, -1));
 
         textfieldAmountPayment.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
@@ -934,9 +934,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelPaymentForm.add(textfieldAmountPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 160, -1));
 
-        jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/monitor.png"))); // NOI18N
-        jLabel14.setText("Screenshot:");
-        panelPaymentForm.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 190, 90, -1));
+        labelScreenshotPaymentForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/monitor.png"))); // NOI18N
+        labelScreenshotPaymentForm.setText("Screenshot:");
+        panelPaymentForm.add(labelScreenshotPaymentForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 190, 90, -1));
 
         combobocMethodPayment.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Cash", "Transfer Bank" }));
         panelPaymentForm.add(combobocMethodPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 150, 160, -1));
@@ -962,20 +962,20 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelPaymentForm.add(buttonSavePayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 350, 70, -1));
 
-        jLabel17.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/coin.png"))); // NOI18N
-        jLabel17.setText("Amount:");
-        panelPaymentForm.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 120, -1));
+        labelAmountPaymentForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/coin.png"))); // NOI18N
+        labelAmountPaymentForm.setText("Amount:");
+        panelPaymentForm.add(labelAmountPaymentForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 120, -1));
 
-        labelBrowseScreenshotPayment.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
-        labelBrowseScreenshotPayment.setForeground(new java.awt.Color(102, 0, 255));
-        labelBrowseScreenshotPayment.setText("Browse Picture");
-        labelBrowseScreenshotPayment.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        labelBrowseScreenshotPayment.addMouseListener(new java.awt.event.MouseAdapter() {
+        labelBrowseScreenshotPaymentForm.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelBrowseScreenshotPaymentForm.setForeground(new java.awt.Color(102, 0, 255));
+        labelBrowseScreenshotPaymentForm.setText("Browse Picture");
+        labelBrowseScreenshotPaymentForm.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelBrowseScreenshotPaymentForm.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                labelBrowseScreenshotPaymentMouseClicked(evt);
+                labelBrowseScreenshotPaymentFormMouseClicked(evt);
             }
         });
-        panelPaymentForm.add(labelBrowseScreenshotPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 330, -1, -1));
+        panelPaymentForm.add(labelBrowseScreenshotPaymentForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 330, -1, -1));
 
         panelPayment.add(panelPaymentForm, java.awt.BorderLayout.WEST);
 
@@ -1378,7 +1378,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_panelBaseMouseDragged
 
     private void buttonProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonProfileActionPerformed
-        labelPanelViewName.setText("<< Profile");
+        
+        //change the menu based upon UI Language
+        //labelPanelViewName.setText("<< Profile");
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameProfile", Comp.LABEL);
+        
+        
         cardLayouterMain.show(panelContentCenter, "panelProfile");
 
         // check the existance of Tmviewer 
@@ -1391,22 +1396,27 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_buttonProfileActionPerformed
 
     private void buttonToolsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonToolsActionPerformed
-        labelPanelViewName.setText("<< Tools");
+        //labelPanelViewName.setText("<< Tools");
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameTools", Comp.LABEL);
+        
         cardLayouterMain.show(panelContentCenter, "panelTools");
     }//GEN-LAST:event_buttonToolsActionPerformed
 
     private void buttonDocumentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDocumentActionPerformed
-        labelPanelViewName.setText("<< Document");
+        //labelPanelViewName.setText("<< Document");
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameDocument", Comp.LABEL);
         cardLayouterMain.show(panelContentCenter, "panelDocument");
     }//GEN-LAST:event_buttonDocumentActionPerformed
 
     private void buttonAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAttendanceActionPerformed
-        labelPanelViewName.setText("<< Attendance");
+        //labelPanelViewName.setText("<< Attendance");
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameAttendance", Comp.LABEL);
         cardLayouterMain.show(panelContentCenter, "panelAttendance");
     }//GEN-LAST:event_buttonAttendanceActionPerformed
 
     private void buttonPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonPaymentActionPerformed
-        labelPanelViewName.setText("<< Payment");
+        //labelPanelViewName.setText("<< Payment");
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNamePayment", Comp.LABEL);
         cardLayouterMain.show(panelContentCenter, "panelPayment");
 
     }//GEN-LAST:event_buttonPaymentActionPerformed
@@ -1416,12 +1426,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_buttonLogoutActionPerformed
 
     private void buttonSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSettingsActionPerformed
-        labelPanelViewName.setText("<< Settings");
+        //labelPanelViewName.setText("<< Settings");
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameSettings", Comp.LABEL);
         cardLayouterMain.show(panelContentCenter, "panelSettings");
     }//GEN-LAST:event_buttonSettingsActionPerformed
 
     private void panelMenuMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelMenuMouseEntered
-
+        
     }//GEN-LAST:event_panelMenuMouseEntered
 
     private void labelPropicUserMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelPropicUserMouseEntered
@@ -1865,7 +1876,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     }//GEN-LAST:event_tableDocumentDataMouseClicked
 
-    private void labelBrowseScreenshotPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotPaymentMouseClicked
+    private void labelBrowseScreenshotPaymentFormMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotPaymentFormMouseClicked
         // browse the picture...
         FileFilter imageFilter = new FileNameExtensionFilter(
                 "Image files", ImageIO.getReaderFileSuffixes());
@@ -1892,7 +1903,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         } else {
             screenshotFile = null;
         }
-    }//GEN-LAST:event_labelBrowseScreenshotPaymentMouseClicked
+    }//GEN-LAST:event_labelBrowseScreenshotPaymentFormMouseClicked
 
     private void enableUserFormSave() {
 
@@ -2058,30 +2069,22 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JComboBox<String> comboboxSystemLanguage;
     private javax.swing.JFileChooser fileChooser;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JLabel labelAddPayment;
-    private javax.swing.JLabel labelBrowseScreenshotPayment;
+    private javax.swing.JLabel labelAddressProfile;
+    private javax.swing.JLabel labelAmountPaymentForm;
+    private javax.swing.JLabel labelBrowseScreenshotPaymentForm;
     private javax.swing.JLabel labelClassRegistered;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelDocumentDownload;
     private javax.swing.JLabel labelDocumentOpen;
+    private javax.swing.JLabel labelEmailProfile;
     private javax.swing.JLabel labelHidePaymentForm;
     private javax.swing.JLabel labelHistoryLast1;
     private javax.swing.JLabel labelHistoryLast2;
@@ -2090,11 +2093,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelHistoryLast5;
     private javax.swing.JLabel labelLastPayment;
     private javax.swing.JLabel labelLoadingStatus;
+    private javax.swing.JLabel labelMethodPaymentForm;
     private javax.swing.JLabel labelMinimize;
     private javax.swing.JLabel labelNavHome;
     private javax.swing.JLabel labelNotifClassSettings;
     private javax.swing.JLabel labelNotifSessionSettings;
     private javax.swing.JLabel labelPanelViewName;
+    private javax.swing.JLabel labelPasswordProfile;
+    private javax.swing.JLabel labelPaymentForm;
     private javax.swing.JLabel labelPercentage;
     private javax.swing.JLabel labelPropicUser;
     private javax.swing.JLabel labelRefreshAttendance;
@@ -2105,13 +2111,18 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelScheduleDay2;
     private javax.swing.JLabel labelScheduleDay3;
     private javax.swing.JLabel labelScreenshotPayment;
+    private javax.swing.JLabel labelScreenshotPaymentForm;
     private javax.swing.JLabel labelShowAttendanceData;
     private javax.swing.JLabel labelShowAttendanceStatistic;
     private javax.swing.JLabel labelSystemLanguagesSettings;
     private javax.swing.JLabel labelTime;
     private javax.swing.JLabel labelTimeIntervalSchedule;
+    private javax.swing.JLabel labelTmvIDProfile;
+    private javax.swing.JLabel labelTmvPassProfile;
     private javax.swing.JLabel labelTotalSessionCompleted;
+    private javax.swing.JLabel labelUsernameProfile;
     private javax.swing.JLabel labelWelcomeUser;
+    private javax.swing.JLabel labelWhatsappProfile;
     private javax.swing.JPanel panelAttandanceAll;
     private javax.swing.JPanel panelAttandanceContent;
     private javax.swing.JPanel panelAttandanceStatistic;
@@ -2448,6 +2459,34 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         
         // for animation time
         UIEffect.setLanguageHelper(languageHelper);
+        
+        // for @userprofilePage
+        languageHelper.apply(labelTmvIDProfile, "labelTmvIDProfile", Comp.LABEL);
+        languageHelper.apply(labelTmvPassProfile, "labelTmvPassProfile", Comp.LABEL);
+        languageHelper.apply(labelWhatsappProfile, "labelWhatsappProfile", Comp.LABEL);
+        languageHelper.apply(labelUsernameProfile, "labelUsernameProfile", Comp.LABEL);
+        languageHelper.apply(labelPasswordProfile, "labelPasswordProfile", Comp.LABEL);
+        languageHelper.apply(labelEmailProfile, "labelEmailProfile", Comp.LABEL);
+        languageHelper.apply(labelAddressProfile, "labelAddressProfile", Comp.LABEL);
+        languageHelper.apply(buttonSaveProfile, "buttonSaveProfile", Comp.BUTTON);
+        
+        // header page name
+        languageHelper.apply(labelPanelViewName, "labelPanelViewName", Comp.LABEL);
+        
+        // button on Tools
+        languageHelper.apply(buttonRunTmv, "buttonRunTmv", Comp.BUTTON);
+        languageHelper.apply(buttonVisitChrome, "buttonVisitChrome", Comp.BUTTON);
+        languageHelper.apply(buttonVisitWhatsapp, "buttonVisitWhatsapp", Comp.BUTTON);
+        
+        // page @paymentForm
+        languageHelper.apply(labelPaymentForm, "labelPaymentForm", Comp.LABEL);
+        languageHelper.apply(labelAmountPaymentForm, "labelAmountPaymentForm", Comp.LABEL);
+        languageHelper.apply(labelMethodPaymentForm, "labelMethodPaymentForm", Comp.LABEL);
+        languageHelper.apply(labelScreenshotPaymentForm, "labelScreenshotPaymentForm", Comp.LABEL);
+        languageHelper.apply(labelBrowseScreenshotPaymentForm, "labelBrowseScreenshotPaymentForm", Comp.LABEL);
+        languageHelper.apply(buttonSavePayment, "buttonSavePayment", Comp.BUTTON);
+        languageHelper.apply(labelRefreshPayment, "labelRefreshPayment", Comp.LABEL);
+        languageHelper.apply(labelAddPayment, "labelAddPayment", Comp.LABEL);
         
     }
 
