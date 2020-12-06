@@ -443,8 +443,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         jScrollPane4 = new javax.swing.JScrollPane();
         tableDocumentData = new javax.swing.JTable();
         panelControllerDocument = new javax.swing.JPanel();
-        labelDocumentOpen = new javax.swing.JLabel();
-        labelDocumentDownload = new javax.swing.JLabel();
+        labelOpenDocument = new javax.swing.JLabel();
+        labelDownloadDocument = new javax.swing.JLabel();
         labelRefreshDocument = new javax.swing.JLabel();
         panelInnerBrowser = new javax.swing.JPanel();
         panelHeaderCenter = new javax.swing.JPanel();
@@ -1256,38 +1256,38 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelControllerDocument.setPreferredSize(new java.awt.Dimension(869, 75));
         panelControllerDocument.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        labelDocumentOpen.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/open.png"))); // NOI18N
-        labelDocumentOpen.setText("Open");
-        labelDocumentOpen.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        labelDocumentOpen.setEnabled(false);
-        labelDocumentOpen.addMouseListener(new java.awt.event.MouseAdapter() {
+        labelOpenDocument.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/open.png"))); // NOI18N
+        labelOpenDocument.setText("Open");
+        labelOpenDocument.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelOpenDocument.setEnabled(false);
+        labelOpenDocument.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                labelDocumentOpenMouseClicked(evt);
+                labelOpenDocumentMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                labelDocumentOpenMouseEntered(evt);
+                labelOpenDocumentMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                labelDocumentOpenMouseExited(evt);
+                labelOpenDocumentMouseExited(evt);
             }
         });
-        panelControllerDocument.add(labelDocumentOpen, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 30, 80, 30));
+        panelControllerDocument.add(labelOpenDocument, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 30, 80, 30));
 
-        labelDocumentDownload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/download.png"))); // NOI18N
-        labelDocumentDownload.setText("Download");
-        labelDocumentDownload.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        labelDocumentDownload.addMouseListener(new java.awt.event.MouseAdapter() {
+        labelDownloadDocument.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/download.png"))); // NOI18N
+        labelDownloadDocument.setText("Download");
+        labelDownloadDocument.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelDownloadDocument.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                labelDocumentDownloadMouseClicked(evt);
+                labelDownloadDocumentMouseClicked(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                labelDocumentDownloadMouseEntered(evt);
+                labelDownloadDocumentMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                labelDocumentDownloadMouseExited(evt);
+                labelDownloadDocumentMouseExited(evt);
             }
         });
-        panelControllerDocument.add(labelDocumentDownload, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 30, 90, 30));
+        panelControllerDocument.add(labelDownloadDocument, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 30, 90, 30));
 
         labelRefreshDocument.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh24.png"))); // NOI18N
         labelRefreshDocument.setText("Refresh");
@@ -1634,7 +1634,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // TODO add your handling code here:
     }//GEN-LAST:event_labelShowAttendanceStatisticMouseExited
 
-    private void labelDocumentOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentOpenMouseClicked
+    private void labelOpenDocumentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelOpenDocumentMouseClicked
         ArrayList dataDoc = tabRender.getCheckedRows(tableDocumentData, 4);
 
         if (dataDoc.isEmpty()) {
@@ -1652,17 +1652,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         }
 
 
-    }//GEN-LAST:event_labelDocumentOpenMouseClicked
+    }//GEN-LAST:event_labelOpenDocumentMouseClicked
 
-    private void labelDocumentOpenMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentOpenMouseEntered
+    private void labelOpenDocumentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelOpenDocumentMouseEntered
         // TODO add your handling code here:
-    }//GEN-LAST:event_labelDocumentOpenMouseEntered
+    }//GEN-LAST:event_labelOpenDocumentMouseEntered
 
-    private void labelDocumentOpenMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentOpenMouseExited
+    private void labelOpenDocumentMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelOpenDocumentMouseExited
         // TODO add your handling code here:
-    }//GEN-LAST:event_labelDocumentOpenMouseExited
+    }//GEN-LAST:event_labelOpenDocumentMouseExited
 
-    private void labelDocumentDownloadMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseClicked
+    private void labelDownloadDocumentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDownloadDocumentMouseClicked
 
         //cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
         // temporaryly
@@ -1685,7 +1685,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         }
 
 
-    }//GEN-LAST:event_labelDocumentDownloadMouseClicked
+    }//GEN-LAST:event_labelDownloadDocumentMouseClicked
 
     private void savePayment() {
         showLoadingStatus();
@@ -1709,13 +1709,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
 
-    private void labelDocumentDownloadMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseEntered
+    private void labelDownloadDocumentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDownloadDocumentMouseEntered
         // TODO add your handling code here:
-    }//GEN-LAST:event_labelDocumentDownloadMouseEntered
+    }//GEN-LAST:event_labelDownloadDocumentMouseEntered
 
-    private void labelDocumentDownloadMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDocumentDownloadMouseExited
+    private void labelDownloadDocumentMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDownloadDocumentMouseExited
         // TODO add your handling code here:
-    }//GEN-LAST:event_labelDocumentDownloadMouseExited
+    }//GEN-LAST:event_labelDownloadDocumentMouseExited
 
     private void labelReportBugsMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugsMouseEntered
         UIEffect.focusGained(labelReportBugs);
@@ -1866,12 +1866,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         if (fName != null) {
 
             File n = new File(PathReference.getDocumentPath(fName));
-            labelDocumentOpen.setEnabled(n.exists());
-            labelDocumentDownload.setEnabled(!n.exists());
+            labelOpenDocument.setEnabled(n.exists());
+            labelDownloadDocument.setEnabled(!n.exists());
 
         } else {
-            labelDocumentOpen.setEnabled(false);
-            labelDocumentDownload.setEnabled(true);
+            labelOpenDocument.setEnabled(false);
+            labelDownloadDocument.setEnabled(true);
         }
 
     }//GEN-LAST:event_tableDocumentDataMouseClicked
@@ -2082,8 +2082,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelBrowseScreenshotPaymentForm;
     private javax.swing.JLabel labelClassRegistered;
     private javax.swing.JLabel labelClose;
-    private javax.swing.JLabel labelDocumentDownload;
-    private javax.swing.JLabel labelDocumentOpen;
+    private javax.swing.JLabel labelDownloadDocument;
     private javax.swing.JLabel labelEmailProfile;
     private javax.swing.JLabel labelHidePaymentForm;
     private javax.swing.JLabel labelHistoryLast1;
@@ -2098,6 +2097,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelNavHome;
     private javax.swing.JLabel labelNotifClassSettings;
     private javax.swing.JLabel labelNotifSessionSettings;
+    private javax.swing.JLabel labelOpenDocument;
     private javax.swing.JLabel labelPanelViewName;
     private javax.swing.JLabel labelPasswordProfile;
     private javax.swing.JLabel labelPaymentForm;
@@ -2487,6 +2487,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         languageHelper.apply(buttonSavePayment, "buttonSavePayment", Comp.BUTTON);
         languageHelper.apply(labelRefreshPayment, "labelRefreshPayment", Comp.LABEL);
         languageHelper.apply(labelAddPayment, "labelAddPayment", Comp.LABEL);
+        
+         // page @attendance
+        languageHelper.apply(labelRefreshAttendance, "labelRefreshAttendance", Comp.LABEL);
+        languageHelper.apply(labelShowAttendanceStatistic, "labelShowAttendanceStatistic", Comp.LABEL);
+        languageHelper.apply(labelShowAttendanceData, "labelShowAttendanceData", Comp.LABEL);
+        
+        // page @document
+        languageHelper.apply(labelRefreshDocument, "labelRefreshDocument", Comp.LABEL);
+        languageHelper.apply(labelDownloadDocument, "labelDownloadDocument", Comp.LABEL);
+        languageHelper.apply(labelOpenDocument, "labelOpenDocument", Comp.LABEL);
+       
         
     }
 
