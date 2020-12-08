@@ -55,6 +55,11 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         applyLanguageUI();
     }
 
+    @Override
+    public void setVisible(boolean b){
+        applyLanguageUI();
+        super.setVisible(b);
+    }
     private void applyLanguageUI() {
 
         languageHelper = new LanguageSwitcher(configuration);

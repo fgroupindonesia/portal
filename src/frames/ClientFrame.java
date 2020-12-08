@@ -73,7 +73,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     //   ExecutorService executorService = Executors.newFixedThreadPool(28);
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(28);
 
-    LanguageSwitcher languageHelper  = new LanguageSwitcher(configuration);
+    LanguageSwitcher languageHelper = new LanguageSwitcher(configuration);
 
     File propicFile;
     File screenshotFile;
@@ -96,8 +96,18 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         processNicely();
     }
 
+    // this functionallity is under consideration 2020-dec-08
+    private void hideNotifLimitReach() {
+        labelNotifSessionSettings.setVisible(false);
+        radioNotifSessionAtLeast1Settings.setVisible(false);
+        radioNotifSessionLessThan3Settings.setVisible(false);
+    }
+
     private void processNicely() {
         initComponents();
+
+        // hide the functions that are still under consideration
+        hideNotifLimitReach();
 
         // rendering UI based upon its language
         applyLanguageUI();
@@ -398,6 +408,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonSaveSettings = new javax.swing.JButton();
         comboboxSystemLanguage = new javax.swing.JComboBox<>();
         labelSystemLanguagesSettings = new javax.swing.JLabel();
+        labelReportBugs2 = new javax.swing.JLabel();
         panelTools = new javax.swing.JPanel();
         jLabel11 = new javax.swing.JLabel();
         buttonTerminateTmv = new javax.swing.JButton();
@@ -446,6 +457,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelDownloadDocument = new javax.swing.JLabel();
         labelRefreshDocument = new javax.swing.JLabel();
         panelInnerBrowser = new javax.swing.JPanel();
+        panelReportBugs = new javax.swing.JPanel();
+        labelReportBugsForm = new javax.swing.JLabel();
+        labelScreenshotReportBugsForm = new javax.swing.JLabel();
+        labelScreenshotPictureReportBugsForm = new javax.swing.JLabel();
+        buttonSaveReportBugsForm = new javax.swing.JButton();
+        labelDescReportBugsForm = new javax.swing.JLabel();
+        labelBrowseScreenshotReportBugsForm = new javax.swing.JLabel();
+        labelCaseReportBugsForm = new javax.swing.JLabel();
+        textfieldCaseReportBugsForm = new javax.swing.JTextField();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        textareaDescriptionReportBugsForm = new javax.swing.JTextArea();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
         labelNavHome = new javax.swing.JLabel();
@@ -652,6 +674,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelReportBugs.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         labelReportBugs.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         labelReportBugs.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelReportBugsMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 labelReportBugsMouseEntered(evt);
             }
@@ -814,15 +839,15 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         radioButtonGroupNotifSessionLimit.add(radioNotifSessionAtLeast1Settings);
         radioNotifSessionAtLeast1Settings.setText("At least 1");
         radioNotifSessionAtLeast1Settings.setActionCommand(radioNotifSessionAtLeast1Settings.getText().toLowerCase());
-        panelSettings.add(radioNotifSessionAtLeast1Settings, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 80, -1, -1));
+        panelSettings.add(radioNotifSessionAtLeast1Settings, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 80, -1, -1));
 
         radioButtonGroupNotifSessionLimit.add(radioNotifSessionLessThan3Settings);
         radioNotifSessionLessThan3Settings.setText("Less than 3");
         radioNotifSessionLessThan3Settings.setActionCommand(radioNotifSessionLessThan3Settings.getText().toLowerCase());
-        panelSettings.add(radioNotifSessionLessThan3Settings, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 100, -1, -1));
+        panelSettings.add(radioNotifSessionLessThan3Settings, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 100, -1, -1));
 
         labelNotifSessionSettings.setText("Notify when sessions limit reach?");
-        panelSettings.add(labelNotifSessionSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 60, 210, -1));
+        panelSettings.add(labelNotifSessionSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 60, 210, -1));
 
         checkboxAutoupdateToolsSettings.setSelected(true);
         checkboxAutoupdateToolsSettings.setText("Autoupdate Tools");
@@ -841,6 +866,25 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         labelSystemLanguagesSettings.setText("System Languages:");
         panelSettings.add(labelSystemLanguagesSettings, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 160, -1, -1));
+
+        labelReportBugs2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelReportBugs2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bug32.png"))); // NOI18N
+        labelReportBugs2.setText("Report Bugs");
+        labelReportBugs2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelReportBugs2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        labelReportBugs2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        labelReportBugs2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelReportBugs2MouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelReportBugs2MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelReportBugs2MouseExited(evt);
+            }
+        });
+        panelSettings.add(labelReportBugs2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 60, 80, 60));
 
         panelContentCenter.add(panelSettings, "panelSettings");
 
@@ -1336,6 +1380,66 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelInnerBrowser.setLayout(new java.awt.BorderLayout());
         panelContentCenter.add(panelInnerBrowser, "panelInnerBrowser");
 
+        panelReportBugs.setPreferredSize(new java.awt.Dimension(200, 371));
+        panelReportBugs.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        labelReportBugsForm.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        labelReportBugsForm.setText("Report Bugs");
+        panelReportBugs.add(labelReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 31, 102, 30));
+
+        labelScreenshotReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/monitor.png"))); // NOI18N
+        labelScreenshotReportBugsForm.setText("Screenshot:");
+        panelReportBugs.add(labelScreenshotReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 70, 90, -1));
+
+        labelScreenshotPictureReportBugsForm.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelScreenshotPictureReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/file.png"))); // NOI18N
+        panelReportBugs.add(labelScreenshotPictureReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 100, 180, 150));
+
+        buttonSaveReportBugsForm.setText("Save");
+        buttonSaveReportBugsForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSaveReportBugsFormActionPerformed(evt);
+            }
+        });
+        panelReportBugs.add(buttonSaveReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 350, 70, -1));
+
+        labelDescReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/coin.png"))); // NOI18N
+        labelDescReportBugsForm.setText("Description");
+        panelReportBugs.add(labelDescReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 150, 120, -1));
+
+        labelBrowseScreenshotReportBugsForm.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelBrowseScreenshotReportBugsForm.setForeground(new java.awt.Color(102, 0, 255));
+        labelBrowseScreenshotReportBugsForm.setText("Browse Picture");
+        labelBrowseScreenshotReportBugsForm.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelBrowseScreenshotReportBugsForm.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelBrowseScreenshotReportBugsFormMouseClicked(evt);
+            }
+        });
+        panelReportBugs.add(labelBrowseScreenshotReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 260, -1, -1));
+
+        labelCaseReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/coin.png"))); // NOI18N
+        labelCaseReportBugsForm.setText("Case");
+        panelReportBugs.add(labelCaseReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 120, -1));
+
+        textfieldCaseReportBugsForm.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                textfieldCaseReportBugsFormFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textfieldCaseReportBugsFormFocusLost(evt);
+            }
+        });
+        panelReportBugs.add(textfieldCaseReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 310, -1));
+
+        textareaDescriptionReportBugsForm.setColumns(20);
+        textareaDescriptionReportBugsForm.setRows(5);
+        jScrollPane5.setViewportView(textareaDescriptionReportBugsForm);
+
+        panelReportBugs.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 180, 310, -1));
+
+        panelContentCenter.add(panelReportBugs, "panelReportBugs");
+
         panelCenter.add(panelContentCenter, java.awt.BorderLayout.CENTER);
 
         panelHeaderCenter.setPreferredSize(new java.awt.Dimension(574, 50));
@@ -1360,7 +1464,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 .addComponent(labelNavHome)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(labelPanelViewName, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(1084, Short.MAX_VALUE))
+                .addContainerGap(1109, Short.MAX_VALUE))
         );
         panelHeaderCenterLayout.setVerticalGroup(
             panelHeaderCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1400,12 +1504,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_panelBaseMouseDragged
 
     private void buttonProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonProfileActionPerformed
-        
+
         //change the menu based upon UI Language
         //labelPanelViewName.setText("<< Profile");
         languageHelper.apply(labelPanelViewName, "labelPanelViewNameProfile", Comp.LABEL);
-        
-        
+
         cardLayouterMain.show(panelContentCenter, "panelProfile");
 
         // check the existance of Tmviewer 
@@ -1420,7 +1523,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void buttonToolsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonToolsActionPerformed
         //labelPanelViewName.setText("<< Tools");
         languageHelper.apply(labelPanelViewName, "labelPanelViewNameTools", Comp.LABEL);
-        
+
         cardLayouterMain.show(panelContentCenter, "panelTools");
     }//GEN-LAST:event_buttonToolsActionPerformed
 
@@ -1454,7 +1557,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_buttonSettingsActionPerformed
 
     private void panelMenuMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_panelMenuMouseEntered
-        
+
     }//GEN-LAST:event_panelMenuMouseEntered
 
     private void labelPropicUserMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelPropicUserMouseEntered
@@ -1927,6 +2030,43 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         }
     }//GEN-LAST:event_labelBrowseScreenshotPaymentFormMouseClicked
 
+    private void labelReportBugs2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugs2MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelReportBugs2MouseEntered
+
+    private void labelReportBugs2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugs2MouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelReportBugs2MouseExited
+
+    private void labelReportBugs2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugs2MouseClicked
+
+
+    }//GEN-LAST:event_labelReportBugs2MouseClicked
+
+    private void labelReportBugsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugsMouseClicked
+
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameReportBugs", Comp.LABEL);
+
+        cardLayouterMain.show(panelContentCenter, "panelReportBugs");
+
+    }//GEN-LAST:event_labelReportBugsMouseClicked
+
+    private void buttonSaveReportBugsFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveReportBugsFormActionPerformed
+        UIEffect.popup("Thank You for your great reports for us!!", this);
+    }//GEN-LAST:event_buttonSaveReportBugsFormActionPerformed
+
+    private void labelBrowseScreenshotReportBugsFormMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotReportBugsFormMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelBrowseScreenshotReportBugsFormMouseClicked
+
+    private void textfieldCaseReportBugsFormFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldCaseReportBugsFormFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textfieldCaseReportBugsFormFocusGained
+
+    private void textfieldCaseReportBugsFormFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldCaseReportBugsFormFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textfieldCaseReportBugsFormFocusLost
+
     private void enableUserFormSave() {
 
         boolean allow = false;
@@ -2038,7 +2178,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void logout() {
         UIEffect.stopTimeEffect();
-        loginFrame.show();
+        loginFrame.setVisible(true);
         this.dispose();
     }
 
@@ -2080,6 +2220,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JButton buttonRunTmv;
     private javax.swing.JButton buttonSavePayment;
     private javax.swing.JButton buttonSaveProfile;
+    private javax.swing.JButton buttonSaveReportBugsForm;
     private javax.swing.JButton buttonSaveSettings;
     private javax.swing.JButton buttonSettings;
     private javax.swing.JButton buttonTerminateTmv;
@@ -2098,12 +2239,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JLabel labelAddPayment;
     private javax.swing.JLabel labelAddressProfile;
     private javax.swing.JLabel labelAmountPaymentForm;
     private javax.swing.JLabel labelBrowseScreenshotPaymentForm;
+    private javax.swing.JLabel labelBrowseScreenshotReportBugsForm;
+    private javax.swing.JLabel labelCaseReportBugsForm;
     private javax.swing.JLabel labelClassRegistered;
     private javax.swing.JLabel labelClose;
+    private javax.swing.JLabel labelDescReportBugsForm;
     private javax.swing.JLabel labelDownloadDocument;
     private javax.swing.JLabel labelEmailProfile;
     private javax.swing.JLabel labelHidePaymentForm;
@@ -2129,11 +2274,15 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelRefreshDocument;
     private javax.swing.JLabel labelRefreshPayment;
     private javax.swing.JLabel labelReportBugs;
+    private javax.swing.JLabel labelReportBugs2;
+    private javax.swing.JLabel labelReportBugsForm;
     private javax.swing.JLabel labelScheduleDay1;
     private javax.swing.JLabel labelScheduleDay2;
     private javax.swing.JLabel labelScheduleDay3;
     private javax.swing.JLabel labelScreenshotPayment;
     private javax.swing.JLabel labelScreenshotPaymentForm;
+    private javax.swing.JLabel labelScreenshotPictureReportBugsForm;
+    private javax.swing.JLabel labelScreenshotReportBugsForm;
     private javax.swing.JLabel labelShowAttendanceData;
     private javax.swing.JLabel labelShowAttendanceStatistic;
     private javax.swing.JLabel labelSystemLanguagesSettings;
@@ -2171,6 +2320,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JPanel panelPaymentForm;
     private javax.swing.JPanel panelPaymentTable;
     private javax.swing.JPanel panelProfile;
+    private javax.swing.JPanel panelReportBugs;
     private javax.swing.JPanel panelSchedule;
     private javax.swing.JPanel panelSettings;
     private javax.swing.JPanel panelTools;
@@ -2186,7 +2336,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JTable tableDocumentData;
     private javax.swing.JTable tablePaymentData;
     private javax.swing.JTextArea textareaAddressProfile;
+    private javax.swing.JTextArea textareaDescriptionReportBugsForm;
     private javax.swing.JTextField textfieldAmountPayment;
+    private javax.swing.JTextField textfieldCaseReportBugsForm;
     private javax.swing.JTextField textfieldEmailProfile;
     private javax.swing.JPasswordField textfieldPasswordProfile;
     private javax.swing.JTextField textfieldTeamviewerID;
@@ -2451,8 +2603,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void applyLanguageUI() {
 
-        
-
         // front page @Home
         languageHelper.apply(buttonProfile, "buttonProfile", Comp.BUTTON);
         languageHelper.apply(buttonTools, "buttonTools", Comp.BUTTON);
@@ -2464,6 +2614,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         languageHelper.apply(labelPanelViewName, "labelPanelViewName", Comp.LABEL);
         languageHelper.apply(labelWelcomeUser, "labelWelcomeUser", Comp.LABEL);
         languageHelper.apply(labelReportBugs, "labelReportBugs", Comp.LABEL);
+        languageHelper.apply(labelReportBugs2, "labelReportBugs", Comp.LABEL);
         languageHelper.apply(labelTotalSessionCompleted, "labelTotalSessionCompleted", Comp.LABEL);
         languageHelper.apply(labelClassRegistered, "labelClassRegistered", Comp.LABEL);
         languageHelper.apply(labelLastPayment, "labelLastPayment", Comp.LABEL);
@@ -2478,10 +2629,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         languageHelper.apply(radioNotifClass1HourSettings, "radioNotifClass1HourSettings", Comp.RADIO_BUTTON);
         languageHelper.apply(labelNotifClassSettings, "labelNotifClassSettings", Comp.LABEL);
         languageHelper.apply(checkboxAutoupdateToolsSettings, "checkboxAutoupdateToolsSettings", Comp.CHECKBOX);
-        
+
         // for animation time
         UIEffect.setLanguageHelper(languageHelper);
-        
+
         // for @userprofilePage
         languageHelper.apply(labelTmvIDProfile, "labelTmvIDProfile", Comp.LABEL);
         languageHelper.apply(labelTmvPassProfile, "labelTmvPassProfile", Comp.LABEL);
@@ -2491,15 +2642,15 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         languageHelper.apply(labelEmailProfile, "labelEmailProfile", Comp.LABEL);
         languageHelper.apply(labelAddressProfile, "labelAddressProfile", Comp.LABEL);
         languageHelper.apply(buttonSaveProfile, "buttonSaveProfile", Comp.BUTTON);
-        
+
         // header page name
         languageHelper.apply(labelPanelViewName, "labelPanelViewName", Comp.LABEL);
-        
+
         // button on Tools
         languageHelper.apply(buttonRunTmv, "buttonRunTmv", Comp.BUTTON);
         languageHelper.apply(buttonVisitChrome, "buttonVisitChrome", Comp.BUTTON);
         languageHelper.apply(buttonVisitWhatsapp, "buttonVisitWhatsapp", Comp.BUTTON);
-        
+
         // page @paymentForm
         languageHelper.apply(labelPaymentForm, "labelPaymentForm", Comp.LABEL);
         languageHelper.apply(labelAmountPaymentForm, "labelAmountPaymentForm", Comp.LABEL);
@@ -2509,26 +2660,25 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         languageHelper.apply(buttonSavePayment, "buttonSavePayment", Comp.BUTTON);
         languageHelper.apply(labelRefreshPayment, "labelRefreshPayment", Comp.LABEL);
         languageHelper.apply(labelAddPayment, "labelAddPayment", Comp.LABEL);
-        
-         // page @attendance
+
+        // page @attendance
         languageHelper.apply(labelRefreshAttendance, "labelRefreshAttendance", Comp.LABEL);
         languageHelper.apply(labelShowAttendanceStatistic, "labelShowAttendanceStatistic", Comp.LABEL);
         languageHelper.apply(labelShowAttendanceData, "labelShowAttendanceData", Comp.LABEL);
-        
+
         // page @document
         languageHelper.apply(labelRefreshDocument, "labelRefreshDocument", Comp.LABEL);
         languageHelper.apply(labelDownloadDocument, "labelDownloadDocument", Comp.LABEL);
         languageHelper.apply(labelOpenDocument, "labelOpenDocument", Comp.LABEL);
-       
+
         // table for @payment
         // column order are:
         // id, username, amount, method, screenshot, date created
-        
         languageHelper.getColumnTable("colUsernamePayment",
-        "colAmountPayment",
-        "colMethodPayment",
-        "colScreenshotPayment",
-        "colDateCreatedPayment");
+                "colAmountPayment",
+                "colMethodPayment",
+                "colScreenshotPayment",
+                "colDateCreatedPayment");
 
     }
 

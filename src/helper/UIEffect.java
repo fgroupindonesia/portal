@@ -196,6 +196,14 @@ public class UIEffect {
                     labelInterval.setText("1A : 1B, "
                             + diffMinutes + " 1C, "
                             + diffSeconds + " 1D.");
+
+                } else if (diffDays == 0 && diffHours < 0) {
+                    // here when the class is already passed
+                    stringMainHolder.append("labelIntervalPassed");
+
+                    stringSecondHolder.append("1A");
+
+                    labelInterval.setText("1A");
                 }
 
                 String dataOrdered[] = stringMainHolder.toString().split(" ");
@@ -204,9 +212,8 @@ public class UIEffect {
                 //clearing string buffer
                 stringMainHolder.delete(0, stringMainHolder.length());
                 stringSecondHolder.delete(0, stringSecondHolder.length());
-                
-                //System.out.println("data ui interval is " + labelInterval.getText());
 
+                //System.out.println("data ui interval is " + labelInterval.getText());
                 if (langHelper != null) {
                     langHelper.apply(labelInterval, dataOrdered, dataLetter);
                 }
@@ -221,9 +228,11 @@ public class UIEffect {
                     frameRef.playNotifSound();
                 }
             }
-        } else {
+        } else if (diffDays < 0) {
+
             scheduleTimer.stop();
             labelInterval.setText("");
+
         }
     }
 

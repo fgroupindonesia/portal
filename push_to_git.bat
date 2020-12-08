@@ -1,5 +1,5 @@
 git add .
-git commit -m "Adding Language UI data for Tables GUI."
+git commit -m "Adding new Report Bugs Management."
 git push origin main
 git gc --prune
 git pull
