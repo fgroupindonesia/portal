@@ -39,7 +39,6 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -74,7 +73,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     //   ExecutorService executorService = Executors.newFixedThreadPool(28);
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(28);
 
-    LanguageSwitcher languageHelper;
+    LanguageSwitcher languageHelper  = new LanguageSwitcher(configuration);
 
     File propicFile;
     File screenshotFile;
@@ -987,9 +986,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             new Object [][] {
 
             },
-            new String [] {
-                "[ x ]", "Id", "Username", "Amount", "Method", "Screenshoot", "Date Created"
-            }
+            /*new String [] {
+                "[ x ]", "Id", "Username", "Amount", "Method", "Screenshot", "Date Created"
+            }*/
+            languageHelper.getColumnTable("colCheckBox",
+                "colId",
+                "colUsernamePayment",
+                "colAmountPayment",
+                "colMethodPayment",
+                "colScreenshotPayment",
+                "colDateCreatedPayment")
         ) {
             Class[] types = new Class [] {
                 java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
@@ -1085,9 +1091,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             new Object [][] {
 
             },
-            new String [] {
+            /*new String [] {
                 "[ x ]", "Id", "Username", "Class", "Status", "Signature", "Date Created", "Date Modified"
-            }
+            }*/
+            languageHelper.getColumnTable("colCheckBox",
+                "colId",
+                "colUsernameAttendance",
+                "colClassAttendance",
+                "colStatusAttendance",
+                "colSignatureAttendance",
+                "colDateCreatedAttendance",
+                "colDateModifiedAttendance")
         ) {
             Class[] types = new Class [] {
                 java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
@@ -1206,9 +1220,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             new Object [][] {
 
             },
-            new String [] {
+            /*new String [] {
                 "[ x ]", "Id", "Title", "Description", "Filename", "Username", "URL", "Date Created"
-            }
+            }*/
+            languageHelper.getColumnTable("colCheckBox",
+                "colId",
+                "colTitleDocument",
+                "colDescDocument",
+                "colFilenameDocument",
+                "colUsernameDocument",
+                "colURLDocument",
+                "colDateCreatedDocument")
         ) {
             Class[] types = new Class [] {
                 java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
@@ -2429,7 +2451,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void applyLanguageUI() {
 
-        languageHelper = new LanguageSwitcher(configuration);
+        
 
         // front page @Home
         languageHelper.apply(buttonProfile, "buttonProfile", Comp.BUTTON);
@@ -2498,7 +2520,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         languageHelper.apply(labelDownloadDocument, "labelDownloadDocument", Comp.LABEL);
         languageHelper.apply(labelOpenDocument, "labelOpenDocument", Comp.LABEL);
        
+        // table for @payment
+        // column order are:
+        // id, username, amount, method, screenshot, date created
         
+        languageHelper.getColumnTable("colUsernamePayment",
+        "colAmountPayment",
+        "colMethodPayment",
+        "colScreenshotPayment",
+        "colDateCreatedPayment");
+
     }
 
     @Override

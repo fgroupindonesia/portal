@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JRadioButton;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 
 /**
@@ -102,16 +103,51 @@ public class LanguageSwitcher {
         }
 
         //System.out.println("Dapat kata " + stb.toString());
-        String newWord [] = stb.toString().split(";");
+        String newWord[] = stb.toString().split(";");
         //System.out.println("jumlah kata " + newWord.length);
         //System.out.println("jumlah huruf " + letter.length);
-      
-        for(int n=0; n<letter.length; n++){
+
+        for (int n = 0; n < letter.length; n++) {
             earlierText = earlierText.replace(letter[n], newWord[n]);
         }
-        
+
         el.setText(earlierText);
+
+    }
+
+    public void apply(JTable table, int id, String key, int comp) {
+        for (LanguageComponent lg : dataDictionary) {
+            if (lg.getKey().equalsIgnoreCase(key)) {
+                table.getTableHeader().getColumnModel().getColumn(id).setHeaderValue(lg.getText());
+                table.repaint();
+                //table.repaint();
+                break;
+            }
+        }
+    }
+
+    public String[] getColumnTable(String... keyNames) {
+        String data[] = null;
+        ArrayList<String> dataTemp = new ArrayList<String>();
+
+        for (LanguageComponent lg : dataDictionary) {
+            for (String keySingle : keyNames) {
+                if (lg.getKey().equalsIgnoreCase(keySingle)) {
+                    dataTemp.add(lg.getText());
+                    break;
+                }
+            }
+
+        }
+
+        if (dataTemp.size() > 0) {
+            data = dataTemp.toArray(new String[0]);
+        }
         
+        //int size = data.length;
+        //System.out.println("Something " + size);
+        
+        return data;
     }
 
     public void apply(JComponent el, String key, int comp) {
