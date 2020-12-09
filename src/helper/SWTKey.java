@@ -28,11 +28,13 @@ public class SWTKey {
     public static final int WORK_REFRESH_PICTURE = 7;
     public static final int WORK_REFRESH_SIGNATURE = 70;
     public static final int WORK_REFRESH_SCREENSHOT_PAYMENT = 701;
+    public static final int WORK_REFRESH_SCREENSHOT_REPORT_BUGS = 7001;
 
     public static final int WORK_REFRESH_CLASSROOM = 71;
 
     public static final int WORK_REFRESH_DASHBOARD = 8;
     public static final int WORK_REFRESH_HISTORY = 9;
+    public static final int WORK_REFRESH_REPORT_BUGS = 91;
 
     public static final int WORK_LOGIN = 10;
     public static final int WORK_TEST_INTERNET = 11;

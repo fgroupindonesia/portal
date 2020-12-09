@@ -1,5 +1,5 @@
 git add .
-git commit -m "Client UI with ReportBugs & History Tracking are all completed."
+git commit -m "Administrator UI with ReportBugs is under progress."
 git push origin main
 git gc --prune
 git pull

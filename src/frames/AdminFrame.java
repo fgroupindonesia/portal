@@ -9,6 +9,7 @@ import beans.Attendance;
 import beans.ClassRoom;
 import beans.Document;
 import beans.Payment;
+import beans.RBugs;
 import beans.Schedule;
 import beans.User;
 import com.google.gson.Gson;
@@ -27,7 +28,6 @@ import helper.WebReference;
 import helper.preferences.Keys;
 import helper.preferences.SettingPreference;
 import java.awt.CardLayout;
-import java.awt.Frame;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
@@ -39,6 +39,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -46,7 +47,7 @@ import javax.swing.JList;
  */
 public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProcess {
 
-    File propicFile, docFile, signatureFile, payFile;
+    File propicFile, docFile, signatureFile, payFile, bugsFile;
     short idForm;
     TableRenderer tabRender = new TableRenderer();
     LoginFrame loginFrame;
@@ -94,6 +95,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         refreshClassRoom();
         refreshAttendance();
         refreshPayment();
+        refreshBugsReported();
 
         // hide the home link
         labelBackToHome.setVisible(false);
@@ -179,6 +181,27 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void renderBugsReportedForm(RBugs dataCome) {
+
+        idForm = (short) dataCome.getId();
+
+        comboboxUsernameBugsReported.setSelectedItem(dataCome.getUsername());
+        comboboxAppNameBugsReported.setSelectedItem(dataCome.getApp_name());
+        textfieldTitleBugsReported.setText(dataCome.getTitle());
+        textfieldIPAddressBugsReported.setText(dataCome.getIp_address());
+        textAreaDescriptionBugsReported.setText(dataCome.getDescription());
+
+        if (!dataCome.getScreenshot().equalsIgnoreCase("not available")) {
+            // we are required to download the image from server
+            refreshScreenshotBugsReportedPicture(dataCome.getScreenshot());
+        } else {
+            // we open the form access
+            lockBugsReportedForm(false);
+            hideLoadingStatus();
+        }
+
+    }
+
     private void renderDocumentForm(Document dataCome) {
 
         idForm = (short) dataCome.getId();
@@ -255,6 +278,26 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // executorService.submit(workSched);
         executorService.schedule(workSignature, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void refreshScreenshotBugsReportedPicture(String filename) {
+
+        // set the path temporarily 
+        // for later usage in locally
+        File dest = new File(PathReference.getScreenshotBugsReportedPath(filename));
+
+        configuration.setValue(Keys.SCREENSHOT_REPORT_BUGS, dest.getAbsolutePath());
+
+        SWThreadWorker workScreenshot = new SWThreadWorker(this);
+
+        // execute the download picture process
+        workScreenshot.setWork(SWTKey.WORK_REFRESH_SCREENSHOT_REPORT_BUGS);
+        workScreenshot.writeMode(true);
+        workScreenshot.addData("screenshot", filename);
+
+        // executorService.submit(workSched);
+        executorService.schedule(workScreenshot, 2, TimeUnit.SECONDS);
 
     }
 
@@ -386,6 +429,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void refreshBugsReported() {
+
+        SWThreadWorker workBugs = new SWThreadWorker(this);
+        workBugs.setWork(SWTKey.WORK_REFRESH_REPORT_BUGS);
+        workBugs.addData("username", "admin");
+        prepareToken(workBugs);
+        executorService.schedule(workBugs, 2, TimeUnit.SECONDS);
+
+    }
+
     private void refreshSchedule() {
 
         SWThreadWorker workSched = new SWThreadWorker(this);
@@ -432,6 +485,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workDoc.addData("id", anID + "");
         prepareToken(workDoc);
         executorService.schedule(workDoc, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void getBugsReported(int anID) {
+
+        SWThreadWorker workBugs = new SWThreadWorker(this);
+        workBugs.setWork(SWTKey.WORK_REPORT_BUGS_EDIT);
+        workBugs.addData("id", anID + "");
+        prepareToken(workBugs);
+        executorService.schedule(workBugs, 2, TimeUnit.SECONDS);
 
     }
 
@@ -510,6 +573,28 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         prepareToken(workPaymentEntity);
         executorService.schedule(workPaymentEntity, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void saveBugsReported() {
+
+        showLoadingStatus();
+        SWThreadWorker workBugsEntity = new SWThreadWorker(this);
+
+        // saving new data
+        workBugsEntity.setWork(SWTKey.WORK_REPORT_BUGS_SAVE);
+
+        workBugsEntity.addData("app_name", comboboxAppNameBugsReported.getSelectedItem().toString());
+        workBugsEntity.addData("username", comboboxUsernameBugsReported.getSelectedItem().toString());
+        workBugsEntity.addData("title", textfieldTitleBugsReported.getText());
+        workBugsEntity.addData("description", textAreaDescriptionBugsReported.getText());
+
+        if (bugsFile != null) {
+            workBugsEntity.addFile("screenshot", bugsFile);
+        }
+
+        prepareToken(workBugsEntity);
+        executorService.schedule(workBugsEntity, 2, TimeUnit.SECONDS);
 
     }
 
@@ -654,6 +739,19 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             workPay.setWork(SWTKey.WORK_PAYMENT_DELETE);
             prepareToken(workPay);
             executorService.schedule(workPay, 1, TimeUnit.SECONDS);
+        }
+
+    }
+
+    private void deleteBugsReported(ArrayList<String> dataIn) {
+
+        // for bugsreported usage the d is actually a number (Integer)
+        for (String d : dataIn) {
+            SWThreadWorker workBugs = new SWThreadWorker(this);
+            workBugs.addData("id", d);
+            workBugs.setWork(SWTKey.WORK_REPORT_BUGS_DELETE);
+            prepareToken(workBugs);
+            executorService.schedule(workBugs, 1, TimeUnit.SECONDS);
         }
 
     }
@@ -839,27 +937,31 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jLabel27 = new javax.swing.JLabel();
         panelBugsReported = new javax.swing.JPanel();
         panelBugsReportedManagement = new javax.swing.JPanel();
-        panelPaymentControl1 = new javax.swing.JPanel();
+        panelReportedBugsControl = new javax.swing.JPanel();
         buttonViewBugsReported = new javax.swing.JButton();
         buttonDeleteBugsReported = new javax.swing.JButton();
         labelBugsReportedManagement = new javax.swing.JLabel();
         labelRefreshBugsReported = new javax.swing.JLabel();
-        panelPaymentTable1 = new javax.swing.JPanel();
+        panelReportedBugsTable = new javax.swing.JPanel();
         jScrollPane9 = new javax.swing.JScrollPane();
         tableBugsReportedData = new javax.swing.JTable();
         panelBugsReportedForm = new javax.swing.JPanel();
-        buttonCancelPaymentForm1 = new javax.swing.JButton();
-        jLabel28 = new javax.swing.JLabel();
+        buttonCancelBugsReportedForm = new javax.swing.JButton();
         jLabel29 = new javax.swing.JLabel();
-        buttonSavePaymentForm1 = new javax.swing.JButton();
-        comboboxMethodPayment1 = new javax.swing.JComboBox<>();
-        comboboxUsernamePayment1 = new javax.swing.JComboBox<>();
+        buttonSaveBugsReportedForm = new javax.swing.JButton();
+        comboboxUsernameBugsReported = new javax.swing.JComboBox<>();
         jLabel30 = new javax.swing.JLabel();
-        labelBrowseScreenshotPayment1 = new javax.swing.JLabel();
+        labelBrowseScreenshotBugsReported = new javax.swing.JLabel();
         jPanel4 = new javax.swing.JPanel();
-        labelScreenshotPayment1 = new javax.swing.JLabel();
-        textfieldAmountPayment1 = new javax.swing.JTextField();
+        labelScreenshotBugsReported = new javax.swing.JLabel();
+        textfieldTitleBugsReported = new javax.swing.JTextField();
         jLabel31 = new javax.swing.JLabel();
+        jScrollPane10 = new javax.swing.JScrollPane();
+        textAreaDescriptionBugsReported = new javax.swing.JTextArea();
+        jLabel32 = new javax.swing.JLabel();
+        comboboxAppNameBugsReported = new javax.swing.JComboBox<>();
+        textfieldIPAddressBugsReported = new javax.swing.JTextField();
+        jLabel33 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         labelBottomPadding = new javax.swing.JLabel();
         labelBackToHome = new javax.swing.JLabel();
@@ -1882,8 +1984,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelBugsReportedManagement.setLayout(new java.awt.BorderLayout());
 
-        panelPaymentControl1.setPreferredSize(new java.awt.Dimension(658, 40));
-        panelPaymentControl1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        panelReportedBugsControl.setPreferredSize(new java.awt.Dimension(658, 40));
+        panelReportedBugsControl.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         buttonViewBugsReported.setText("View");
         buttonViewBugsReported.addActionListener(new java.awt.event.ActionListener() {
@@ -1891,7 +1993,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonViewBugsReportedActionPerformed(evt);
             }
         });
-        panelPaymentControl1.add(buttonViewBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(514, 5, 60, -1));
+        panelReportedBugsControl.add(buttonViewBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(514, 5, 60, -1));
 
         buttonDeleteBugsReported.setText("Delete");
         buttonDeleteBugsReported.addActionListener(new java.awt.event.ActionListener() {
@@ -1899,11 +2001,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonDeleteBugsReportedActionPerformed(evt);
             }
         });
-        panelPaymentControl1.add(buttonDeleteBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(589, 5, -1, -1));
+        panelReportedBugsControl.add(buttonDeleteBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(589, 5, -1, -1));
 
         labelBugsReportedManagement.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
         labelBugsReportedManagement.setText("Bugs Reported Management");
-        panelPaymentControl1.add(labelBugsReportedManagement, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 280, 40));
+        panelReportedBugsControl.add(labelBugsReportedManagement, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 280, 40));
 
         labelRefreshBugsReported.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh16.png"))); // NOI18N
         labelRefreshBugsReported.setText("Refresh");
@@ -1919,22 +2021,22 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 labelRefreshBugsReportedMouseExited(evt);
             }
         });
-        panelPaymentControl1.add(labelRefreshBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 10, 70, 20));
+        panelReportedBugsControl.add(labelRefreshBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 10, 70, 20));
 
-        panelBugsReportedManagement.add(panelPaymentControl1, java.awt.BorderLayout.PAGE_START);
+        panelBugsReportedManagement.add(panelReportedBugsControl, java.awt.BorderLayout.PAGE_START);
 
-        panelPaymentTable1.setLayout(new java.awt.BorderLayout());
+        panelReportedBugsTable.setLayout(new java.awt.BorderLayout());
 
         tableBugsReportedData.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "[ x ]", "Id", "Username", "Amount", "Method", "Screenshot", "Date Created"
+                "[ x ]", "Id", "App Name", "Username", "IP Address", "Title", "Description", "Screenshot", "Date Created"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -1958,91 +2060,115 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             tableBugsReportedData.getColumnModel().getColumn(4).setMinWidth(80);
             tableBugsReportedData.getColumnModel().getColumn(4).setPreferredWidth(80);
             tableBugsReportedData.getColumnModel().getColumn(4).setMaxWidth(80);
+            tableBugsReportedData.getColumnModel().getColumn(5).setMinWidth(80);
+            tableBugsReportedData.getColumnModel().getColumn(5).setPreferredWidth(80);
+            tableBugsReportedData.getColumnModel().getColumn(5).setMaxWidth(80);
         }
 
-        panelPaymentTable1.add(jScrollPane9, java.awt.BorderLayout.CENTER);
+        panelReportedBugsTable.add(jScrollPane9, java.awt.BorderLayout.CENTER);
 
-        panelBugsReportedManagement.add(panelPaymentTable1, java.awt.BorderLayout.CENTER);
+        panelBugsReportedManagement.add(panelReportedBugsTable, java.awt.BorderLayout.CENTER);
 
         panelBugsReported.add(panelBugsReportedManagement, "panelBugsReportedManagement");
 
-        panelBugsReportedForm.setBorder(javax.swing.BorderFactory.createTitledBorder("Payment Form"));
+        panelBugsReportedForm.setBorder(javax.swing.BorderFactory.createTitledBorder("Bugs Reported Form"));
         panelBugsReportedForm.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        buttonCancelPaymentForm1.setText("Cancel");
-        buttonCancelPaymentForm1.addActionListener(new java.awt.event.ActionListener() {
+        buttonCancelBugsReportedForm.setText("Cancel");
+        buttonCancelBugsReportedForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonCancelPaymentForm1ActionPerformed(evt);
+                buttonCancelBugsReportedFormActionPerformed(evt);
             }
         });
-        panelBugsReportedForm.add(buttonCancelPaymentForm1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
+        panelBugsReportedForm.add(buttonCancelBugsReportedForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
 
-        jLabel28.setText("Rp.");
-        panelBugsReportedForm.add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 40, 30));
-
-        jLabel29.setText("Method :");
+        jLabel29.setText("Description :");
         panelBugsReportedForm.add(jLabel29, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 160, 150, -1));
 
-        buttonSavePaymentForm1.setText("Save");
-        buttonSavePaymentForm1.addActionListener(new java.awt.event.ActionListener() {
+        buttonSaveBugsReportedForm.setText("Save");
+        buttonSaveBugsReportedForm.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonSavePaymentForm1ActionPerformed(evt);
+                buttonSaveBugsReportedFormActionPerformed(evt);
             }
         });
-        panelBugsReportedForm.add(buttonSavePaymentForm1, new org.netbeans.lib.awtextra.AbsoluteConstraints(555, 250, 60, -1));
+        panelBugsReportedForm.add(buttonSaveBugsReportedForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(555, 250, 60, -1));
 
-        comboboxMethodPayment1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Transfer Bank", "Cash", " " }));
-        panelBugsReportedForm.add(comboboxMethodPayment1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, 200, -1));
-
-        comboboxUsernamePayment1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        panelBugsReportedForm.add(comboboxUsernamePayment1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 200, -1));
+        comboboxUsernameBugsReported.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        panelBugsReportedForm.add(comboboxUsernameBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 200, -1));
 
         jLabel30.setText("Username : ");
         panelBugsReportedForm.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 150, -1));
 
-        labelBrowseScreenshotPayment1.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
-        labelBrowseScreenshotPayment1.setForeground(new java.awt.Color(0, 51, 255));
-        labelBrowseScreenshotPayment1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        labelBrowseScreenshotPayment1.setText("<html><u>Browse Picture</u></html>");
-        labelBrowseScreenshotPayment1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        labelBrowseScreenshotPayment1.addMouseListener(new java.awt.event.MouseAdapter() {
+        labelBrowseScreenshotBugsReported.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelBrowseScreenshotBugsReported.setForeground(new java.awt.Color(0, 51, 255));
+        labelBrowseScreenshotBugsReported.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelBrowseScreenshotBugsReported.setText("<html><u>Browse Picture</u></html>");
+        labelBrowseScreenshotBugsReported.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelBrowseScreenshotBugsReported.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                labelBrowseScreenshotPayment1MouseClicked(evt);
+                labelBrowseScreenshotBugsReportedMouseClicked(evt);
             }
         });
-        panelBugsReportedForm.add(labelBrowseScreenshotPayment1, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 210, 120, -1));
+        panelBugsReportedForm.add(labelBrowseScreenshotBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 210, 120, -1));
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Screenshot"));
         jPanel4.setLayout(new java.awt.BorderLayout());
 
-        labelScreenshotPayment1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        labelScreenshotPayment1.setText("preview");
-        labelScreenshotPayment1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        labelScreenshotPayment1.addMouseListener(new java.awt.event.MouseAdapter() {
+        labelScreenshotBugsReported.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelScreenshotBugsReported.setText("preview");
+        labelScreenshotBugsReported.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelScreenshotBugsReported.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                labelScreenshotPayment1MouseClicked(evt);
+                labelScreenshotBugsReportedMouseClicked(evt);
             }
         });
-        jPanel4.add(labelScreenshotPayment1, java.awt.BorderLayout.CENTER);
+        jPanel4.add(labelScreenshotBugsReported, java.awt.BorderLayout.CENTER);
 
-        panelBugsReportedForm.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, 210, 170));
+        panelBugsReportedForm.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 40, 210, 170));
 
-        textfieldAmountPayment1.addFocusListener(new java.awt.event.FocusAdapter() {
+        textfieldTitleBugsReported.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                textfieldAmountPayment1FocusGained(evt);
+                textfieldTitleBugsReportedFocusGained(evt);
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
-                textfieldAmountPayment1FocusLost(evt);
+                textfieldTitleBugsReportedFocusLost(evt);
             }
         });
-        panelBugsReportedForm.add(textfieldAmountPayment1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 120, 150, -1));
+        panelBugsReportedForm.add(textfieldTitleBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 190, -1));
 
-        jLabel31.setText("Amount : ");
+        jLabel31.setText("Title :");
         panelBugsReportedForm.add(jLabel31, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 150, -1));
+
+        jScrollPane10.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        textAreaDescriptionBugsReported.setColumns(20);
+        textAreaDescriptionBugsReported.setRows(5);
+        jScrollPane10.setViewportView(textAreaDescriptionBugsReported);
+
+        panelBugsReportedForm.add(jScrollPane10, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 190, 230, 90));
+
+        jLabel32.setText("App name :");
+        panelBugsReportedForm.add(jLabel32, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 40, 150, -1));
+
+        comboboxAppNameBugsReported.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "portal access", "fgi mobile" }));
+        panelBugsReportedForm.add(comboboxAppNameBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 60, 170, -1));
+
+        textfieldIPAddressBugsReported.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                textfieldIPAddressBugsReportedFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textfieldIPAddressBugsReportedFocusLost(evt);
+            }
+        });
+        panelBugsReportedForm.add(textfieldIPAddressBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 120, 160, -1));
+
+        jLabel33.setText("IP Address:");
+        panelBugsReportedForm.add(jLabel33, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 100, 150, -1));
 
         panelBugsReported.add(panelBugsReportedForm, "panelBugsReportedForm");
 
-        panelInnerCenter.add(panelBugsReported, "panelPayment");
+        panelInnerCenter.add(panelBugsReported, "panelBugsReported");
 
         panelCenter.add(panelInnerCenter, new org.netbeans.lib.awtextra.AbsoluteConstraints(43, 48, 658, 297));
 
@@ -2724,15 +2850,44 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_buttonBugsReportedActionPerformed
 
     private void buttonViewBugsReportedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonViewBugsReportedActionPerformed
-        // TODO add your handling code here:
+
+        ArrayList dataBugs = tabRender.getCheckedRows(tableBugsReportedData, 1);
+
+        if (dataBugs.size() == 1) {
+            // go to reportedbugs form
+            cardLayoutEntity.show(panelBugsReported, "panelBugsReportedForm");
+
+            // clean the form 
+            cleanUpBugsReportedForm();
+
+            // call the API with id passed
+            getBugsReported(Integer.parseInt(dataBugs.get(0).toString()));
+
+            // show the loading bar
+            showLoadingStatus();
+        } else {
+            UIEffect.popup("please select 1 single data only!", this);
+        }
     }//GEN-LAST:event_buttonViewBugsReportedActionPerformed
 
     private void buttonDeleteBugsReportedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteBugsReportedActionPerformed
-        // TODO add your handling code here:
+        ArrayList dataBugs = tabRender.getCheckedRows(tableBugsReportedData, 1);
+
+        if (dataBugs.size() == 0) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing id only
+            deleteBugsReported(dataBugs);
+            showLoadingStatus();
+        }
     }//GEN-LAST:event_buttonDeleteBugsReportedActionPerformed
 
     private void labelRefreshBugsReportedMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshBugsReportedMouseClicked
-        // TODO add your handling code here:
+        // change to loading icon
+        labelRefreshBugsReported.setIcon(loadingImage);
+
+        // refresh the table
+        refreshBugsReported();
     }//GEN-LAST:event_labelRefreshBugsReportedMouseClicked
 
     private void labelRefreshBugsReportedMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshBugsReportedMouseEntered
@@ -2743,29 +2898,69 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         // TODO add your handling code here:
     }//GEN-LAST:event_labelRefreshBugsReportedMouseExited
 
-    private void buttonCancelPaymentForm1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelPaymentForm1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_buttonCancelPaymentForm1ActionPerformed
+    private void buttonCancelBugsReportedFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelBugsReportedFormActionPerformed
+        cardLayoutEntity.show(panelBugsReported, "panelBugsReportedManagement");
+        labelBackToHome.setVisible(true);
+    }//GEN-LAST:event_buttonCancelBugsReportedFormActionPerformed
 
-    private void buttonSavePaymentForm1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSavePaymentForm1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_buttonSavePaymentForm1ActionPerformed
+    private void buttonSaveBugsReportedFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveBugsReportedFormActionPerformed
+        cardLayoutEntity.show(panelBugsReported, "panelBugsReportedManagement");
+        saveBugsReported();
+    }//GEN-LAST:event_buttonSaveBugsReportedFormActionPerformed
 
-    private void labelBrowseScreenshotPayment1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotPayment1MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_labelBrowseScreenshotPayment1MouseClicked
+    private void labelBrowseScreenshotBugsReportedMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotBugsReportedMouseClicked
 
-    private void labelScreenshotPayment1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScreenshotPayment1MouseClicked
-        // TODO add your handling code here:
-    }//GEN-LAST:event_labelScreenshotPayment1MouseClicked
+        // check first whether it is for delete
+        // or for browse picture?
+        if (labelBrowseScreenshotBugsReported.getText().contains("Delete")) {
 
-    private void textfieldAmountPayment1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPayment1FocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_textfieldAmountPayment1FocusGained
+            labelBrowseScreenshotBugsReported.setText(UIEffect.underline("Browse Picture"));
+            bugsFile = null;
 
-    private void textfieldAmountPayment1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPayment1FocusLost
+            labelScreenshotBugsReported.setIcon(null);
+            labelScreenshotBugsReported.setText("preview");
+
+        } else {
+            // call the browse process
+
+            // browse file
+            int result = fileChooser.showOpenDialog(null);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                payFile = fileChooser.getSelectedFile();
+                try {
+                    labelScreenshotBugsReported.setIcon(new ImageIcon(ImageIO.read(bugsFile)));
+                    labelBrowseScreenshotBugsReported.setText(UIEffect.underline("Delete"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    UIEffect.popup("Error while browse picutre applied!", this);
+                }
+            } else {
+                // if no file was chosen
+                bugsFile = null;
+            }
+
+        }
+    }//GEN-LAST:event_labelBrowseScreenshotBugsReportedMouseClicked
+
+    private void labelScreenshotBugsReportedMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScreenshotBugsReportedMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_textfieldAmountPayment1FocusLost
+    }//GEN-LAST:event_labelScreenshotBugsReportedMouseClicked
+
+    private void textfieldTitleBugsReportedFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldTitleBugsReportedFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textfieldTitleBugsReportedFocusGained
+
+    private void textfieldTitleBugsReportedFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldTitleBugsReportedFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textfieldTitleBugsReportedFocusLost
+
+    private void textfieldIPAddressBugsReportedFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldIPAddressBugsReportedFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textfieldIPAddressBugsReportedFocusGained
+
+    private void textfieldIPAddressBugsReportedFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldIPAddressBugsReportedFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textfieldIPAddressBugsReportedFocusLost
 
     private void enableUserFormSave() {
 
@@ -2856,9 +3051,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonAttendance;
     private javax.swing.JButton buttonBugsReported;
     private javax.swing.JButton buttonCancelAttendanceForm;
+    private javax.swing.JButton buttonCancelBugsReportedForm;
     private javax.swing.JButton buttonCancelDocumentForm;
     private javax.swing.JButton buttonCancelPaymentForm;
-    private javax.swing.JButton buttonCancelPaymentForm1;
     private javax.swing.JButton buttonCancelScheduleForm;
     private javax.swing.JButton buttonCancelUserForm;
     private javax.swing.JButton buttonDeleteAttendance;
@@ -2876,25 +3071,25 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonLogout;
     private javax.swing.JButton buttonPayment;
     private javax.swing.JButton buttonSaveAttendanceForm;
+    private javax.swing.JButton buttonSaveBugsReportedForm;
     private javax.swing.JButton buttonSaveDocumentForm;
     private javax.swing.JButton buttonSavePaymentForm;
-    private javax.swing.JButton buttonSavePaymentForm1;
     private javax.swing.JButton buttonSaveScheduleForm;
     private javax.swing.JButton buttonSaveUserForm;
     private javax.swing.JButton buttonSchedule;
     private javax.swing.JButton buttonSettings;
     private javax.swing.JButton buttonUserManagement;
     private javax.swing.JButton buttonViewBugsReported;
+    private javax.swing.JComboBox<String> comboboxAppNameBugsReported;
     private javax.swing.JComboBox<String> comboboxClassRegAttendance;
     private javax.swing.JComboBox<String> comboboxClassRegSched;
     private javax.swing.JComboBox<String> comboboxDaySched;
     private javax.swing.JComboBox<String> comboboxMethodPayment;
-    private javax.swing.JComboBox<String> comboboxMethodPayment1;
     private javax.swing.JComboBox<String> comboboxStatusAttendance;
     private javax.swing.JComboBox<String> comboboxUsernameAttendance;
+    private javax.swing.JComboBox<String> comboboxUsernameBugsReported;
     private javax.swing.JComboBox<String> comboboxUsernameDoc;
     private javax.swing.JComboBox<String> comboboxUsernamePayment;
-    private javax.swing.JComboBox<String> comboboxUsernamePayment1;
     private javax.swing.JComboBox<String> comboboxUsernameSched;
     private javax.swing.JFileChooser fileChooser;
     private javax.swing.JLabel jLabel1;
@@ -2915,11 +3110,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
-    private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -2931,6 +3127,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
@@ -2943,8 +3140,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel labelAttendanceManagement1;
     private javax.swing.JLabel labelBackToHome;
     private javax.swing.JLabel labelBottomPadding;
+    private javax.swing.JLabel labelBrowseScreenshotBugsReported;
     private javax.swing.JLabel labelBrowseScreenshotPayment;
-    private javax.swing.JLabel labelBrowseScreenshotPayment1;
     private javax.swing.JLabel labelBrowseSignatureAttendance;
     private javax.swing.JLabel labelBugsReportedManagement;
     private javax.swing.JLabel labelClose;
@@ -2961,8 +3158,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel labelRefreshUser;
     private javax.swing.JLabel labelRightPadding;
     private javax.swing.JLabel labelScheduleManagement;
+    private javax.swing.JLabel labelScreenshotBugsReported;
     private javax.swing.JLabel labelScreenshotPayment;
-    private javax.swing.JLabel labelScreenshotPayment1;
     private javax.swing.JLabel labelSignatureAttendance;
     private javax.swing.JLabel labelTime;
     private javax.swing.JLabel labelUserManagement;
@@ -2986,11 +3183,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel panelInnerCenter;
     private javax.swing.JPanel panelPayment;
     private javax.swing.JPanel panelPaymentControl;
-    private javax.swing.JPanel panelPaymentControl1;
     private javax.swing.JPanel panelPaymentForm;
     private javax.swing.JPanel panelPaymentManagement;
     private javax.swing.JPanel panelPaymentTable;
-    private javax.swing.JPanel panelPaymentTable1;
+    private javax.swing.JPanel panelReportedBugsControl;
+    private javax.swing.JPanel panelReportedBugsTable;
     private javax.swing.JPanel panelSchedule;
     private javax.swing.JPanel panelScheduleControl;
     private javax.swing.JPanel panelScheduleForm;
@@ -3009,14 +3206,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JTable tablePaymentData;
     private javax.swing.JTable tableScheduleData;
     private javax.swing.JTable tableUserData;
+    private javax.swing.JTextArea textAreaDescriptionBugsReported;
     private javax.swing.JTextArea textareaAddress;
     private javax.swing.JTextArea textareaDescriptionDoc;
     private javax.swing.JTextField textfieldAmountPayment;
-    private javax.swing.JTextField textfieldAmountPayment1;
     private javax.swing.JTextField textfieldEmail;
     private javax.swing.JTextField textfieldFilenameDoc;
+    private javax.swing.JTextField textfieldIPAddressBugsReported;
     private javax.swing.JTextField textfieldMobile;
     private javax.swing.JTextField textfieldPass;
+    private javax.swing.JTextField textfieldTitleBugsReported;
     private javax.swing.JTextField textfieldTitleDoc;
     private javax.swing.JTextField textfieldUrlDoc;
     private javax.swing.JTextField textfieldUsername;
@@ -3055,6 +3254,24 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             UIEffect.iconChanger(labelScreenshotPayment, (propic));
             // change the browse link
             labelBrowseScreenshotPayment.setText(UIEffect.underline("Delete"));
+        }
+
+    }
+
+    private void loadScreenshotBugsReportedLocally() {
+
+        String propic = configuration.getStringValue(Keys.SCREENSHOT_REPORT_BUGS);
+
+        System.out.println("Trying to load " + propic);
+
+        lockBugsReportedForm(false);
+        hideLoadingStatus();
+
+        if (!propic.contains("not available")) {
+            // set the propic
+            UIEffect.iconChanger(labelScreenshotBugsReported, (propic));
+            // change the browse link
+            labelBrowseScreenshotBugsReported.setText(UIEffect.underline("Delete"));
         }
 
     }
@@ -3127,6 +3344,19 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         textfieldTitleDoc.setEnabled(!b);
 
         comboboxUsernameDoc.setEnabled(!b);
+
+    }
+
+    private void lockBugsReportedForm(boolean b) {
+
+        textfieldTitleBugsReported.setEnabled(!b);
+        textfieldIPAddressBugsReported.setEnabled(!b);
+        textAreaDescriptionBugsReported.setEnabled(!b);
+
+        comboboxUsernameBugsReported.setEnabled(!b);
+        comboboxAppNameBugsReported.setEnabled(!b);
+
+        labelScreenshotBugsReported.setEnabled(!b);
 
     }
 
@@ -3237,6 +3467,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void cleanUpBugsReportedForm() {
+
+    }
+
     private void cleanUpPaymentForm(boolean editWork) {
 
         editMode = editWork;
@@ -3299,128 +3533,156 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         if (jchecker.isValid(resp)) {
             String innerData = jchecker.getValueAsString("multi_data");
 
-            if (urlTarget.equalsIgnoreCase(WebReference.ALL_USER)) {
-                User[] dataIn = objectG.fromJson(innerData, User[].class);
-                tabRender.render(tableUserData, dataIn);
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    // all Thread Safe
 
-                // rendering the username for document ui form
-                renderUsernameForCombobox(dataIn, comboboxUsernameDoc);
-                renderUsernameForCombobox(dataIn, comboboxUsernameSched);
-                renderUsernameForCombobox(dataIn, comboboxUsernameAttendance);
-                renderUsernameForCombobox(dataIn, comboboxUsernamePayment);
+                    if (urlTarget.equalsIgnoreCase(WebReference.ALL_USER)) {
+                        User[] dataIn = objectG.fromJson(innerData, User[].class);
+                        tabRender.render(tableUserData, dataIn);
 
-                hideLoadingStatus();
+                        // rendering the username for document ui form
+                        renderUsernameForCombobox(dataIn, comboboxUsernameDoc);
+                        renderUsernameForCombobox(dataIn, comboboxUsernameSched);
+                        renderUsernameForCombobox(dataIn, comboboxUsernameAttendance);
+                        renderUsernameForCombobox(dataIn, comboboxUsernamePayment);
+                        renderUsernameForCombobox(dataIn, comboboxUsernameBugsReported);
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_CLASSROOM)) {
-                ClassRoom[] dataIn = objectG.fromJson(innerData, ClassRoom[].class);
+                        hideLoadingStatus();
 
-                renderClassRoomForCombobox(dataIn, comboboxClassRegSched);
-                renderClassRoomForCombobox(dataIn, comboboxClassRegAttendance);
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_CLASSROOM)) {
+                        ClassRoom[] dataIn = objectG.fromJson(innerData, ClassRoom[].class);
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
-                Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
-                tabRender.render(tableScheduleData, dataIn);
+                        renderClassRoomForCombobox(dataIn, comboboxClassRegSched);
+                        renderClassRoomForCombobox(dataIn, comboboxClassRegAttendance);
 
-                hideLoadingStatus();
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_REPORT_BUGS)) {
+                        RBugs[] dataIn = objectG.fromJson(innerData, RBugs[].class);
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE_BY_DAY)) {
-                Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
-                renderScheduleForList(dataIn, listAnotherClassSched);
+                        tabRender.render(tableBugsReportedData, dataIn);
+                        hideLoadingStatus();
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
+                        Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
+                        tabRender.render(tableScheduleData, dataIn);
 
-                hideLoadingStatus();
+                        hideLoadingStatus();
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
-                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
-                tabRender.render(tableAttendanceData, dataIn);
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE_BY_DAY)) {
+                        Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
+                        renderScheduleForList(dataIn, listAnotherClassSched);
 
-                hideLoadingStatus();
+                        hideLoadingStatus();
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
-                Document[] dataIn = objectG.fromJson(innerData, Document[].class);
-                tabRender.render(tableDocumentData, dataIn);
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
+                        Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
+                        tabRender.render(tableAttendanceData, dataIn);
 
-                hideLoadingStatus();
+                        hideLoadingStatus();
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
-                Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
-                tabRender.render(tablePaymentData, dataIn);
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
+                        Document[] dataIn = objectG.fromJson(innerData, Document[].class);
+                        tabRender.render(tableDocumentData, dataIn);
 
-                hideLoadingStatus();
+                        hideLoadingStatus();
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.REGISTER_USER)
-                    || urlTarget.equalsIgnoreCase(WebReference.DELETE_USER)
-                    || urlTarget.equalsIgnoreCase(WebReference.UPDATE_USER)) {
-                // once new user submitted
-                // thus we refresh the table
-                refreshUser();
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_DOCUMENT)
-                    || urlTarget.equalsIgnoreCase(WebReference.DELETE_DOCUMENT)
-                    || urlTarget.equalsIgnoreCase(WebReference.UPDATE_DOCUMENT)) {
-                // thus we refresh the document table
-                refreshDocument();
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_SCHEDULE)
-                    || urlTarget.equalsIgnoreCase(WebReference.DELETE_SCHEDULE)
-                    || urlTarget.equalsIgnoreCase(WebReference.UPDATE_SCHEDULE)) {
-                // thus we refresh the schedule table
-                refreshSchedule();
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_PAYMENT)
-                    || urlTarget.equalsIgnoreCase(WebReference.DELETE_PAYMENT)
-                    || urlTarget.equalsIgnoreCase(WebReference.UPDATE_PAYMENT)) {
-                // thus we refresh the payment table
-                refreshPayment();
-            } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_ATTENDANCE)
-                    || urlTarget.equalsIgnoreCase(WebReference.DELETE_ATTENDANCE)
-                    || urlTarget.equalsIgnoreCase(WebReference.UPDATE_ATTENDANCE)) {
-                // thus we refresh the attendance table
-                refreshAttendance();
-            } else if (urlTarget.equalsIgnoreCase(WebReference.PROFILE_USER)) {
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
+                        Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
+                        tabRender.render(tablePaymentData, dataIn);
 
-                // we got the single user data here
-                User dataIn = objectG.fromJson(innerData, User.class);
-                // data temporarily saved here for button save checking
-                userEdited = dataIn;
-                renderUserForm(dataIn);
+                        hideLoadingStatus();
 
-            } else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT) && !urlTarget.contains("delete")) {
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.REGISTER_USER)
+                            || urlTarget.equalsIgnoreCase(WebReference.DELETE_USER)
+                            || urlTarget.equalsIgnoreCase(WebReference.UPDATE_USER)) {
+                        // once new user submitted
+                        // thus we refresh the table
+                        refreshUser();
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_DOCUMENT)
+                            || urlTarget.equalsIgnoreCase(WebReference.DELETE_DOCUMENT)
+                            || urlTarget.equalsIgnoreCase(WebReference.UPDATE_DOCUMENT)) {
+                        // thus we refresh the document table
+                        refreshDocument();
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_SCHEDULE)
+                            || urlTarget.equalsIgnoreCase(WebReference.DELETE_SCHEDULE)
+                            || urlTarget.equalsIgnoreCase(WebReference.UPDATE_SCHEDULE)) {
+                        // thus we refresh the schedule table
+                        refreshSchedule();
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_PAYMENT)
+                            || urlTarget.equalsIgnoreCase(WebReference.DELETE_PAYMENT)
+                            || urlTarget.equalsIgnoreCase(WebReference.UPDATE_PAYMENT)) {
+                        // thus we refresh the payment table
+                        refreshPayment();
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_ATTENDANCE)
+                            || urlTarget.equalsIgnoreCase(WebReference.DELETE_ATTENDANCE)
+                            || urlTarget.equalsIgnoreCase(WebReference.UPDATE_ATTENDANCE)) {
+                        // thus we refresh the attendance table
+                        refreshAttendance();
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.DELETE_REPORT_BUGS)) {
+                        // thus we refresh the reportedbugs table
+                        refreshBugsReported();
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.PROFILE_USER)) {
 
-                System.out.println("Obtaining Screenshot Picture from web is success...\nNow applying it locally.");
-                loadScreenshotPaymentLocally();
+                        // we got the single user data here
+                        User dataIn = objectG.fromJson(innerData, User.class);
+                        // data temporarily saved here for button save checking
+                        userEdited = dataIn;
+                        renderUserForm(dataIn);
 
-            } else if (urlTarget.contains(WebReference.PICTURE_USER) && !urlTarget.contains("delete")) {
+                    } else if (urlTarget.contains(WebReference.SCREENSHOT_REPORT_BUGS) && !urlTarget.contains("delete")) {
 
-                System.out.println("Obtaining User Picture from web is success...\nNow applying it locally.");
-                loadUserPictureLocally();
+                        System.out.println("Obtaining Screenshot Picture from web is success...\nNow applying it locally.");
+                        loadScreenshotBugsReportedLocally();
 
-            } else if (urlTarget.contains(WebReference.SIGNATURE_ATTENDANCE) && !urlTarget.contains("delete")) {
+                    } else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT) && !urlTarget.contains("delete")) {
 
-                System.out.println("Obtaining Signature Picture from web is success...\nNow applying it locally.");
-                loadSignaturePictureLocally();
+                        System.out.println("Obtaining Screenshot Picture from web is success...\nNow applying it locally.");
+                        loadScreenshotPaymentLocally();
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_PAYMENT)) {
+                    } else if (urlTarget.contains(WebReference.PICTURE_USER) && !urlTarget.contains("delete")) {
 
-                // we got the single payment data here
-                Payment dataIn = objectG.fromJson(innerData, Payment.class);
-                renderPaymentForm(dataIn);
+                        System.out.println("Obtaining User Picture from web is success...\nNow applying it locally.");
+                        loadUserPictureLocally();
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_ATTENDANCE)) {
+                    } else if (urlTarget.contains(WebReference.SIGNATURE_ATTENDANCE) && !urlTarget.contains("delete")) {
 
-                // we got the single attendance data here
-                Attendance dataIn = objectG.fromJson(innerData, Attendance.class);
-                renderAttendanceForm(dataIn);
+                        System.out.println("Obtaining Signature Picture from web is success...\nNow applying it locally.");
+                        loadSignaturePictureLocally();
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_DOCUMENT)) {
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_REPORT_BUGS)) {
 
-                // we got the single document data here
-                Document dataIn = objectG.fromJson(innerData, Document.class);
-                renderDocumentForm(dataIn);
+                        // we got the single reportbugs data here
+                        RBugs dataIn = objectG.fromJson(innerData, RBugs.class);
+                        renderBugsReportedForm(dataIn);
 
-            } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_SCHEDULE)) {
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_PAYMENT)) {
 
-                // we got the single schedule data here
-                Schedule dataIn = objectG.fromJson(innerData, Schedule.class);
-                renderScheduleForm(dataIn);
+                        // we got the single payment data here
+                        Payment dataIn = objectG.fromJson(innerData, Payment.class);
+                        renderPaymentForm(dataIn);
 
-            }
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_ATTENDANCE)) {
+
+                        // we got the single attendance data here
+                        Attendance dataIn = objectG.fromJson(innerData, Attendance.class);
+                        renderAttendanceForm(dataIn);
+
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_DOCUMENT)) {
+
+                        // we got the single document data here
+                        Document dataIn = objectG.fromJson(innerData, Document.class);
+                        renderDocumentForm(dataIn);
+
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_SCHEDULE)) {
+
+                        // we got the single schedule data here
+                        Schedule dataIn = objectG.fromJson(innerData, Schedule.class);
+                        renderScheduleForm(dataIn);
+
+                    }
+
+                }
+            });
+
         } else {
 
             // when it is invalid but coming from all sched by day
@@ -3454,6 +3716,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelRefreshSchedule.setIcon(refreshImage);
         labelRefreshAttendance.setIcon(refreshImage);
         labelRefreshDocument.setIcon(refreshImage);
+        labelRefreshBugsReported.setIcon(refreshImage);
 
         labelLoadingStatus.setVisible(false);
     }

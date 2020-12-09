@@ -8,6 +8,7 @@ package helper;
 import beans.Attendance;
 import beans.Document;
 import beans.Payment;
+import beans.RBugs;
 import beans.Schedule;
 import beans.User;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class TableRenderer {
 
             // the targeted column is exist here
             String val = model.getValueAt(row, column).toString();
-            if(val.equalsIgnoreCase(valTarget)){
+            if (val.equalsIgnoreCase(valTarget)) {
                 counted++;
             }
 
@@ -106,6 +107,29 @@ public class TableRenderer {
                 UIEffect.decodeSafe(d.getAddress()),
                 d.getPropic(),
                 d.getMobile()
+            };
+            tableModel.addRow(dataBaru);
+        }
+
+    }
+
+    public void render(JTable el, RBugs[] dataCome) {
+
+        DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
+
+        tableModel.setRowCount(0);
+
+        for (RBugs d : dataCome) {
+            Object[] dataBaru = new Object[]{
+                false,
+                d.getId(),
+                d.getApp_name(),
+                d.getUsername(),
+                d.getIp_address(),
+                d.getTitle(),
+                d.getDescription(),
+                d.getScreenshot(),
+                d.getDate_created()
             };
             tableModel.addRow(dataBaru);
         }

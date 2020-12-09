@@ -16,6 +16,7 @@ public class PathReference {
     public static String ToolsDirName = DirName + "\\tools";
     public static String LanguagesDirName = DirName + "\\languages";
     public static String DocumentDirName = DirName + "\\documents";
+    public static String BugsReportedDirName = DirName + "\\bugs";
     public static String ScreenshotPaymentDirName = DirName + "\\screenshots";
     public static String JXBrowserDirName = DirName + "\\jxbrowser";
     public static String TeamviewerPath = ToolsDirName + "\\TeamViewer_Setup.exe";
@@ -48,6 +49,10 @@ public class PathReference {
 
     public static String getScreenshotPath(String fname) {
         return ScreenshotPaymentDirName + "\\" + fname;
+    }
+    
+    public static String getScreenshotBugsReportedPath(String fname) {
+        return BugsReportedDirName + "\\" + fname;
     }
 
     public static String getToolsPath(String fname) {

@@ -152,6 +152,12 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_BROWSER_PREPARE:
                 name = "refresh_browser";
                 break;
+            case SWTKey.WORK_REFRESH_SCREENSHOT_REPORT_BUGS:
+                name = "refresh_screenshot_report_bugs";
+                break;
+            case SWTKey.WORK_REFRESH_REPORT_BUGS:
+                name = "refresh_report_bugs";
+                break;
             case SWTKey.WORK_REFRESH_DOCUMENT:
                 name = "refresh_document";
                 break;
@@ -192,6 +198,12 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         System.out.println("I am working on " + whatWorkAsString());
 
         switch (whatWork()) {
+            case SWTKey.WORK_REFRESH_SCREENSHOT_REPORT_BUGS:
+                refreshScreenshotReportBugsData();
+                break;
+            case SWTKey.WORK_REFRESH_REPORT_BUGS:
+                refreshReportBugsData();
+                break;
             case SWTKey.WORK_DOWNLOAD_TOOLS:
                 downloadTools();
                 break;
@@ -207,7 +219,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_HISTORY_SAVE:
                 historySave();
                 break;
-                
+
             case SWTKey.WORK_REPORT_BUGS_UPDATE:
                 reportBugsUpdate();
                 break;
@@ -487,10 +499,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void historySave() {
-            urlExecutor.start(WebReference.ADD_HISTORY, HttpCall.METHOD_POST);
-       
+        urlExecutor.start(WebReference.ADD_HISTORY, HttpCall.METHOD_POST);
+
     }
-    
+
     private void paymentSave() {
         if (hasFile()) {
             urlExecutor.start(WebReference.ADD_PAYMENT, HttpCall.METHOD_POST_FILE);
@@ -594,6 +606,13 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
 
+     private void refreshScreenshotReportBugsData() {
+
+        // the url is manually defined here
+        String urlManual = WebReference.SCREENSHOT_REPORT_BUGS + "?screenshot=" + urlExecutor.getData("screenshot");
+        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+    }
+    
     private void refreshScreenshotPaymentData() {
 
         // the url is manually defined here
@@ -623,6 +642,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.ALL_SCHEDULE_BY_DAY, HttpCall.METHOD_POST);
     }
 
+     private void refreshReportBugsData() {
+        urlExecutor.start(WebReference.ALL_REPORT_BUGS, HttpCall.METHOD_POST);
+    }
+    
     private void refreshDocumentData() {
 
         urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
