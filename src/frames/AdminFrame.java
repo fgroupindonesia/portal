@@ -61,7 +61,6 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     TrayMaker tm = new TrayMaker();
 
-    
     // for form checking before save mechanism
     User userEdited;
     Attendance attendanceEdited;
@@ -82,9 +81,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     public AdminFrame(LoginFrame lg) {
         initComponents();
 
-         //prepare the tray usage
+        //prepare the tray usage
         tm.setFrameRef(this);
-        
+
         loginFrame = lg;
         cardLayoutInnerCenter = (CardLayout) panelInnerCenter.getLayout();
 
@@ -709,7 +708,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonPayment = new javax.swing.JButton();
         buttonSchedule = new javax.swing.JButton();
         buttonSettings = new javax.swing.JButton();
-        buttonFuture2 = new javax.swing.JButton();
+        buttonBugsReported = new javax.swing.JButton();
         buttonLogout = new javax.swing.JButton();
         panelUser = new javax.swing.JPanel();
         panelUserManagement = new javax.swing.JPanel();
@@ -838,6 +837,29 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelScreenshotPayment = new javax.swing.JLabel();
         textfieldAmountPayment = new javax.swing.JTextField();
         jLabel27 = new javax.swing.JLabel();
+        panelBugsReported = new javax.swing.JPanel();
+        panelBugsReportedManagement = new javax.swing.JPanel();
+        panelPaymentControl1 = new javax.swing.JPanel();
+        buttonViewBugsReported = new javax.swing.JButton();
+        buttonDeleteBugsReported = new javax.swing.JButton();
+        labelBugsReportedManagement = new javax.swing.JLabel();
+        labelRefreshBugsReported = new javax.swing.JLabel();
+        panelPaymentTable1 = new javax.swing.JPanel();
+        jScrollPane9 = new javax.swing.JScrollPane();
+        tableBugsReportedData = new javax.swing.JTable();
+        panelBugsReportedForm = new javax.swing.JPanel();
+        buttonCancelPaymentForm1 = new javax.swing.JButton();
+        jLabel28 = new javax.swing.JLabel();
+        jLabel29 = new javax.swing.JLabel();
+        buttonSavePaymentForm1 = new javax.swing.JButton();
+        comboboxMethodPayment1 = new javax.swing.JComboBox<>();
+        comboboxUsernamePayment1 = new javax.swing.JComboBox<>();
+        jLabel30 = new javax.swing.JLabel();
+        labelBrowseScreenshotPayment1 = new javax.swing.JLabel();
+        jPanel4 = new javax.swing.JPanel();
+        labelScreenshotPayment1 = new javax.swing.JLabel();
+        textfieldAmountPayment1 = new javax.swing.JTextField();
+        jLabel31 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         labelBottomPadding = new javax.swing.JLabel();
         labelBackToHome = new javax.swing.JLabel();
@@ -968,11 +990,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonSettings.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         panelHome.add(buttonSettings);
 
-        buttonFuture2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/warning64.png"))); // NOI18N
-        buttonFuture2.setText("next release");
-        buttonFuture2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        buttonFuture2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        panelHome.add(buttonFuture2);
+        buttonBugsReported.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bug64.png"))); // NOI18N
+        buttonBugsReported.setText("Bugs Reported");
+        buttonBugsReported.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        buttonBugsReported.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        buttonBugsReported.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonBugsReportedActionPerformed(evt);
+            }
+        });
+        panelHome.add(buttonBugsReported);
 
         buttonLogout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock64.png"))); // NOI18N
         buttonLogout.setText("Logout");
@@ -1851,6 +1878,172 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelInnerCenter.add(panelPayment, "panelPayment");
 
+        panelBugsReported.setLayout(new java.awt.CardLayout());
+
+        panelBugsReportedManagement.setLayout(new java.awt.BorderLayout());
+
+        panelPaymentControl1.setPreferredSize(new java.awt.Dimension(658, 40));
+        panelPaymentControl1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        buttonViewBugsReported.setText("View");
+        buttonViewBugsReported.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonViewBugsReportedActionPerformed(evt);
+            }
+        });
+        panelPaymentControl1.add(buttonViewBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(514, 5, 60, -1));
+
+        buttonDeleteBugsReported.setText("Delete");
+        buttonDeleteBugsReported.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonDeleteBugsReportedActionPerformed(evt);
+            }
+        });
+        panelPaymentControl1.add(buttonDeleteBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(589, 5, -1, -1));
+
+        labelBugsReportedManagement.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
+        labelBugsReportedManagement.setText("Bugs Reported Management");
+        panelPaymentControl1.add(labelBugsReportedManagement, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 280, 40));
+
+        labelRefreshBugsReported.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh16.png"))); // NOI18N
+        labelRefreshBugsReported.setText("Refresh");
+        labelRefreshBugsReported.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelRefreshBugsReported.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelRefreshBugsReportedMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelRefreshBugsReportedMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelRefreshBugsReportedMouseExited(evt);
+            }
+        });
+        panelPaymentControl1.add(labelRefreshBugsReported, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 10, 70, 20));
+
+        panelBugsReportedManagement.add(panelPaymentControl1, java.awt.BorderLayout.PAGE_START);
+
+        panelPaymentTable1.setLayout(new java.awt.BorderLayout());
+
+        tableBugsReportedData.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "[ x ]", "Id", "Username", "Amount", "Method", "Screenshot", "Date Created"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane9.setViewportView(tableBugsReportedData);
+        if (tableBugsReportedData.getColumnModel().getColumnCount() > 0) {
+            tableBugsReportedData.getColumnModel().getColumn(0).setMinWidth(30);
+            tableBugsReportedData.getColumnModel().getColumn(0).setPreferredWidth(30);
+            tableBugsReportedData.getColumnModel().getColumn(0).setMaxWidth(30);
+            tableBugsReportedData.getColumnModel().getColumn(1).setMinWidth(0);
+            tableBugsReportedData.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tableBugsReportedData.getColumnModel().getColumn(1).setMaxWidth(0);
+            tableBugsReportedData.getColumnModel().getColumn(2).setMinWidth(100);
+            tableBugsReportedData.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tableBugsReportedData.getColumnModel().getColumn(2).setMaxWidth(100);
+            tableBugsReportedData.getColumnModel().getColumn(3).setMinWidth(100);
+            tableBugsReportedData.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tableBugsReportedData.getColumnModel().getColumn(3).setMaxWidth(100);
+            tableBugsReportedData.getColumnModel().getColumn(4).setMinWidth(80);
+            tableBugsReportedData.getColumnModel().getColumn(4).setPreferredWidth(80);
+            tableBugsReportedData.getColumnModel().getColumn(4).setMaxWidth(80);
+        }
+
+        panelPaymentTable1.add(jScrollPane9, java.awt.BorderLayout.CENTER);
+
+        panelBugsReportedManagement.add(panelPaymentTable1, java.awt.BorderLayout.CENTER);
+
+        panelBugsReported.add(panelBugsReportedManagement, "panelBugsReportedManagement");
+
+        panelBugsReportedForm.setBorder(javax.swing.BorderFactory.createTitledBorder("Payment Form"));
+        panelBugsReportedForm.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        buttonCancelPaymentForm1.setText("Cancel");
+        buttonCancelPaymentForm1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonCancelPaymentForm1ActionPerformed(evt);
+            }
+        });
+        panelBugsReportedForm.add(buttonCancelPaymentForm1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
+
+        jLabel28.setText("Rp.");
+        panelBugsReportedForm.add(jLabel28, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 40, 30));
+
+        jLabel29.setText("Method :");
+        panelBugsReportedForm.add(jLabel29, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 160, 150, -1));
+
+        buttonSavePaymentForm1.setText("Save");
+        buttonSavePaymentForm1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSavePaymentForm1ActionPerformed(evt);
+            }
+        });
+        panelBugsReportedForm.add(buttonSavePaymentForm1, new org.netbeans.lib.awtextra.AbsoluteConstraints(555, 250, 60, -1));
+
+        comboboxMethodPayment1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Transfer Bank", "Cash", " " }));
+        panelBugsReportedForm.add(comboboxMethodPayment1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, 200, -1));
+
+        comboboxUsernamePayment1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        panelBugsReportedForm.add(comboboxUsernamePayment1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 200, -1));
+
+        jLabel30.setText("Username : ");
+        panelBugsReportedForm.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 150, -1));
+
+        labelBrowseScreenshotPayment1.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelBrowseScreenshotPayment1.setForeground(new java.awt.Color(0, 51, 255));
+        labelBrowseScreenshotPayment1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelBrowseScreenshotPayment1.setText("<html><u>Browse Picture</u></html>");
+        labelBrowseScreenshotPayment1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelBrowseScreenshotPayment1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelBrowseScreenshotPayment1MouseClicked(evt);
+            }
+        });
+        panelBugsReportedForm.add(labelBrowseScreenshotPayment1, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 210, 120, -1));
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Screenshot"));
+        jPanel4.setLayout(new java.awt.BorderLayout());
+
+        labelScreenshotPayment1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelScreenshotPayment1.setText("preview");
+        labelScreenshotPayment1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelScreenshotPayment1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelScreenshotPayment1MouseClicked(evt);
+            }
+        });
+        jPanel4.add(labelScreenshotPayment1, java.awt.BorderLayout.CENTER);
+
+        panelBugsReportedForm.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, 210, 170));
+
+        textfieldAmountPayment1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                textfieldAmountPayment1FocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                textfieldAmountPayment1FocusLost(evt);
+            }
+        });
+        panelBugsReportedForm.add(textfieldAmountPayment1, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 120, 150, -1));
+
+        jLabel31.setText("Amount : ");
+        panelBugsReportedForm.add(jLabel31, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 150, -1));
+
+        panelBugsReported.add(panelBugsReportedForm, "panelBugsReportedForm");
+
+        panelInnerCenter.add(panelBugsReported, "panelPayment");
+
         panelCenter.add(panelInnerCenter, new org.netbeans.lib.awtextra.AbsoluteConstraints(43, 48, 658, 297));
 
         jLabel1.setFont(new java.awt.Font("sansserif", 1, 24)); // NOI18N
@@ -1884,36 +2077,35 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }// </editor-fold>//GEN-END:initComponents
 
     private void labelCloseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelCloseMouseClicked
-        
+
         logout();
     }//GEN-LAST:event_labelCloseMouseClicked
 
     private void logout() {
-UIEffect.stopTimeEffect();
+        UIEffect.stopTimeEffect();
         loginFrame.show();
         this.dispose();
     }
 
     private void labelMinimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelMinimizeMouseClicked
-          toggleTray();
+        toggleTray();
     }//GEN-LAST:event_labelMinimizeMouseClicked
 
-    private void toggleTray(){
+    private void toggleTray() {
         this.setVisible(false);
         try {
-            
-            
-            if(tm.isSupported()){
+
+            if (tm.isSupported()) {
                 System.out.println("Tray created!");
                 tm.createTray();
             }
-            
-             System.out.println("Tray done!");
+
+            System.out.println("Tray done!");
         } catch (Exception ex) {
             UIEffect.popup("Warning! Unsupported Tray!", this);
         }
     }
-    
+
     private void buttonUserManagementActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonUserManagementActionPerformed
         cardLayoutInnerCenter.show(panelInnerCenter, "panelUser");
         cardLayoutEntity = (CardLayout) panelUser.getLayout();
@@ -2507,22 +2699,74 @@ UIEffect.stopTimeEffect();
     }//GEN-LAST:event_labelPreviewPictureMouseClicked
 
     private void labelSignatureAttendanceMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelSignatureAttendanceMouseClicked
-         if (labelSignatureAttendance.getIcon() != null) {
+        if (labelSignatureAttendance.getIcon() != null) {
             File lokasiSignature = new File(PathReference.SignaturePath);
             CMDExecutor.openPicture(lokasiSignature);
         }
     }//GEN-LAST:event_labelSignatureAttendanceMouseClicked
 
     private void buttonLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLogoutActionPerformed
-logout();
+        logout();
     }//GEN-LAST:event_buttonLogoutActionPerformed
 
     private void formMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseReleased
         UIDragger.mouseReleased(evt);
     }//GEN-LAST:event_formMouseReleased
 
-    
-    
+    private void buttonBugsReportedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonBugsReportedActionPerformed
+
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelBugsReported");
+        cardLayoutEntity = (CardLayout) panelBugsReported.getLayout();
+        cardLayoutEntity.show(panelBugsReported, "panelBugsReportedManagement");
+
+        labelBackToHome.setVisible(true);
+
+    }//GEN-LAST:event_buttonBugsReportedActionPerformed
+
+    private void buttonViewBugsReportedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonViewBugsReportedActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonViewBugsReportedActionPerformed
+
+    private void buttonDeleteBugsReportedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteBugsReportedActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonDeleteBugsReportedActionPerformed
+
+    private void labelRefreshBugsReportedMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshBugsReportedMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshBugsReportedMouseClicked
+
+    private void labelRefreshBugsReportedMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshBugsReportedMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshBugsReportedMouseEntered
+
+    private void labelRefreshBugsReportedMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshBugsReportedMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshBugsReportedMouseExited
+
+    private void buttonCancelPaymentForm1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelPaymentForm1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonCancelPaymentForm1ActionPerformed
+
+    private void buttonSavePaymentForm1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSavePaymentForm1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonSavePaymentForm1ActionPerformed
+
+    private void labelBrowseScreenshotPayment1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotPayment1MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelBrowseScreenshotPayment1MouseClicked
+
+    private void labelScreenshotPayment1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScreenshotPayment1MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelScreenshotPayment1MouseClicked
+
+    private void textfieldAmountPayment1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPayment1FocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textfieldAmountPayment1FocusGained
+
+    private void textfieldAmountPayment1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldAmountPayment1FocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textfieldAmountPayment1FocusLost
+
     private void enableUserFormSave() {
 
         if (editMode) {
@@ -2610,12 +2854,15 @@ logout();
     private javax.swing.JButton buttonAddSchedule;
     private javax.swing.JButton buttonAddUser;
     private javax.swing.JButton buttonAttendance;
+    private javax.swing.JButton buttonBugsReported;
     private javax.swing.JButton buttonCancelAttendanceForm;
     private javax.swing.JButton buttonCancelDocumentForm;
     private javax.swing.JButton buttonCancelPaymentForm;
+    private javax.swing.JButton buttonCancelPaymentForm1;
     private javax.swing.JButton buttonCancelScheduleForm;
     private javax.swing.JButton buttonCancelUserForm;
     private javax.swing.JButton buttonDeleteAttendance;
+    private javax.swing.JButton buttonDeleteBugsReported;
     private javax.swing.JButton buttonDeleteDocument;
     private javax.swing.JButton buttonDeletePayment;
     private javax.swing.JButton buttonDeleteSchedule;
@@ -2626,25 +2873,28 @@ logout();
     private javax.swing.JButton buttonEditPayment;
     private javax.swing.JButton buttonEditSchedule;
     private javax.swing.JButton buttonEditUser;
-    private javax.swing.JButton buttonFuture2;
     private javax.swing.JButton buttonLogout;
     private javax.swing.JButton buttonPayment;
     private javax.swing.JButton buttonSaveAttendanceForm;
     private javax.swing.JButton buttonSaveDocumentForm;
     private javax.swing.JButton buttonSavePaymentForm;
+    private javax.swing.JButton buttonSavePaymentForm1;
     private javax.swing.JButton buttonSaveScheduleForm;
     private javax.swing.JButton buttonSaveUserForm;
     private javax.swing.JButton buttonSchedule;
     private javax.swing.JButton buttonSettings;
     private javax.swing.JButton buttonUserManagement;
+    private javax.swing.JButton buttonViewBugsReported;
     private javax.swing.JComboBox<String> comboboxClassRegAttendance;
     private javax.swing.JComboBox<String> comboboxClassRegSched;
     private javax.swing.JComboBox<String> comboboxDaySched;
     private javax.swing.JComboBox<String> comboboxMethodPayment;
+    private javax.swing.JComboBox<String> comboboxMethodPayment1;
     private javax.swing.JComboBox<String> comboboxStatusAttendance;
     private javax.swing.JComboBox<String> comboboxUsernameAttendance;
     private javax.swing.JComboBox<String> comboboxUsernameDoc;
     private javax.swing.JComboBox<String> comboboxUsernamePayment;
+    private javax.swing.JComboBox<String> comboboxUsernamePayment1;
     private javax.swing.JComboBox<String> comboboxUsernameSched;
     private javax.swing.JFileChooser fileChooser;
     private javax.swing.JLabel jLabel1;
@@ -2665,7 +2915,11 @@ logout();
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -2675,6 +2929,7 @@ logout();
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -2683,12 +2938,15 @@ logout();
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JScrollPane jScrollPane8;
+    private javax.swing.JScrollPane jScrollPane9;
     private javax.swing.JLabel labelAttendanceManagement;
     private javax.swing.JLabel labelAttendanceManagement1;
     private javax.swing.JLabel labelBackToHome;
     private javax.swing.JLabel labelBottomPadding;
     private javax.swing.JLabel labelBrowseScreenshotPayment;
+    private javax.swing.JLabel labelBrowseScreenshotPayment1;
     private javax.swing.JLabel labelBrowseSignatureAttendance;
+    private javax.swing.JLabel labelBugsReportedManagement;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelLinkChangeFileDoc;
     private javax.swing.JLabel labelLinkChangePicture;
@@ -2696,6 +2954,7 @@ logout();
     private javax.swing.JLabel labelMinimize;
     private javax.swing.JLabel labelPreviewPicture;
     private javax.swing.JLabel labelRefreshAttendance;
+    private javax.swing.JLabel labelRefreshBugsReported;
     private javax.swing.JLabel labelRefreshDocument;
     private javax.swing.JLabel labelRefreshPayment;
     private javax.swing.JLabel labelRefreshSchedule;
@@ -2703,6 +2962,7 @@ logout();
     private javax.swing.JLabel labelRightPadding;
     private javax.swing.JLabel labelScheduleManagement;
     private javax.swing.JLabel labelScreenshotPayment;
+    private javax.swing.JLabel labelScreenshotPayment1;
     private javax.swing.JLabel labelSignatureAttendance;
     private javax.swing.JLabel labelTime;
     private javax.swing.JLabel labelUserManagement;
@@ -2712,6 +2972,9 @@ logout();
     private javax.swing.JPanel panelAttendanceForm;
     private javax.swing.JPanel panelAttendanceManagement;
     private javax.swing.JPanel panelAttendanceTable;
+    private javax.swing.JPanel panelBugsReported;
+    private javax.swing.JPanel panelBugsReportedForm;
+    private javax.swing.JPanel panelBugsReportedManagement;
     private javax.swing.JPanel panelCenter;
     private javax.swing.JPanel panelDocument;
     private javax.swing.JPanel panelDocumentControl;
@@ -2723,9 +2986,11 @@ logout();
     private javax.swing.JPanel panelInnerCenter;
     private javax.swing.JPanel panelPayment;
     private javax.swing.JPanel panelPaymentControl;
+    private javax.swing.JPanel panelPaymentControl1;
     private javax.swing.JPanel panelPaymentForm;
     private javax.swing.JPanel panelPaymentManagement;
     private javax.swing.JPanel panelPaymentTable;
+    private javax.swing.JPanel panelPaymentTable1;
     private javax.swing.JPanel panelSchedule;
     private javax.swing.JPanel panelScheduleControl;
     private javax.swing.JPanel panelScheduleForm;
@@ -2739,6 +3004,7 @@ logout();
     private javax.swing.JSpinner spinnerHourSched;
     private javax.swing.JSpinner spinnerMinutesSched;
     private javax.swing.JTable tableAttendanceData;
+    private javax.swing.JTable tableBugsReportedData;
     private javax.swing.JTable tableDocumentData;
     private javax.swing.JTable tablePaymentData;
     private javax.swing.JTable tableScheduleData;
@@ -2746,6 +3012,7 @@ logout();
     private javax.swing.JTextArea textareaAddress;
     private javax.swing.JTextArea textareaDescriptionDoc;
     private javax.swing.JTextField textfieldAmountPayment;
+    private javax.swing.JTextField textfieldAmountPayment1;
     private javax.swing.JTextField textfieldEmail;
     private javax.swing.JTextField textfieldFilenameDoc;
     private javax.swing.JTextField textfieldMobile;
@@ -2877,7 +3144,6 @@ logout();
 
         editMode = editWork;
 
-        
         textfieldUsername.setText("");
         textareaAddress.setText("");
         textfieldEmail.setText("");

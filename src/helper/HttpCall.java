@@ -5,6 +5,7 @@
  */
 package helper;
 
+import com.sun.jndi.toolkit.url.UrlUtil;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -16,6 +17,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -189,7 +192,7 @@ public class HttpCall {
                             request.writeBytes("Content-Disposition: form-data; name=\"" + fd.getKey() + "\"" + CRLF);
                             request.writeBytes("Content-Type: text/plain; charset=UTF-8" + CRLF);
                             request.writeBytes(CRLF);
-                            request.writeBytes(fd.getValue() + CRLF);
+                            request.writeBytes(URLDecoder.decode(fd.getValue(),"UTF-8") + CRLF);
                             request.flush();
 
                         }

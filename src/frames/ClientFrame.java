@@ -65,7 +65,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
      * Creates new form MainFrame
      */
     LoginFrame loginFrame;
-    CardLayout cardLayouterMain, cardLayouterAttendance;
+    CardLayout cardLayouterMain, cardLayouterAttendance, cardLayoutHistory;
     SettingPreference configuration = new SettingPreference();
     Browser browser = null;
     TableRenderer tabRender = new TableRenderer();
@@ -77,6 +77,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     File propicFile;
     File screenshotFile;
+    String oldDay;
 
     TrayMaker tm = new TrayMaker();
 
@@ -113,6 +114,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // rendering UI based upon its language
         applyLanguageUI();
 
+        // set the listener after popup
+        UIEffect.setPopupListener(this);
+
         // checkin autoupdate tools
         autoUpdateTools();
 
@@ -129,11 +133,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         UIEffect.iconChanger(this);
         UIEffect.playTimeEffect(labelTime);
 
-        labelWelcomeUser.setText("Hello " + personLogged.getUsername() + "!");
+        String welcome = languageHelper.getData("labelHello") + " " + personLogged.getUsername() + "!";
+        labelWelcomeUser.setText(welcome);
 
-        labelPanelViewName.setText("Home");
+        labelPanelViewName.setText(languageHelper.getData("labelHome"));
+
         cardLayouterMain = (CardLayout) panelContentCenter.getLayout();
         cardLayouterAttendance = (CardLayout) panelAttandanceContent.getLayout();
+        cardLayoutHistory = (CardLayout) panelHistory.getLayout();
 
         showPaymentForm(false);
 
@@ -197,6 +204,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     private void refreshHistory() {
+
+        // showing the loading
+        labelHistoryLast1.setIcon(loadingImage);
+        labelHistoryLast1.setText(languageHelper.getData("labelLoading"));
+        labelHistoryLast1.setVisible(true);
+
+        // showing the loading part of history
+        cardLayoutHistory.show(panelHistory, "panelHistoryFound");
 
         SWThreadWorker workHist = new SWThreadWorker(this);
         workHist.setWork(SWTKey.WORK_REFRESH_HISTORY);
@@ -376,6 +391,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelClassRegistered = new javax.swing.JLabel();
         labelLastPayment = new javax.swing.JLabel();
         panelHistory = new javax.swing.JPanel();
+        panelHistoryNone = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        panelHistoryFound = new javax.swing.JPanel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        jPanel1 = new javax.swing.JPanel();
         labelHistoryLast1 = new javax.swing.JLabel();
         labelHistoryLast2 = new javax.swing.JLabel();
         labelHistoryLast3 = new javax.swing.JLabel();
@@ -645,18 +665,54 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelHome.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         panelSchedule.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createTitledBorder("Schedule"), javax.swing.BorderFactory.createEmptyBorder(0, 15, 0, 15)));
-        panelSchedule.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
+        panelSchedule.setLayout(new java.awt.GridLayout(0, 1, 50, 0));
 
         labelScheduleDay1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
         labelScheduleDay1.setText("loading...");
+        labelScheduleDay1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelScheduleDay1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelScheduleDay1MouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelScheduleDay1MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelScheduleDay1MouseExited(evt);
+            }
+        });
         panelSchedule.add(labelScheduleDay1);
 
         labelScheduleDay2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/calendar16.png"))); // NOI18N
         labelScheduleDay2.setText("schedule day 2");
+        labelScheduleDay2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelScheduleDay2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelScheduleDay2MouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelScheduleDay2MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelScheduleDay2MouseExited(evt);
+            }
+        });
         panelSchedule.add(labelScheduleDay2);
 
         labelScheduleDay3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/calendar16.png"))); // NOI18N
         labelScheduleDay3.setText("schedule day 3");
+        labelScheduleDay3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelScheduleDay3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelScheduleDay3MouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelScheduleDay3MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelScheduleDay3MouseExited(evt);
+            }
+        });
         panelSchedule.add(labelScheduleDay3);
 
         panelHome.add(panelSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 110, 210, 100));
@@ -700,27 +756,53 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelHome.add(labelLastPayment, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 240, 250, -1));
 
         panelHistory.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createTitledBorder("History"), javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 5)));
-        panelHistory.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
+        panelHistory.setLayout(new java.awt.CardLayout());
+
+        panelHistoryNone.setBorder(null);
+        panelHistoryNone.setLayout(new java.awt.BorderLayout());
+
+        jLabel1.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/history.png"))); // NOI18N
+        jLabel1.setText("No History Data!");
+        panelHistoryNone.add(jLabel1, java.awt.BorderLayout.CENTER);
+
+        panelHistory.add(panelHistoryNone, "panelHistoryNone");
+
+        panelHistoryFound.setBorder(null);
+        panelHistoryFound.setLayout(new java.awt.BorderLayout());
+
+        jScrollPane6.setBorder(null);
+        jScrollPane6.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+        jPanel1.setBorder(null);
+        jPanel1.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
 
         labelHistoryLast1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
         labelHistoryLast1.setText("loading...");
-        panelHistory.add(labelHistoryLast1);
+        jPanel1.add(labelHistoryLast1);
 
         labelHistoryLast2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ok16.png"))); // NOI18N
         labelHistoryLast2.setText("history 2");
-        panelHistory.add(labelHistoryLast2);
+        jPanel1.add(labelHistoryLast2);
 
         labelHistoryLast3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ok16.png"))); // NOI18N
         labelHistoryLast3.setText("history 3");
-        panelHistory.add(labelHistoryLast3);
+        jPanel1.add(labelHistoryLast3);
 
         labelHistoryLast4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ok16.png"))); // NOI18N
         labelHistoryLast4.setText("history 4");
-        panelHistory.add(labelHistoryLast4);
+        jPanel1.add(labelHistoryLast4);
 
         labelHistoryLast5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/ok16.png"))); // NOI18N
         labelHistoryLast5.setText("history 5");
-        panelHistory.add(labelHistoryLast5);
+        jPanel1.add(labelHistoryLast5);
+
+        jScrollPane6.setViewportView(jPanel1);
+
+        panelHistoryFound.add(jScrollPane6, java.awt.BorderLayout.CENTER);
+
+        panelHistory.add(panelHistoryFound, "panelHistoryFound");
 
         panelHome.add(panelHistory, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 330, 170));
 
@@ -1298,23 +1380,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 tableDocumentDataMouseClicked(evt);
             }
         });
+        tableDocumentData.getColumnModel().getColumn(0).setPreferredWidth(35);
         jScrollPane4.setViewportView(tableDocumentData);
-        if (tableDocumentData.getColumnModel().getColumnCount() > 0) {
-            tableDocumentData.getColumnModel().getColumn(0).setResizable(false);
-            tableDocumentData.getColumnModel().getColumn(0).setPreferredWidth(35);
-            tableDocumentData.getColumnModel().getColumn(1).setMinWidth(0);
-            tableDocumentData.getColumnModel().getColumn(1).setPreferredWidth(0);
-            tableDocumentData.getColumnModel().getColumn(1).setMaxWidth(0);
-            tableDocumentData.getColumnModel().getColumn(2).setPreferredWidth(150);
-            tableDocumentData.getColumnModel().getColumn(3).setPreferredWidth(300);
-            tableDocumentData.getColumnModel().getColumn(5).setMinWidth(0);
-            tableDocumentData.getColumnModel().getColumn(5).setPreferredWidth(0);
-            tableDocumentData.getColumnModel().getColumn(5).setMaxWidth(0);
-            tableDocumentData.getColumnModel().getColumn(6).setMinWidth(0);
-            tableDocumentData.getColumnModel().getColumn(6).setPreferredWidth(0);
-            tableDocumentData.getColumnModel().getColumn(6).setMaxWidth(0);
-            tableDocumentData.getColumnModel().getColumn(7).setPreferredWidth(150);
-        }
 
         panelDocumentContent.add(jScrollPane4, java.awt.BorderLayout.CENTER);
 
@@ -1625,6 +1692,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_labelNavHomeMouseClicked
 
     private void buttonSaveSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveSettingsActionPerformed
+        saveHistory("updating client settings");
+
         configuration.setValue(Keys.AUTO_UPDATE_TOOLS, checkboxAutoupdateToolsSettings.isSelected());
 
         String notifClass = radioButtonGroupNotifClass.getSelection().getActionCommand();
@@ -1713,7 +1782,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonRunTmv.setEnabled(false);
 
         CMDExecutor.runTeamviewer();
-
+        saveHistory("opening teamviewer");
     }//GEN-LAST:event_buttonRunTmvActionPerformed
 
     private void labelAddPaymentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelAddPaymentMouseClicked
@@ -1749,7 +1818,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         showPaymentForm(false);
 
         savePayment();
-
+        saveHistory("uploading payment proof [" + combobocMethodPayment.getSelectedItem().toString() + "]");
     }//GEN-LAST:event_buttonSavePaymentActionPerformed
 
     private void labelHidePaymentFormMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelHidePaymentFormMouseClicked
@@ -1772,6 +1841,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void labelShowAttendanceStatisticMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelShowAttendanceStatisticMouseClicked
         showAttendanceStat(true);
         generateAttendanceStat();
+        saveHistory("checking attendance statistics");
     }//GEN-LAST:event_labelShowAttendanceStatisticMouseClicked
 
     private void labelShowAttendanceStatisticMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelShowAttendanceStatisticMouseEntered
@@ -1786,9 +1856,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         ArrayList dataDoc = tabRender.getCheckedRows(tableDocumentData, 4);
 
         if (dataDoc.isEmpty()) {
-            UIEffect.popup("Please select the row first!", this);
+            warningSelectRow();
         } else {
             // passing file name
+            saveHistory("opening document [" + dataDoc.get(0) + "]");
+
             for (Object f : dataDoc) {
                 PathReference.setDocumentFileName(f.toString());
                 File lokasiFile = new File(PathReference.DocumentFilePath);
@@ -1810,16 +1882,25 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // TODO add your handling code here:
     }//GEN-LAST:event_labelOpenDocumentMouseExited
 
+    private void warningSelectRow() {
+        String mes = languageHelper.getData("labelSelectRow");
+        UIEffect.popup(mes, this);
+    }
+
     private void labelDownloadDocumentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDownloadDocumentMouseClicked
 
         //cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
         // temporaryly
         ArrayList dataDoc = tabRender.getCheckedRows(tableDocumentData, 6);
         ArrayList dataDoc2 = tabRender.getCheckedRows(tableDocumentData, 4);
+        ArrayList dataDocFileName = tabRender.getCheckedRows(tableDocumentData, 2);
 
         if (dataDoc.isEmpty()) {
-            UIEffect.popup("Please select the row first!", this);
+            warningSelectRow();
         } else {
+
+            saveHistory("downloading document [" + dataDocFileName.get(0) + "]");
+
             // passing url only
             if (!progressBarDownload.isVisible()) {
                 showLoadingStatus();
@@ -1828,7 +1909,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 // download only the 1 one
                 downloadFile(dataDoc.get(0).toString(), dataDoc2.get(0).toString());
             } else {
-                UIEffect.popup("Please wait until the download progress is completed!", this);
+                String mes = languageHelper.getData("labelDownloadWait");
+                UIEffect.popup(mes, this);
             }
         }
 
@@ -1856,8 +1938,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonSavePayment.setEnabled(false);
     }
 
+    private void saveHistory(String message) {
+
+        // some history are tracked from client request
+        SWThreadWorker workHistory = new SWThreadWorker(this);
+
+        workHistory.setWork(SWTKey.WORK_HISTORY_SAVE);
+
+        workHistory.addData("username", personLogged.getUsername());
+        workHistory.addData("description", message);
+
+        prepareToken(workHistory);
+        executorService.schedule(workHistory, 1, TimeUnit.SECONDS);
+
+    }
+
     private void saveReportBugs() {
-        showLoadingStatus();
+        //showLoadingStatus();
         SWThreadWorker workReport = new SWThreadWorker(this);
 
         workReport.setWork(SWTKey.WORK_REPORT_BUGS_SAVE);
@@ -1912,7 +2009,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
             System.out.println("Tray done!");
         } catch (Exception ex) {
-            UIEffect.popup("Warning! Unsupported Tray!", this);
+            String mes = languageHelper.getData("labelTrayError");
+            UIEffect.popup(mes, this);
         }
     }
 
@@ -1920,12 +2018,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         browser.loadURL("http://bing.com");
 
         cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+
+        saveHistory("opening embedded browser");
     }//GEN-LAST:event_buttonVisitChromeActionPerformed
 
     private void buttonVisitWhatsappActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitWhatsappActionPerformed
         browser.loadURL("http://web.whatsapp.com");
 
         cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+
+        saveHistory("opening embedded whatsapp");
     }//GEN-LAST:event_buttonVisitWhatsappActionPerformed
 
     public void setBrowserBack(Browser b) {
@@ -1953,6 +2055,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void buttonSaveProfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveProfileActionPerformed
         saveUserProfile();
+        saveHistory("updating userprofile");
     }//GEN-LAST:event_buttonSaveProfileActionPerformed
 
     private void textfieldTeamviewerIDKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldTeamviewerIDKeyReleased
@@ -2114,9 +2217,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     private void buttonSaveReportBugsFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveReportBugsFormActionPerformed
-        UIEffect.popup("Thank You for your reporting, it's good news for our improvements!", this);
+        String mes = languageHelper.getData("labelReportBugsThanks");
+        UIEffect.popup(mes, this);
 
         saveReportBugs();
+        saveHistory("reporting bugs [" + textfieldCaseReportBugsForm.getText() + "]");
 
         languageHelper.apply(labelPanelViewName, "labelPanelViewNameHome", Comp.LABEL);
 
@@ -2175,6 +2280,62 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         enableReportBugsFormSave();
     }//GEN-LAST:event_textareaDescriptionReportBugsFormKeyReleased
 
+    private void labelScheduleDay1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay1MouseEntered
+        UIEffect.focusGained(labelScheduleDay1);
+    }//GEN-LAST:event_labelScheduleDay1MouseEntered
+
+    private void labelScheduleDay1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay1MouseExited
+        UIEffect.focusLost(labelScheduleDay1);
+    }//GEN-LAST:event_labelScheduleDay1MouseExited
+
+    private void labelScheduleDay2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay2MouseEntered
+        UIEffect.focusGained(labelScheduleDay2);
+    }//GEN-LAST:event_labelScheduleDay2MouseEntered
+
+    private void labelScheduleDay2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay2MouseExited
+        UIEffect.focusLost(labelScheduleDay2);
+    }//GEN-LAST:event_labelScheduleDay2MouseExited
+
+    private void labelScheduleDay3MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay3MouseEntered
+        UIEffect.focusGained(labelScheduleDay3);
+    }//GEN-LAST:event_labelScheduleDay3MouseEntered
+
+    private void labelScheduleDay3MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay3MouseExited
+        UIEffect.focusLost(labelScheduleDay3);
+    }//GEN-LAST:event_labelScheduleDay3MouseExited
+
+    private void labelScheduleDay1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay1MouseClicked
+        oldDay = labelScheduleDay1.getText();
+        showChangeSchedule();
+    }//GEN-LAST:event_labelScheduleDay1MouseClicked
+
+    private void labelScheduleDay2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay2MouseClicked
+        oldDay = labelScheduleDay2.getText();
+        showChangeSchedule();
+    }//GEN-LAST:event_labelScheduleDay2MouseClicked
+
+    private void labelScheduleDay3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay3MouseClicked
+        oldDay = labelScheduleDay3.getText();
+        showChangeSchedule();
+    }//GEN-LAST:event_labelScheduleDay3MouseClicked
+
+    private void showChangeSchedule() {
+
+        String days[] = languageHelper.getDaysData("labelMonday",
+                "labelTuesday",
+                "labelWednesday",
+                "labelThursday",
+                "labelFriday",
+                "labelSaturday",
+                "labelSunday");
+        String mess = languageHelper.getData("labelChangeDaysInfo");
+        String title = languageHelper.getData("labelChangeDaysTitle");
+
+        UIEffect.ACTION = UIEffect.ACTION_CHANGE_SCHEDULE;
+        UIEffect.popupConfirm(days, mess, title, this);
+
+    }
+
     private void enableReportBugsFormSave() {
 
         boolean allow = false;
@@ -2182,7 +2343,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         if (!UIEffect.isEmpty(textfieldCaseReportBugsForm)) {
 
             if (!UIEffect.isEmpty(textareaDescriptionReportBugsForm)) {
-
+                allow = true;
             }
         }
 
@@ -2220,7 +2381,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     private void showLoadingStatus() {
-        labelLoadingStatus.setText("Loading...");
+        labelLoadingStatus.setText(languageHelper.getData("labelLoading"));
         labelLoadingStatus.setIcon(loadingImage);
         labelLoadingStatus.setVisible(true);
     }
@@ -2354,15 +2515,18 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JComboBox<String> combobocMethodPayment;
     private javax.swing.JComboBox<String> comboboxSystemLanguage;
     private javax.swing.JFileChooser fileChooser;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JLabel labelAddPayment;
     private javax.swing.JLabel labelAddressProfile;
     private javax.swing.JLabel labelAmountPaymentForm;
@@ -2435,6 +2599,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JPanel panelHeader;
     private javax.swing.JPanel panelHeaderCenter;
     private javax.swing.JPanel panelHistory;
+    private javax.swing.JPanel panelHistoryFound;
+    private javax.swing.JPanel panelHistoryNone;
     private javax.swing.JPanel panelHome;
     private javax.swing.JPanel panelInnerBrowser;
     private javax.swing.JPanel panelMenu;
@@ -2518,15 +2684,21 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             String innerData = jchecker.getValueAsString("multi_data");
 
             //System.out.println(callingFromURL + " is valid " + b);
-            if (callingFromURL.equalsIgnoreCase(WebReference.ADD_PAYMENT)) {
+            if (callingFromURL.equalsIgnoreCase(WebReference.ADD_HISTORY)) {
+                refreshHistory();
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ADD_REPORT_BUGS)) {
+                refreshHistory();
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ADD_PAYMENT)) {
 
                 // success refreshing the table
                 refreshPayment();
+                refreshHistory();
                 hideLoadingStatus();
 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.UPDATE_USER)) {
 
                 // success updating user profile
+                refreshHistory();
                 hideLoadingStatus();
 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
@@ -2541,7 +2713,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
                 labelRefreshAttendance.setIcon(refreshImage);
 
-                labelTotalSessionCompleted.setText("Total Session Completed: " + dataIn.length);
+                labelTotalSessionCompleted.setText(languageHelper.getData("labelTotalSession") + dataIn.length);
                 labelTotalSessionCompleted.setIcon(sessionIcon);
             } else if (callingFromURL.equalsIgnoreCase(WebReference.CHECK_TOOLS)) {
 
@@ -2556,8 +2728,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 if (diff) {
                     System.out.println("We have to download new tools one!");
                     // kill any instance first
-                    UIEffect.setPopupListener(this);
-                    UIEffect.popupConfirm("New version for Tools (TeamViewer) is now available. Are you ready to download this update?", this);
+                    String mess = languageHelper.getData("labelAutoUpdateAvailable");
+                    UIEffect.ACTION = UIEffect.ACTION_AUTO_UPDATE;
+                    UIEffect.popupConfirm(mess, this);
                     // it will jump to actionYES or actionNO below
                 } else {
                     System.out.println("No new updates for the tools...");
@@ -2572,7 +2745,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
                 tabRender.render(tablePaymentData, dataIn);
 
-                labelLastPayment.setText("Last Payment : " + dataIn[dataIn.length - 1].getDate_created());
+                labelLastPayment.setText(languageHelper.getData("labelLastPayment") + dataIn[dataIn.length - 1].getDate_created());
                 labelLastPayment.setIcon(coinIcon);
 
                 labelRefreshPayment.setIcon(refreshImage);
@@ -2601,6 +2774,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             } else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
                 History[] dataIn = objectG.fromJson(innerData, History[].class);
 
+                if (dataIn.length > 0) {
+                    showHistoryPanel(true);
+                }
+
                 switch (dataIn.length) {
                     case 5:
                         labelHistoryLast5.setText(" " + dataIn[4].getDescription() + " on " + dataIn[4].getDate_created());
@@ -2624,6 +2801,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                         labelHistoryLast3.setVisible(false);
                         labelHistoryLast4.setVisible(false);
                         labelHistoryLast5.setVisible(false);
+
                 }
 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
@@ -2635,7 +2813,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 // change the title accordingly
                 String className = dataIn[0].getClass_registered();
                 panelSchedule.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule : " + className));
-                labelClassRegistered.setText("Class Registered : " + className);
+                labelClassRegistered.setText(languageHelper.getData("labelClassRegistered") + className);
                 labelClassRegistered.setIcon(classIcon);
 
                 // schedule helper to calculate and animate time interval before class started
@@ -2669,6 +2847,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
             if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
                 hideHistoryData();
+
             } else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_PAYMENT)) {
                 hidePaymentData();
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
@@ -2682,6 +2861,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void hideHistoryData() {
         labelHistoryLast1.setVisible(false);
+        showHistoryPanel(false);
+    }
+
+    public void showHistoryPanel(boolean b) {
+
+        if (b) {
+            cardLayoutHistory.show(panelHistory, "panelHistoryFound");
+            return;
+        }
+
+        cardLayoutHistory.show(panelHistory, "panelHistoryNone");
     }
 
     private void hideScheduleData() {
@@ -2703,7 +2893,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     public void playNotifSound() {
         AudioPlayer wmp = new AudioPlayer();
         wmp.play();
-        UIEffect.popup("Class started now!", this);
+        String mes = languageHelper.getData("labelClassStarted");
+        UIEffect.popup(mes, this);
 
     }
 
@@ -2713,15 +2904,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         stat = configuration.getStringValue(Keys.NOTIF_CLASS_START).contains("day");
 
         return stat;
-    }
-
-    @Override
-    public void actionYes() {
-        // this is when popup say YES
-        UIEffect.popup("yes we do!", this);
-        CMDExecutor.killTeamviewer();
-        downloadTools();
-
     }
 
     private void applyLanguageUI() {
@@ -2815,7 +2997,27 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     @Override
     public void actionNo() {
         // this is when popup say NO
-        UIEffect.popup("Download cancelled and Tools will be updated later...", this);
+        if (UIEffect.ACTION == UIEffect.ACTION_AUTO_UPDATE) {
+            String mes = languageHelper.getData("labelDownloadCancelled");
+            UIEffect.popup(mes, this);
+        } else if (UIEffect.ACTION == UIEffect.ACTION_CHANGE_SCHEDULE) {
+
+        }
+    }
+
+    @Override
+    public void actionYes() {
+        // this is when popup say YES
+        //UIEffect.popup("yes we do!", this);
+        if (UIEffect.ACTION == UIEffect.ACTION_AUTO_UPDATE) {
+            CMDExecutor.killTeamviewer();
+            downloadTools();
+        } else if (UIEffect.ACTION == UIEffect.ACTION_CHANGE_SCHEDULE) {
+            String mes = languageHelper.getData("labelWaitForAdmin");
+            UIEffect.popup(mes, this);
+            saveHistory("changing schedule [" + oldDay + "] to [" + UIEffect.selectedItem + "]");
+        }
+
     }
 
 }

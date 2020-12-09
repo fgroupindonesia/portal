@@ -7,6 +7,7 @@ package helper;
 
 import frames.ClientFrame;
 import helper.language.LanguageSwitcher;
+import java.awt.BorderLayout;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -19,10 +20,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.imageio.ImageIO;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Timer;
@@ -33,6 +37,10 @@ import javax.swing.Timer;
  */
 public class UIEffect {
 
+    public static int ACTION = -1;
+    public static final int ACTION_AUTO_UPDATE = 1;
+    public static final int ACTION_CHANGE_SCHEDULE = 2;
+
     protected static final DateFormat CLOCK_FORMAT = new SimpleDateFormat("dd/MMM/yyyy hh:mm:ss a");
     private static JLabel labelTime, labelInterval;
     private static Timer timer, scheduleTimer;
@@ -41,6 +49,7 @@ public class UIEffect {
     private static LanguageSwitcher langHelper;
     private static StringBuffer stringMainHolder = new StringBuffer();
     private static StringBuffer stringSecondHolder = new StringBuffer();
+    public static String selectedItem = null;
 
     public static void setLanguageHelper(LanguageSwitcher lgs) {
         langHelper = lgs;
@@ -273,6 +282,29 @@ public class UIEffect {
 
     public static void setPopupListener(PopupAction p) {
         listener = p;
+    }
+
+    public static void popupConfirm(String[] dataCombobox, String message, String title, JFrame ref) {
+
+        BorderLayout layout = new BorderLayout();
+        JPanel topPanel = new JPanel(layout);
+        JLabel label = new JLabel(message);
+        topPanel.add(label, BorderLayout.NORTH);
+        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
+        JComboBox cb = new JComboBox();
+        cb.setModel(new DefaultComboBoxModel(dataCombobox));
+        cb.setSelectedIndex(-1);
+        centerPanel.add(cb, BorderLayout.CENTER);
+        topPanel.add(centerPanel);
+
+        int reply = JOptionPane.showConfirmDialog(ref, topPanel, title, JOptionPane.OK_CANCEL_OPTION);
+        if (reply == JOptionPane.OK_OPTION) {
+            selectedItem = cb.getSelectedItem().toString().toLowerCase();
+            listener.actionYes();
+        } else {
+            selectedItem = null;
+            listener.actionNo();
+        }
     }
 
     public static void popupConfirm(String message, JFrame ref) {

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 30, 2020 at 11:28 AM
+-- Generation Time: Dec 09, 2020 at 07:48 AM
 -- Server version: 5.5.39
 -- PHP Version: 5.4.31
 
@@ -93,8 +93,8 @@ CREATE TABLE IF NOT EXISTS `data_document` (
 --
 
 INSERT INTO `data_document` (`id`, `title`, `description`, `filename`, `username`, `url`, `date_created`) VALUES
-(3, 'Corel+Data', 'Corel+Data', '1605830368_CorelDRAWTechnicalSuiteX7.txt', 'asdsad', 'asd', '2020-11-19 23:59:28'),
-(4, 'kuliah', 'contoh+priority', '1606286025_PRIORITY.xlsx', 'dddd', '', '2020-11-25 06:33:45');
+(3, 'Corel+Data', 'Corel+Data', 'bitplay.mp4', 'udin', 'http://fgroupindonesia.com/downloadable/bitplay.mp4', '2020-11-30 17:11:16'),
+(4, 'kuliah', 'kuliah desc', 'pencil.png', 'udin', 'http://fgroupindonesia.com/downloadable/pencil.png', '2020-11-30 17:05:55');
 
 -- --------------------------------------------------------
 
@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `data_payment` (
   `method` varchar(45) NOT NULL,
   `screenshot` varchar(75) NOT NULL DEFAULT 'not available',
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
 
 --
 -- Dumping data for table `data_payment`
@@ -143,7 +143,34 @@ CREATE TABLE IF NOT EXISTS `data_payment` (
 
 INSERT INTO `data_payment` (`id`, `username`, `amount`, `method`, `screenshot`, `date_created`) VALUES
 (3, 'dddd', 500000, 'Cash', 'not available', '2020-11-30 03:42:05'),
-(10, 'udin', 100000, 'Transfer Bank', 'not available', '2020-11-30 04:19:19');
+(10, 'udin', 100000, 'Transfer Bank', 'not available', '2020-11-30 04:19:19'),
+(11, 'udin', 750000, 'Transfer+Bank', '1606763748_youtube.jpg', '2020-11-30 19:15:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `data_report_bugs`
+--
+
+CREATE TABLE IF NOT EXISTS `data_report_bugs` (
+`id` int(4) NOT NULL,
+  `app_name` varchar(75) NOT NULL,
+  `username` varchar(75) NOT NULL,
+  `ip_address` varchar(20) NOT NULL,
+  `title` varchar(75) NOT NULL,
+  `description` varchar(200) NOT NULL,
+  `screenshot` varchar(75) NOT NULL DEFAULT 'not available',
+  `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+
+--
+-- Dumping data for table `data_report_bugs`
+--
+
+INSERT INTO `data_report_bugs` (`id`, `app_name`, `username`, `ip_address`, `title`, `description`, `screenshot`, `date_created`) VALUES
+(2, 'portal access', 'udin', '127.0.0.1', 'error', 'something', 'not available', '2020-12-09 03:56:07'),
+(3, 'portal access', 'udin', '127.0.0.1', 'error', 'something', 'not available', '2020-12-09 03:56:21'),
+(5, 'portal x', 'udin', '127.0.0.1', 'error', 'something', '1607487131_assami.gif', '2020-12-09 04:12:11');
 
 -- --------------------------------------------------------
 
@@ -165,7 +192,7 @@ CREATE TABLE IF NOT EXISTS `data_schedule` (
 
 INSERT INTO `data_schedule` (`id`, `username`, `day_schedule`, `time_schedule`, `class_registered`) VALUES
 (1, 'dddd', 'friday', '10:00', 'java web'),
-(10, 'udin', 'monday', '12:00', 'javascript web');
+(10, 'udin', 'monday', '12:14', 'javascript web');
 
 -- --------------------------------------------------------
 
@@ -179,7 +206,7 @@ CREATE TABLE IF NOT EXISTS `data_token` (
   `token` varchar(75) NOT NULL,
   `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `expired_date` datetime NOT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=29 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=35 ;
 
 --
 -- Dumping data for table `data_token`
@@ -200,7 +227,32 @@ INSERT INTO `data_token` (`id`, `username`, `token`, `created_date`, `expired_da
 (25, 'admin', '3eb80fb7b8a63a23044bfe77ccb6e606a16a1058', '2020-11-25 07:43:19', '2020-11-26 14:11:19'),
 (26, 'admin', 'f49ee4aa22c35b983a028e4e277a8e706e2bc647', '2020-11-28 07:24:24', '2020-11-29 14:11:24'),
 (27, 'admin', '1036d1305bde10a9beb3d701271fea5d9187a3c1', '2020-11-30 03:19:46', '2020-12-01 10:12:46'),
-(28, 'udin', '30956bab90246302df6844f74f920ca632f601a5', '2020-11-30 07:12:09', '2020-12-01 14:12:09');
+(28, 'udin', '30956bab90246302df6844f74f920ca632f601a5', '2020-11-30 07:12:09', '2020-12-01 14:12:09'),
+(29, 'udin', '3f1f76c8a6005a34688d996e2db5a651a6358431', '2020-12-01 07:40:47', '2020-12-02 14:12:47'),
+(30, 'udin', '1b35fbf53b2533b60a377b0a270a92f333a7ffa2', '2020-12-02 09:48:05', '2020-12-03 16:12:05'),
+(31, 'udin', '1605b693273f488e905c1b355bd4111d26daa8d9', '2020-12-03 15:30:58', '2020-12-04 22:12:58'),
+(32, 'udin', 'bcd93849504bd29780ecef0a0d2240270234017c', '2020-12-06 15:15:51', '2020-12-07 22:12:51'),
+(33, 'udin', 'd8f897a9980cb87b088b5916a68f1830c377bca1', '2020-12-08 07:24:16', '2020-12-09 14:12:16'),
+(34, 'admin', '630aa0c9c101fbce344937c527d55676fc60814c', '2020-12-09 03:54:53', '2020-12-10 11:20:23');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `data_tools`
+--
+
+CREATE TABLE IF NOT EXISTS `data_tools` (
+`id` int(4) NOT NULL,
+  `app_name` varchar(75) NOT NULL,
+  `app_ver` varchar(25) NOT NULL
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `data_tools`
+--
+
+INSERT INTO `data_tools` (`id`, `app_name`, `app_ver`) VALUES
+(1, 'teamviewer', '15.12.4.0');
 
 -- --------------------------------------------------------
 
@@ -219,7 +271,7 @@ CREATE TABLE IF NOT EXISTS `data_user` (
   `tmv_id` varchar(25) NOT NULL DEFAULT 'not available',
   `tmv_pass` varchar(25) NOT NULL DEFAULT 'not available',
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=43 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=39 ;
 
 --
 -- Dumping data for table `data_user`
@@ -228,7 +280,7 @@ CREATE TABLE IF NOT EXISTS `data_user` (
 INSERT INTO `data_user` (`id`, `username`, `pass`, `email`, `address`, `propic`, `mobile`, `tmv_id`, `tmv_pass`, `date_created`) VALUES
 (1, 'admin', 'admin', 'home@home.com', 'bdg', 'default.png', 'not available', 'not available', 'not available', '2020-10-22 08:25:09'),
 (37, 'dddd', 'ddd', 'dddd@ymail.com', 'jakarta ku kan berpetualangan ya', 'default.png', '123-123', 'not available', 'not available', '2020-11-30 06:44:04'),
-(38, 'udin', '123', 'udin@udin.com', 'jakarta aja dinnn hehe', 'default.png', '09128', '432996191', 'asd', '2020-11-30 10:26:59');
+(38, 'udin', '123', 'udin@udin.com', 'jakarta singapur', 'default.png', '1231', '432996191', 'test', '2020-11-30 15:33:32');
 
 --
 -- Indexes for dumped tables
@@ -265,6 +317,12 @@ ALTER TABLE `data_payment`
  ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `data_report_bugs`
+--
+ALTER TABLE `data_report_bugs`
+ ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `data_schedule`
 --
 ALTER TABLE `data_schedule`
@@ -274,6 +332,12 @@ ALTER TABLE `data_schedule`
 -- Indexes for table `data_token`
 --
 ALTER TABLE `data_token`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `data_tools`
+--
+ALTER TABLE `data_tools`
  ADD PRIMARY KEY (`id`);
 
 --
@@ -310,7 +374,12 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=8;
 -- AUTO_INCREMENT for table `data_payment`
 --
 ALTER TABLE `data_payment`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=11;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=12;
+--
+-- AUTO_INCREMENT for table `data_report_bugs`
+--
+ALTER TABLE `data_report_bugs`
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `data_schedule`
 --
@@ -320,12 +389,17 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=11;
 -- AUTO_INCREMENT for table `data_token`
 --
 ALTER TABLE `data_token`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=29;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=35;
+--
+-- AUTO_INCREMENT for table `data_tools`
+--
+ALTER TABLE `data_tools`
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `data_user`
 --
 ALTER TABLE `data_user`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=43;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=39;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -89,6 +89,43 @@ public class LanguageSwitcher {
         }
     }
 
+    public String getData(String key){
+        
+        String val = null;
+        
+        for (LanguageComponent lg : dataDictionary) {
+            if(lg.getKey().equalsIgnoreCase(key)){
+                val = lg.getText();
+                break;
+            }
+        }
+        
+        return val;
+        
+    }
+    
+    public String[] getDaysData(String... keys) {
+
+        ArrayList<String> dataTemp = new ArrayList<String>();
+        String data[] = null;
+
+        for (LanguageComponent lg : dataDictionary) {
+            for (int n = 0; n < keys.length; n++) {
+                if (lg.getKey().equalsIgnoreCase(keys[n])) {
+                    dataTemp.add(lg.getText());
+                    break;
+                }
+            }
+        }
+        
+        if (dataTemp.size() > 0) {
+            data = dataTemp.toArray(new String[0]);
+        }
+
+        return data;
+
+    }
+
     public void apply(JLabel el, String[] keys, String[] letter) {
         String earlierText = el.getText();
         StringBuffer stb = new StringBuffer();
@@ -143,10 +180,9 @@ public class LanguageSwitcher {
         if (dataTemp.size() > 0) {
             data = dataTemp.toArray(new String[0]);
         }
-        
+
         //int size = data.length;
         //System.out.println("Something " + size);
-        
         return data;
     }
 

@@ -62,5 +62,7 @@ public class WebReference {
     public static final String DELETE_SCHEDULE = REMOTE + "schedule/delete";
     public static final String UPDATE_SCHEDULE = REMOTE + "schedule/update";
     public static final String ADD_SCHEDULE = REMOTE + "schedule/add";
+    
+    public static final String ADD_HISTORY = REMOTE + "history/add";
 
 }

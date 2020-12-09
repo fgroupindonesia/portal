@@ -73,4 +73,6 @@ public class SWTKey {
     public static final int WORK_REPORT_BUGS_SAVE = 33;
     public static final int WORK_REPORT_BUGS_UPDATE = 34;
 
+    public static final int WORK_HISTORY_SAVE = 35;
+
 }

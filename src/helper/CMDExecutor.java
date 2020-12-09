@@ -35,7 +35,20 @@ public class CMDExecutor {
     }
 
     public static void runTeamviewer() {
-        String command = PathReference.TeamviewerPath;
+
+        // check first does he has installed?
+        // check under C:\Program Files (x86)\TeamViewer
+        String command = null;
+
+        File dirInstalled = new File("C:\\Program Files (x86)\\TeamViewer");
+
+        if (dirInstalled.exists() && dirInstalled.listFiles().length > 0) {
+            // installed
+            command = dirInstalled.getAbsolutePath() + "\\TeamViewer.exe";
+        } else {
+            command = PathReference.TeamviewerPath;
+        }
+
         call(command);
     }
 

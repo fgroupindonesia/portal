@@ -56,6 +56,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_SCREENSHOT_PAYMENT:
                 name = "refresh_screenshot_payment";
                 break;
+            case SWTKey.WORK_HISTORY_SAVE:
+                name = "history_save";
+                break;
             case SWTKey.WORK_REPORT_BUGS_SAVE:
                 name = "report_bugs_save";
                 break;
@@ -201,6 +204,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_SCREENSHOT_PAYMENT:
                 refreshScreenshotPaymentData();
                 break;
+            case SWTKey.WORK_HISTORY_SAVE:
+                historySave();
+                break;
+                
             case SWTKey.WORK_REPORT_BUGS_UPDATE:
                 reportBugsUpdate();
                 break;
@@ -479,6 +486,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.DELETE_SIGNATURE, HttpCall.METHOD_POST);
     }
 
+    private void historySave() {
+            urlExecutor.start(WebReference.ADD_HISTORY, HttpCall.METHOD_POST);
+       
+    }
+    
     private void paymentSave() {
         if (hasFile()) {
             urlExecutor.start(WebReference.ADD_PAYMENT, HttpCall.METHOD_POST_FILE);
