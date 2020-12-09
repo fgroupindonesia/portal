@@ -83,6 +83,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     ImageIcon loadingImage = new ImageIcon(getClass().getResource("/images/loadingprel.gif"));
     ImageIcon okImage = new ImageIcon(getClass().getResource("/images/ok16.png"));
     ImageIcon refreshImage = new ImageIcon(getClass().getResource("/images/refresh24.png"));
+    ImageIcon browseImage = new ImageIcon(getClass().getResource("/images/file.png"));
 
     User personLogged;
 
@@ -884,7 +885,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelReportBugs2MouseExited(evt);
             }
         });
-        panelSettings.add(labelReportBugs2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 60, 80, 60));
+        panelSettings.add(labelReportBugs2, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 60, 80, 60));
 
         panelContentCenter.add(panelSettings, "panelSettings");
 
@@ -1393,6 +1394,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         labelScreenshotPictureReportBugsForm.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelScreenshotPictureReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/file.png"))); // NOI18N
+        labelScreenshotPictureReportBugsForm.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelScreenshotPictureReportBugsFormMouseClicked(evt);
+            }
+        });
         panelReportBugs.add(labelScreenshotPictureReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 100, 180, 150));
 
         buttonSaveReportBugsForm.setText("Save");
@@ -1401,9 +1407,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 buttonSaveReportBugsFormActionPerformed(evt);
             }
         });
-        panelReportBugs.add(buttonSaveReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 350, 70, -1));
+        panelReportBugs.add(buttonSaveReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 340, 70, -1));
 
-        labelDescReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/coin.png"))); // NOI18N
+        labelDescReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/write.png"))); // NOI18N
         labelDescReportBugsForm.setText("Description");
         panelReportBugs.add(labelDescReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 150, 120, -1));
 
@@ -1418,7 +1424,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         });
         panelReportBugs.add(labelBrowseScreenshotReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 260, -1, -1));
 
-        labelCaseReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/coin.png"))); // NOI18N
+        labelCaseReportBugsForm.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/notes.png"))); // NOI18N
         labelCaseReportBugsForm.setText("Case");
         panelReportBugs.add(labelCaseReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 120, -1));
 
@@ -1430,10 +1436,20 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 textfieldCaseReportBugsFormFocusLost(evt);
             }
         });
+        textfieldCaseReportBugsForm.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textfieldCaseReportBugsFormKeyReleased(evt);
+            }
+        });
         panelReportBugs.add(textfieldCaseReportBugsForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 100, 310, -1));
 
         textareaDescriptionReportBugsForm.setColumns(20);
         textareaDescriptionReportBugsForm.setRows(5);
+        textareaDescriptionReportBugsForm.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                textareaDescriptionReportBugsFormKeyReleased(evt);
+            }
+        });
         jScrollPane5.setViewportView(textareaDescriptionReportBugsForm);
 
         panelReportBugs.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 180, 310, -1));
@@ -1602,7 +1618,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_labelPropicUserMouseClicked
 
     private void labelNavHomeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelNavHomeMouseClicked
-        labelPanelViewName.setText("Home");
+        //labelPanelViewName.setText("Home");
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameHome", Comp.LABEL);
+
         cardLayouterMain.show(panelContentCenter, "panelHome");
     }//GEN-LAST:event_labelNavHomeMouseClicked
 
@@ -1704,6 +1722,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void showPaymentForm(boolean stat) {
         if (stat) {
+
+            textfieldAmountPayment.setText("");
+            combobocMethodPayment.setSelectedIndex(-1);
+            labelScreenshotPayment.setIcon(browseImage);
+            screenshotFile = null;
 
             panelPaymentForm.setPreferredSize(new java.awt.Dimension(200, 371));
 
@@ -1833,6 +1856,27 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonSavePayment.setEnabled(false);
     }
 
+    private void saveReportBugs() {
+        showLoadingStatus();
+        SWThreadWorker workReport = new SWThreadWorker(this);
+
+        workReport.setWork(SWTKey.WORK_REPORT_BUGS_SAVE);
+
+        workReport.addData("username", personLogged.getUsername());
+        workReport.addData("app_name", "portal access");
+        workReport.addData("title", textfieldCaseReportBugsForm.getText());
+        workReport.addData("description", textareaDescriptionReportBugsForm.getText());
+
+        // for screenshot we will post the data here
+        if (screenshotFile != null) {
+            workReport.addFile("screenshot", screenshotFile);
+        }
+
+        prepareToken(workReport);
+        executorService.schedule(workReport, 1, TimeUnit.SECONDS);
+
+        buttonSaveReportBugsForm.setEnabled(false);
+    }
 
     private void labelDownloadDocumentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelDownloadDocumentMouseEntered
         // TODO add your handling code here:
@@ -2031,7 +2075,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_labelBrowseScreenshotPaymentFormMouseClicked
 
     private void labelReportBugs2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugs2MouseEntered
-        // TODO add your handling code here:
+        UIEffect.focusGained(labelReportBugs2);
     }//GEN-LAST:event_labelReportBugs2MouseEntered
 
     private void labelReportBugs2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugs2MouseExited
@@ -2040,6 +2084,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void labelReportBugs2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelReportBugs2MouseClicked
 
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameReportBugs", Comp.LABEL);
+
+        cardLayouterMain.show(panelContentCenter, "panelReportBugs");
+
+        cleanUpReportBugsForm();
 
     }//GEN-LAST:event_labelReportBugs2MouseClicked
 
@@ -2049,14 +2098,61 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         cardLayouterMain.show(panelContentCenter, "panelReportBugs");
 
+        cleanUpReportBugsForm();
     }//GEN-LAST:event_labelReportBugsMouseClicked
 
+    private void cleanUpReportBugsForm() {
+
+        textfieldCaseReportBugsForm.setText("");
+        textareaDescriptionReportBugsForm.setText("");
+
+        screenshotFile = null;
+        labelScreenshotPictureReportBugsForm.setIcon(browseImage);
+
+        buttonSaveReportBugsForm.setEnabled(false);
+
+    }
+
     private void buttonSaveReportBugsFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveReportBugsFormActionPerformed
-        UIEffect.popup("Thank You for your great reports for us!!", this);
+        UIEffect.popup("Thank You for your reporting, it's good news for our improvements!", this);
+
+        saveReportBugs();
+
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameHome", Comp.LABEL);
+
+        cardLayouterMain.show(panelContentCenter, "panelHome");
+
     }//GEN-LAST:event_buttonSaveReportBugsFormActionPerformed
 
     private void labelBrowseScreenshotReportBugsFormMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseScreenshotReportBugsFormMouseClicked
-        // TODO add your handling code here:
+
+        // browse the picture...
+        FileFilter imageFilter = new FileNameExtensionFilter(
+                "Image files", ImageIO.getReaderFileSuffixes());
+
+        fileChooser.setFileFilter(imageFilter);
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            // change accordingly
+            // copy the image to Local AppData path
+            // use it to Jlabel Propic
+            screenshotFile = fileChooser.getSelectedFile();
+
+            File dest = new File(PathReference.getScreenshotPath(screenshotFile.getName()));
+
+            try {
+                FileCopier.copyTo(screenshotFile, dest);
+                UIEffect.iconChanger(labelScreenshotPictureReportBugsForm, dest.getAbsolutePath());
+
+                System.out.println("screenshot now is " + dest.getAbsolutePath());
+            } catch (Exception ex) {
+
+            }
+
+        } else {
+            screenshotFile = null;
+        }
+
     }//GEN-LAST:event_labelBrowseScreenshotReportBugsFormMouseClicked
 
     private void textfieldCaseReportBugsFormFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldCaseReportBugsFormFocusGained
@@ -2066,6 +2162,33 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void textfieldCaseReportBugsFormFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textfieldCaseReportBugsFormFocusLost
         // TODO add your handling code here:
     }//GEN-LAST:event_textfieldCaseReportBugsFormFocusLost
+
+    private void labelScreenshotPictureReportBugsFormMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScreenshotPictureReportBugsFormMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelScreenshotPictureReportBugsFormMouseClicked
+
+    private void textfieldCaseReportBugsFormKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldCaseReportBugsFormKeyReleased
+        enableReportBugsFormSave();
+    }//GEN-LAST:event_textfieldCaseReportBugsFormKeyReleased
+
+    private void textareaDescriptionReportBugsFormKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textareaDescriptionReportBugsFormKeyReleased
+        enableReportBugsFormSave();
+    }//GEN-LAST:event_textareaDescriptionReportBugsFormKeyReleased
+
+    private void enableReportBugsFormSave() {
+
+        boolean allow = false;
+
+        if (!UIEffect.isEmpty(textfieldCaseReportBugsForm)) {
+
+            if (!UIEffect.isEmpty(textareaDescriptionReportBugsForm)) {
+
+            }
+        }
+
+        buttonSaveReportBugsForm.setEnabled(allow);
+
+    }
 
     private void enableUserFormSave() {
 
@@ -2602,6 +2725,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     private void applyLanguageUI() {
+
+        // page of @reportbugs
+        languageHelper.apply(labelCaseReportBugsForm, "labelCaseReportBugsForm", Comp.LABEL);
+        languageHelper.apply(labelDescReportBugsForm, "labelDescReportBugsForm", Comp.LABEL);
+        languageHelper.apply(labelScreenshotReportBugsForm, "labelScreenshotReportBugsForm", Comp.LABEL);
+        languageHelper.apply(labelBrowseScreenshotReportBugsForm, "labelBrowseScreenshotReportBugsForm", Comp.LABEL);
+        languageHelper.apply(buttonSaveReportBugsForm, "buttonSaveReportBugsForm", Comp.BUTTON);
 
         // front page @Home
         languageHelper.apply(buttonProfile, "buttonProfile", Comp.BUTTON);
