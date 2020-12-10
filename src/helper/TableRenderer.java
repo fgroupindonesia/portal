@@ -21,6 +21,23 @@ import javax.swing.table.DefaultTableModel;
  */
 public class TableRenderer {
 
+    public String getSelectedRowValue(JTable el, int colFind) {
+
+        String val = null;
+
+        DefaultTableModel model = (DefaultTableModel) el.getModel();
+        int activeRow = el.getSelectedRow();
+
+        Object dat = model.getValueAt(activeRow, colFind);
+
+        if (dat != null) {
+            val = dat.toString();
+        }
+
+        return val;
+
+    }
+
     public String getCheckedRowValue(JTable el, int column) {
 
         String val = null;
@@ -36,8 +53,11 @@ public class TableRenderer {
 
             if (b) {
                 // the targeted column is exist here
-                val = model.getValueAt(row, column).toString();
+                Object dat = model.getValueAt(row, column);
 
+                if (dat != null) {
+                    val = dat.toString();
+                }
             }
 
         }
@@ -82,8 +102,11 @@ public class TableRenderer {
 
             if (b) {
                 // the targeted column is exist here
-                String val = model.getValueAt(row, column).toString();
-                data.add(val);
+                Object dat = model.getValueAt(row, column);
+                if (dat != null) {
+                    String val = dat.toString();
+                    data.add(val);
+                }
             }
 
         }

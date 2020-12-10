@@ -56,18 +56,22 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }
 
     @Override
-    public void setVisible(boolean b){
+    public void setVisible(boolean b) {
         applyLanguageUI();
         super.setVisible(b);
     }
+
     private void applyLanguageUI() {
 
         languageHelper = new LanguageSwitcher(configuration);
-        
+
         languageHelper.apply(labelTitleLogin, "labelTitleLogin", Comp.LABEL);
         languageHelper.apply(labelUsernameLogin, "labelUsernameLogin", Comp.LABEL);
         languageHelper.apply(labelPasswordLogin, "labelPasswordLogin", Comp.LABEL);
         languageHelper.apply(labelLinkLoginPhone, "labelLinkLoginPhone", Comp.LABEL);
+        languageHelper.apply(labelLinkNormalLogin, "labelLinkNormalLogin", Comp.LABEL);
+        languageHelper.apply(labelCaptureQR, "labelCaptureQR", Comp.LABEL);
+        
         languageHelper.apply(buttonLogin, "buttonLogin", Comp.BUTTON);
 
     }
@@ -98,6 +102,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         panelPhoneLogin = new javax.swing.JPanel();
         labelBarcode = new javax.swing.JLabel();
         labelLinkNormalLogin = new javax.swing.JLabel();
+        labelCaptureQR = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Login");
@@ -259,10 +264,13 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelPhoneLogin.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        labelBarcode.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelBarcode.setText("Preview");
+        labelBarcode.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         panelPhoneLogin.add(labelBarcode, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 40, 300, 160));
 
         labelLinkNormalLogin.setForeground(new java.awt.Color(0, 102, 255));
+        labelLinkNormalLogin.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/left.png"))); // NOI18N
         labelLinkNormalLogin.setText("<html><u>Back to Normal Login</u></html>");
         labelLinkNormalLogin.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         labelLinkNormalLogin.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -270,7 +278,12 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 labelLinkNormalLoginMouseClicked(evt);
             }
         });
-        panelPhoneLogin.add(labelLinkNormalLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 210, 100, 20));
+        panelPhoneLogin.add(labelLinkNormalLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 220, 180, 20));
+
+        labelCaptureQR.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelCaptureQR.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelCaptureQR.setText("Capture this QR Code using your Mobile Phone.");
+        panelPhoneLogin.add(labelCaptureQR, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 10, 300, -1));
 
         panelBase.add(panelPhoneLogin, "panelPhoneLogin");
 
@@ -485,6 +498,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonLogin;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel labelBarcode;
+    private javax.swing.JLabel labelCaptureQR;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelLinkLoginPhone;
     private javax.swing.JLabel labelLinkNormalLogin;
@@ -540,6 +554,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                     AdminFrame nextFrame = new AdminFrame(this);
                     nextFrame.setVisible(true);
                 } else {
+
                     User person = new User(textfieldUsername, textfieldPass);
                     ClientFrame nextFrame = new ClientFrame(this, person);
                     nextFrame.setVisible(true);

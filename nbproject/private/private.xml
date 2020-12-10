@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="15">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="17">
         <file>
             <url>src/frames/ClientFrame.java</url>
             <bookmark id="8">
                 <name/>
-                <line>1717</line>
+                <line>1731</line>
+                <key/>
+            </bookmark>
+            <bookmark id="17">
+                <name/>
+                <line>1875</line>
                 <key/>
             </bookmark>
             <bookmark id="5">
                 <name/>
-                <line>2636</line>
+                <line>2691</line>
                 <key/>
             </bookmark>
         </file>
@@ -24,27 +29,17 @@
         </file>
         <file>
             <url>src/frames/AdminFrame.java</url>
-            <bookmark id="15">
+            <bookmark id="16">
                 <name/>
-                <line>288</line>
-                <key/>
-            </bookmark>
-            <bookmark id="13">
-                <name/>
-                <line>2917</line>
-                <key/>
-            </bookmark>
-            <bookmark id="14">
-                <name/>
-                <line>3683</line>
+                <line>3471</line>
                 <key/>
             </bookmark>
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/java/desktop/Portal/src/helper/PathReference.java</file>
-            <file>file:/D:/java/desktop/Portal/src/frames/AdminFrame.java</file>
+            <file>file:/D:/java/desktop/Portal/src/frames/ClientFrame.java</file>
+            <file>file:/D:/java/desktop/Portal/src/frames/LoginFrame.java</file>
         </group>
     </open-files>
 </project-private>

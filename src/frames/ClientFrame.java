@@ -78,6 +78,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     File propicFile;
     File screenshotFile;
     String oldDay;
+    String textChangeHover = "change -";
 
     TrayMaker tm = new TrayMaker();
 
@@ -160,6 +161,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         refreshHistory();
 
         prepareBrowserNow();
+
+        saveHistory("logging in successfuly");
     }
 
     SWThreadWorker prepbrowser = new SWThreadWorker(this);
@@ -1380,7 +1383,15 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 tableDocumentDataMouseClicked(evt);
             }
         });
-        tableDocumentData.getColumnModel().getColumn(0).setPreferredWidth(35);
+        // we hide the checklist
+        tableDocumentData.getColumnModel().getColumn(0).setPreferredWidth(0);
+        tableDocumentData.getColumnModel().getColumn(0).setMinWidth(0);
+        tableDocumentData.getColumnModel().getColumn(0).setMaxWidth(0);
+
+        // we hide the id as well
+        tableDocumentData.getColumnModel().getColumn(1).setPreferredWidth(0);
+        tableDocumentData.getColumnModel().getColumn(1).setMinWidth(0);
+        tableDocumentData.getColumnModel().getColumn(1).setMaxWidth(0);
         jScrollPane4.setViewportView(tableDocumentData);
 
         panelDocumentContent.add(jScrollPane4, java.awt.BorderLayout.CENTER);
@@ -1689,6 +1700,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         languageHelper.apply(labelPanelViewName, "labelPanelViewNameHome", Comp.LABEL);
 
         cardLayouterMain.show(panelContentCenter, "panelHome");
+
+        // if any browser opened earlier
+        turnOffBrowser();
     }//GEN-LAST:event_labelNavHomeMouseClicked
 
     private void buttonSaveSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveSettingsActionPerformed
@@ -1853,25 +1867,36 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_labelShowAttendanceStatisticMouseExited
 
     private void labelOpenDocumentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelOpenDocumentMouseClicked
-        ArrayList dataDoc = tabRender.getCheckedRows(tableDocumentData, 4);
+        String dataDoc = tabRender.getSelectedRowValue(tableDocumentData, 4);
+        String dataDocLink = tabRender.getSelectedRowValue(tableDocumentData, 6);
 
-        if (dataDoc.isEmpty()) {
+        if (dataDocLink == null) {
             warningSelectRow();
         } else {
-            // passing file name
-            saveHistory("opening document [" + dataDoc.get(0) + "]");
+            // check the content
+            if (dataDocLink.contains("youtube")) {
 
-            for (Object f : dataDoc) {
-                PathReference.setDocumentFileName(f.toString());
+                // when it's for youtube link we open into embed browser
+                saveHistory("opening youtube [" + dataDocLink + "]");
+
+                browser.loadURL(dataDocLink);
+
+                cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+
+            } else {
+
+                // we open the local file
+                saveHistory("opening document [" + dataDoc + "]");
+
+                PathReference.setDocumentFileName(dataDoc);
                 File lokasiFile = new File(PathReference.DocumentFilePath);
                 if (lokasiFile.exists()) {
                     CMDExecutor.openDocument(lokasiFile);
                 }
+
             }
-
         }
-
-
+    
     }//GEN-LAST:event_labelOpenDocumentMouseClicked
 
     private void labelOpenDocumentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelOpenDocumentMouseEntered
@@ -2030,6 +2055,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         saveHistory("opening embedded whatsapp");
     }//GEN-LAST:event_buttonVisitWhatsappActionPerformed
 
+    private void turnOffBrowser() {
+        if (browser != null) {
+            // browser.dispose();
+            // disposal is okay but require more memory call at startup
+            // thus we will 
+            // just open the simple page as nothing
+            browser.loadURL(WebReference.BLANK);
+        }
+    }
+
     public void setBrowserBack(Browser b) {
         browser = b;
     }
@@ -2133,7 +2168,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         // check the existance of the file
         // the file name is stored here
-        String fName = tabRender.getCheckedRowValue(tableDocumentData, 4);
+        // but without any check list 
+        String fName = tabRender.getSelectedRowValue(tableDocumentData, 4);
+        String urlChosen = tabRender.getSelectedRowValue(tableDocumentData, 6);
 
         if (fName != null) {
 
@@ -2141,10 +2178,22 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             labelOpenDocument.setEnabled(n.exists());
             labelDownloadDocument.setEnabled(!n.exists());
 
+        } else if (urlChosen != null) {
+
+            if (urlChosen.contains("youtube")) {
+
+                // if it is utube link
+                labelOpenDocument.setEnabled(true);
+                labelDownloadDocument.setEnabled(false);
+
+            }
         } else {
+            // if it is not utube link
+            // we shall download first
             labelOpenDocument.setEnabled(false);
             labelDownloadDocument.setEnabled(true);
         }
+
 
     }//GEN-LAST:event_tableDocumentDataMouseClicked
 
@@ -2282,26 +2331,32 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void labelScheduleDay1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay1MouseEntered
         UIEffect.focusGained(labelScheduleDay1);
+        labelScheduleDay1.setText(textChangeHover + labelScheduleDay1.getText());
     }//GEN-LAST:event_labelScheduleDay1MouseEntered
 
     private void labelScheduleDay1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay1MouseExited
         UIEffect.focusLost(labelScheduleDay1);
+        labelScheduleDay1.setText(labelScheduleDay1.getText().replace(textChangeHover, ""));
     }//GEN-LAST:event_labelScheduleDay1MouseExited
 
     private void labelScheduleDay2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay2MouseEntered
         UIEffect.focusGained(labelScheduleDay2);
+        labelScheduleDay2.setText(textChangeHover + labelScheduleDay2.getText());
     }//GEN-LAST:event_labelScheduleDay2MouseEntered
 
     private void labelScheduleDay2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay2MouseExited
         UIEffect.focusLost(labelScheduleDay2);
+        labelScheduleDay2.setText(labelScheduleDay2.getText().replace(textChangeHover, ""));
     }//GEN-LAST:event_labelScheduleDay2MouseExited
 
     private void labelScheduleDay3MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay3MouseEntered
         UIEffect.focusGained(labelScheduleDay3);
+        labelScheduleDay3.setText(textChangeHover + labelScheduleDay3.getText());
     }//GEN-LAST:event_labelScheduleDay3MouseEntered
 
     private void labelScheduleDay3MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay3MouseExited
         UIEffect.focusLost(labelScheduleDay3);
+        labelScheduleDay3.setText(labelScheduleDay3.getText().replace(textChangeHover, ""));
     }//GEN-LAST:event_labelScheduleDay3MouseExited
 
     private void labelScheduleDay1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScheduleDay1MouseClicked
@@ -2667,7 +2722,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     @Override
-    public void checkResponse(String resp, String callingFromURL) {
+        public void checkResponse(String resp, String callingFromURL) {
         Gson objectG = new Gson();
 
         System.out.println(callingFromURL + " have " + resp);
@@ -2701,23 +2756,32 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 refreshHistory();
                 hideLoadingStatus();
 
-            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
-                Document[] dataIn = objectG.fromJson(innerData, Document[].class);
+            
+
+} else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
+                Document[] dataIn = objectG.fromJson(innerData, Document[].class
+);
                 tabRender.render(tableDocumentData, dataIn);
 
                 labelRefreshDocument.setIcon(refreshImage);
 
-            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
-                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
+            
+
+} else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
+                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class
+);
                 tabRender.render(tableAttendanceData, dataIn);
 
                 labelRefreshAttendance.setIcon(refreshImage);
 
                 labelTotalSessionCompleted.setText(languageHelper.getData("labelTotalSession") + dataIn.length);
                 labelTotalSessionCompleted.setIcon(sessionIcon);
-            } else if (callingFromURL.equalsIgnoreCase(WebReference.CHECK_TOOLS)) {
+            
 
-                Tool dataIn = objectG.fromJson(innerData, Tool.class);
+} else if (callingFromURL.equalsIgnoreCase(WebReference.CHECK_TOOLS)) {
+
+                Tool dataIn = objectG.fromJson(innerData, Tool.class
+);
 
                 // checking versioning
                 // this is forcing the version to be saved on configuration
@@ -2741,8 +2805,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
                 loadUserPictureLocally();
 
-            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
-                Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
+            
+
+} else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
+                Payment[] dataIn = objectG.fromJson(innerData, Payment[].class
+);
                 tabRender.render(tablePaymentData, dataIn);
 
                 labelLastPayment.setText(languageHelper.getData("labelLastPayment") + dataIn[dataIn.length - 1].getDate_created());
@@ -2753,7 +2820,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
                 System.out.println("Obtaining Profile User data...");
 
-                User dataIn = objectG.fromJson(innerData, User.class);
+                User 
+
+dataIn = objectG.fromJson(innerData, User.class
+);
                 textfieldUsernameProfile.setText(dataIn.getUsername());
                 textfieldPasswordProfile.setText(dataIn.getPass());
                 textfieldEmailProfile.setText(dataIn.getEmail());
@@ -2771,8 +2841,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
                 System.out.println("Complete User Profile data was obtained!");
 
-            } else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
-                History[] dataIn = objectG.fromJson(innerData, History[].class);
+            
+
+} else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
+                History[] dataIn = objectG.fromJson(innerData, History[].class
+);
 
                 if (dataIn.length > 0) {
                     showHistoryPanel(true);
@@ -2802,10 +2875,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                         labelHistoryLast4.setVisible(false);
                         labelHistoryLast5.setVisible(false);
 
-                }
+                
+
+}
 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
-                Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
+                Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class
+);
 
                 ImageIcon calendarIcon = new ImageIcon(getClass().getResource("/images/calendar16.png"));
                 ImageIcon classIcon = new ImageIcon(getClass().getResource("/images/class.png"));
@@ -2908,6 +2984,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void applyLanguageUI() {
 
+        // for the schedule hover
+        textChangeHover = languageHelper.getData("labelChangeSchedule");
+        
         // page of @reportbugs
         languageHelper.apply(labelCaseReportBugsForm, "labelCaseReportBugsForm", Comp.LABEL);
         languageHelper.apply(labelDescReportBugsForm, "labelDescReportBugsForm", Comp.LABEL);
@@ -2995,7 +3074,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     @Override
-    public void actionNo() {
+        public void actionNo() {
         // this is when popup say NO
         if (UIEffect.ACTION == UIEffect.ACTION_AUTO_UPDATE) {
             String mes = languageHelper.getData("labelDownloadCancelled");
@@ -3006,7 +3085,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     @Override
-    public void actionYes() {
+        public void actionYes() {
         // this is when popup say YES
         //UIEffect.popup("yes we do!", this);
         if (UIEffect.ACTION == UIEffect.ACTION_AUTO_UPDATE) {
