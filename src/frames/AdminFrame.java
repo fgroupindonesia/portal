@@ -1094,6 +1094,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         buttonBugsReported.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bug64.png"))); // NOI18N
         buttonBugsReported.setText("Bugs Reported");
+        buttonBugsReported.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         buttonBugsReported.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonBugsReported.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonBugsReported.addActionListener(new java.awt.event.ActionListener() {
@@ -3468,6 +3469,18 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }
 
     private void cleanUpBugsReportedForm() {
+
+        comboboxUsernameBugsReported.setSelectedIndex(-1);
+        comboboxAppNameBugsReported.setSelectedIndex(-1);
+        textfieldTitleBugsReported.setText("");
+        textfieldIPAddressBugsReported.setText("");
+        textAreaDescriptionBugsReported.setText("");
+
+        labelScreenshotBugsReported.setText("preview");
+        labelScreenshotBugsReported.setIcon(null);
+        labelBrowseScreenshotBugsReported.setText("Browse Picture");
+
+        bugsFile = null;
 
     }
 

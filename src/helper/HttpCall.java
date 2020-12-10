@@ -5,7 +5,6 @@
  */
 package helper;
 
-import com.sun.jndi.toolkit.url.UrlUtil;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -18,7 +17,6 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -256,6 +254,8 @@ public class HttpCall {
                     fileName = PathReference.ScreenshotPaymentPath;
                 }else if (urlTarget.contains(WebReference.DOWNLOAD_TOOLS)) {
                     fileName = PathReference.TeamviewerPath;
+                }else if (urlTarget.contains(WebReference.SCREENSHOT_REPORT_BUGS)) {
+                    fileName = PathReference.getScreenshotBugsReportedPath(getData("screenshot"));
                 }else {
                     // this is for downloading manual
                     PathReference.setDocumentFileName(getData("filename"));

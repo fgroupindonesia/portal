@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 09, 2020 at 07:48 AM
+-- Generation Time: Dec 10, 2020 at 05:25 AM
 -- Server version: 5.5.39
 -- PHP Version: 5.4.31
 
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `data_history` (
   `username` varchar(75) NOT NULL,
   `description` varchar(200) NOT NULL,
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=23 ;
 
 --
 -- Dumping data for table `data_history`
@@ -120,7 +120,18 @@ INSERT INTO `data_history` (`id`, `username`, `description`, `date_created`) VAL
 (4, 'asd', 'moving up freespace', '2020-10-21 14:14:21'),
 (5, 'asd', 'copying document', '2020-10-21 14:14:35'),
 (6, 'asd', 'deleting document locally', '2020-10-21 14:14:35'),
-(7, 'ccc', 'waiting', '2020-10-21 14:14:47');
+(7, 'ccc', 'waiting', '2020-10-21 14:14:47'),
+(12, 'dede', 'add new report bugs [dsdsd]', '2020-12-09 07:35:20'),
+(13, 'dede', 'add new payment proof from [Cash]', '2020-12-09 07:35:58'),
+(14, 'dede', 'updating user profile', '2020-12-09 07:36:21'),
+(15, 'udin', 'reporting bugs [coba caob]', '2020-12-09 07:58:07'),
+(16, 'udin', 'uploading payment proof [Transfer Bank]', '2020-12-09 07:59:40'),
+(17, 'udin', 'changing schedule [ monday 12:14] to [Wednesday]', '2020-12-09 09:34:59'),
+(18, 'udin', 'updating client settings', '2020-12-09 09:58:09'),
+(19, 'udin', 'changing schedule [ monday 12:14] to [selasa]', '2020-12-09 10:01:14'),
+(20, 'udin', 'reporting bugs [asd]', '2020-12-09 17:54:09'),
+(21, 'udin', 'reporting bugs [cccc]', '2020-12-09 17:54:22'),
+(22, 'udin', 'reporting bugs [asdasd]', '2020-12-09 17:54:42');
 
 -- --------------------------------------------------------
 
@@ -135,7 +146,7 @@ CREATE TABLE IF NOT EXISTS `data_payment` (
   `method` varchar(45) NOT NULL,
   `screenshot` varchar(75) NOT NULL DEFAULT 'not available',
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
 
 --
 -- Dumping data for table `data_payment`
@@ -144,7 +155,10 @@ CREATE TABLE IF NOT EXISTS `data_payment` (
 INSERT INTO `data_payment` (`id`, `username`, `amount`, `method`, `screenshot`, `date_created`) VALUES
 (3, 'dddd', 500000, 'Cash', 'not available', '2020-11-30 03:42:05'),
 (10, 'udin', 100000, 'Transfer Bank', 'not available', '2020-11-30 04:19:19'),
-(11, 'udin', 750000, 'Transfer+Bank', '1606763748_youtube.jpg', '2020-11-30 19:15:48');
+(11, 'udin', 750000, 'Transfer+Bank', '1606763748_youtube.jpg', '2020-11-30 19:15:48'),
+(12, 'udin', 900000, 'Transfer Bank', '1607497879_LOGO_RTH.jpg', '2020-12-09 07:11:19'),
+(13, 'dede', 900000, 'Cash', 'not available', '2020-12-09 07:35:58'),
+(14, 'udin', 500000, 'Transfer Bank', '1607500780_123a.png', '2020-12-09 07:59:40');
 
 -- --------------------------------------------------------
 
@@ -161,16 +175,16 @@ CREATE TABLE IF NOT EXISTS `data_report_bugs` (
   `description` varchar(200) NOT NULL,
   `screenshot` varchar(75) NOT NULL DEFAULT 'not available',
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
 
 --
 -- Dumping data for table `data_report_bugs`
 --
 
 INSERT INTO `data_report_bugs` (`id`, `app_name`, `username`, `ip_address`, `title`, `description`, `screenshot`, `date_created`) VALUES
-(2, 'portal access', 'udin', '127.0.0.1', 'error', 'something', 'not available', '2020-12-09 03:56:07'),
-(3, 'portal access', 'udin', '127.0.0.1', 'error', 'something', 'not available', '2020-12-09 03:56:21'),
-(5, 'portal x', 'udin', '127.0.0.1', 'error', 'something', '1607487131_assami.gif', '2020-12-09 04:12:11');
+(14, 'portal access', 'udin', '127.0.0.1', 'asd', 'asd', 'not available', '2020-12-09 17:54:09'),
+(15, 'portal access', 'udin', '127.0.0.1', 'cccc', 'cccc cccc', 'not available', '2020-12-09 17:54:22'),
+(16, 'portal access', 'udin', '127.0.0.1', 'asdasd', 'asdasd asd', '1607536482_drawing.png', '2020-12-09 17:54:42');
 
 -- --------------------------------------------------------
 
@@ -206,7 +220,7 @@ CREATE TABLE IF NOT EXISTS `data_token` (
   `token` varchar(75) NOT NULL,
   `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `expired_date` datetime NOT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=35 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=37 ;
 
 --
 -- Dumping data for table `data_token`
@@ -233,7 +247,9 @@ INSERT INTO `data_token` (`id`, `username`, `token`, `created_date`, `expired_da
 (31, 'udin', '1605b693273f488e905c1b355bd4111d26daa8d9', '2020-12-03 15:30:58', '2020-12-04 22:12:58'),
 (32, 'udin', 'bcd93849504bd29780ecef0a0d2240270234017c', '2020-12-06 15:15:51', '2020-12-07 22:12:51'),
 (33, 'udin', 'd8f897a9980cb87b088b5916a68f1830c377bca1', '2020-12-08 07:24:16', '2020-12-09 14:12:16'),
-(34, 'admin', '630aa0c9c101fbce344937c527d55676fc60814c', '2020-12-09 03:54:53', '2020-12-10 11:20:23');
+(34, 'admin', '630aa0c9c101fbce344937c527d55676fc60814c', '2020-12-09 03:54:53', '2020-12-10 11:20:23'),
+(35, 'udin', '1cf9d86d4d6c67d02ed411a5ae15b9b92e236a75', '2020-12-09 07:15:23', '2020-12-10 14:12:23'),
+(36, 'dede', '95de77ce50fa4fc423c680f2b06152a2e5149f79', '2020-12-09 07:27:58', '2020-12-10 14:12:58');
 
 -- --------------------------------------------------------
 
@@ -279,7 +295,7 @@ CREATE TABLE IF NOT EXISTS `data_user` (
 
 INSERT INTO `data_user` (`id`, `username`, `pass`, `email`, `address`, `propic`, `mobile`, `tmv_id`, `tmv_pass`, `date_created`) VALUES
 (1, 'admin', 'admin', 'home@home.com', 'bdg', 'default.png', 'not available', 'not available', 'not available', '2020-10-22 08:25:09'),
-(37, 'dddd', 'ddd', 'dddd@ymail.com', 'jakarta ku kan berpetualangan ya', 'default.png', '123-123', 'not available', 'not available', '2020-11-30 06:44:04'),
+(37, 'dede', 'dede', 'dddd@ymail.com', 'hehehe', 'default.png', '123-123', '432996191', 'sosoais', '2020-12-09 07:36:21'),
 (38, 'udin', '123', 'udin@udin.com', 'jakarta singapur', 'default.png', '1231', '432996191', 'test', '2020-11-30 15:33:32');
 
 --
@@ -369,17 +385,17 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
 -- AUTO_INCREMENT for table `data_history`
 --
 ALTER TABLE `data_history`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=8;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=23;
 --
 -- AUTO_INCREMENT for table `data_payment`
 --
 ALTER TABLE `data_payment`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=12;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=15;
 --
 -- AUTO_INCREMENT for table `data_report_bugs`
 --
 ALTER TABLE `data_report_bugs`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=6;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=17;
 --
 -- AUTO_INCREMENT for table `data_schedule`
 --
@@ -389,7 +405,7 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=11;
 -- AUTO_INCREMENT for table `data_token`
 --
 ALTER TABLE `data_token`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=35;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=37;
 --
 -- AUTO_INCREMENT for table `data_tools`
 --

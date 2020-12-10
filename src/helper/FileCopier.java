@@ -44,9 +44,11 @@ public class FileCopier {
 
     public static void downloadFromURL(URL urlCome, String savedPath) throws Exception {
 
-        innerLabelBar.setVisible(true);
-        innerProgressBar.setVisible(true);
-        labelLoading.setVisible(true);
+        if (innerLabelBar != null) {
+            innerLabelBar.setVisible(true);
+            innerProgressBar.setVisible(true);
+            labelLoading.setVisible(true);
+        }
 
         System.out.println("Downloading " + urlCome);
         System.out.println("Saving " + savedPath);
@@ -86,13 +88,13 @@ public class FileCopier {
         });
         FileOutputStream fos = new FileOutputStream(new File(savedPath));
         fos.getChannel().transferFrom(rcbc, 0, Long.MAX_VALUE);
-        
+
         // manual for releasing memory
         fos.flush();
         fos.close();
         fos = null;
         System.gc();
-        
+
     }
 
     public static void downloadImageFromURL(URL urlCome, String pathSave) throws Exception {
