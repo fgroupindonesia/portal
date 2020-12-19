@@ -67,5 +67,9 @@ public class WebReference {
     public static final String ADD_SCHEDULE = REMOTE + "schedule/add";
     
     public static final String ADD_HISTORY = REMOTE + "history/add";
+    
+    public static final String REMOTE_LOGIN_ACTIVATE = REMOTE + "remotelogin/activate";
+    public static final String REMOTE_LOGIN_CHECK = REMOTE + "remotelogin/check";
+    public static final String REMOTE_LOGIN_VERIFY = REMOTE + "remotelogin/verify";
 
 }

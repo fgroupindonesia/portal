@@ -16,6 +16,15 @@ public class JSONChecker {
 
     private JsonObject jsonObject;
 
+    public JSONChecker() {
+
+    }
+
+    public JSONChecker(String resp) {
+        jsonObject = new JsonParser().parse(resp).getAsJsonObject();
+        //System.out.println("val " + jsonObject.get("status").getAsString());
+    }
+
     public boolean isValid(String resp) {
 
         jsonObject = new JsonParser().parse(resp).getAsJsonObject();
@@ -28,21 +37,42 @@ public class JSONChecker {
     public String getValueAsString(String keyName) {
         String val = null;
 
-        if (jsonObject.has(keyName)) {
+        try {
 
-            if (jsonObject.get(keyName).isJsonArray()) {
-                val = jsonObject.get(keyName).getAsJsonArray().toString();
-            } else {
-                val = jsonObject.get(keyName).getAsJsonObject().toString();
+            if (jsonObject.has(keyName)) {
+
+                if (jsonObject.get(keyName).isJsonArray()) {
+                    val = jsonObject.get(keyName).getAsJsonArray().toString();
+                } else if(jsonObject.get(keyName).isJsonObject()) {
+                    val = jsonObject.get(keyName).getAsJsonObject().toString();
+                }else {
+                    val = jsonObject.get(keyName).getAsString();
+                }
+
             }
 
+        } catch (Exception ex) {
+            System.out.println("error while obtaining string value");
         }
 
         return val;
     }
 
     public boolean getValueAsBoolean(String keyName) {
-        return jsonObject.get(keyName).getAsBoolean();
+
+        boolean stat = false;
+
+        try {
+
+            if(jsonObject.has(keyName)){
+                stat = jsonObject.get(keyName).getAsBoolean();
+            }
+            
+        } catch (Exception ex) {
+
+        }
+
+        return stat;
     }
 
     public JsonObject getJSON() {

@@ -1,5 +1,5 @@
 git add .
-git commit -m "ClientFrame now can Mouse Hover at Schedule."
+git commit -m "Adding Mobile QRCode integration for Mobile AutoLogin."
 git push origin main
 git gc --prune
 git pull

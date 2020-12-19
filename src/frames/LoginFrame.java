@@ -18,6 +18,7 @@ import helper.SWTKey;
 import helper.SWThreadWorker;
 import helper.UIDragger;
 import helper.UIEffect;
+import helper.WebReference;
 import helper.preferences.Keys;
 import helper.preferences.SettingPreference;
 import java.awt.CardLayout;
@@ -71,7 +72,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         languageHelper.apply(labelLinkLoginPhone, "labelLinkLoginPhone", Comp.LABEL);
         languageHelper.apply(labelLinkNormalLogin, "labelLinkNormalLogin", Comp.LABEL);
         languageHelper.apply(labelCaptureQR, "labelCaptureQR", Comp.LABEL);
-        
+
         languageHelper.apply(buttonLogin, "buttonLogin", Comp.BUTTON);
 
     }
@@ -307,10 +308,12 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_panelBaseMouseDragged
 
     private void labelLinkLoginPhoneMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkLoginPhoneMouseClicked
-        BarcodeGenerator qr = new BarcodeGenerator();
-        qr.create("sample", labelBarcode);
 
-        cardLayouter.show(panelBase, "panelPhoneLogin");
+        // ask the server for what is my public ip address
+        // it will be rendered as qrcode locally
+        obtainIPAddress();
+
+
     }//GEN-LAST:event_labelLinkLoginPhoneMouseClicked
 
     private void labelLinkNormalLoginMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkNormalLoginMouseClicked
@@ -374,6 +377,15 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workLogging.addData("password", textfieldPass.getText());
 
         executorService.schedule(workLogging, 3, TimeUnit.SECONDS);
+        labelLoading.setVisible(true);
+    }
+
+    private void obtainIPAddress() {
+        SWThreadWorker workObtain = new SWThreadWorker(this);
+
+        workObtain.setWork(SWTKey.WORK_REMOTE_LOGIN_ACTIVATE);
+
+        executorService.schedule(workObtain, 3, TimeUnit.SECONDS);
         labelLoading.setVisible(true);
     }
 
@@ -536,7 +548,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 internetExist = true;
                 apiLogging();
 
-            } else {
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.LOGIN_USER)) {
                 // now this is the usual process of logging in
 
                 System.out.println("Logging success....");
@@ -562,8 +574,28 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
                 // dont let the button leave alone
                 buttonLogin.setEnabled(true);
-                this.hide();
+                this.setVisible(false);
 
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.REMOTE_LOGIN_ACTIVATE)) {
+
+                System.out.println("Activating Remote Login success....");
+
+                String innerData = jchecker.getValueAsString("multi_data");
+                
+                System.out.println("obtaining multi_data");
+                
+                JSONChecker jcheckerAnother = new JSONChecker(innerData);
+
+                System.out.println("using jchecker");
+                
+                String innerAnotherData = jcheckerAnother.getValueAsString("ip_address");
+
+                System.out.println("Generating QRCode...");
+
+                BarcodeGenerator qr = new BarcodeGenerator();
+                qr.create(innerAnotherData, labelBarcode);
+
+                cardLayouter.show(panelBase, "panelPhoneLogin");
             }
 
         } else {

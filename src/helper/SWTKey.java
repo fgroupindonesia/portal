@@ -76,5 +76,9 @@ public class SWTKey {
     public static final int WORK_REPORT_BUGS_UPDATE = 34;
 
     public static final int WORK_HISTORY_SAVE = 35;
+    
+    public static final int WORK_REMOTE_LOGIN_ACTIVATE = 36;
+    public static final int WORK_REMOTE_LOGIN_CHECK = 37;
+    public static final int WORK_REMOTE_LOGIN_VERIFY = 38;
 
 }

@@ -44,6 +44,15 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String name = null;
 
         switch (whatWork()) {
+            case SWTKey.WORK_REMOTE_LOGIN_CHECK:
+                name = "remote_login_check";
+                break;
+            case SWTKey.WORK_REMOTE_LOGIN_VERIFY:
+                name = "remote_login_verify";
+                break;
+            case SWTKey.WORK_REMOTE_LOGIN_ACTIVATE:
+                name = "remote_login_activate";
+                break;
             case SWTKey.WORK_DOWNLOAD_TOOLS:
                 name = "download_tools";
                 break;
@@ -198,6 +207,15 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         System.out.println("I am working on " + whatWorkAsString());
 
         switch (whatWork()) {
+            case SWTKey.WORK_REMOTE_LOGIN_ACTIVATE:
+                remoteLoginActivate();
+                break;
+            case SWTKey.WORK_REMOTE_LOGIN_CHECK:
+                remoteLoginCheck();
+                break;
+            case SWTKey.WORK_REMOTE_LOGIN_VERIFY:
+                remoteLoginVerify();
+                break;
             case SWTKey.WORK_REFRESH_SCREENSHOT_REPORT_BUGS:
                 refreshScreenshotReportBugsData();
                 break;
@@ -219,7 +237,6 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_HISTORY_SAVE:
                 historySave();
                 break;
-
             case SWTKey.WORK_REPORT_BUGS_UPDATE:
                 reportBugsUpdate();
                 break;
@@ -418,6 +435,20 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.isInternetAlive();
     }
 
+    private void remoteLoginActivate() {
+        urlExecutor.start(WebReference.REMOTE_LOGIN_ACTIVATE, HttpCall.METHOD_POST);
+    }
+    
+    private void remoteLoginCheck() {
+        // urlExecutor.start(WebReference.REMOTE_LOGIN_ACTIVATE, HttpCall.METHOD_POST);
+        // in progress
+    }
+    
+    private void remoteLoginVerify() {
+        // urlExecutor.start(WebReference.REMOTE_LOGIN_ACTIVATE, HttpCall.METHOD_POST);
+        // in progress
+    }
+    
     private void userLogin() {
         urlExecutor.start(WebReference.LOGIN_USER, HttpCall.METHOD_POST);
     }
@@ -606,13 +637,13 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
 
-     private void refreshScreenshotReportBugsData() {
+    private void refreshScreenshotReportBugsData() {
 
         // the url is manually defined here
         String urlManual = WebReference.SCREENSHOT_REPORT_BUGS + "?screenshot=" + urlExecutor.getData("screenshot");
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
-    
+
     private void refreshScreenshotPaymentData() {
 
         // the url is manually defined here
@@ -642,10 +673,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.ALL_SCHEDULE_BY_DAY, HttpCall.METHOD_POST);
     }
 
-     private void refreshReportBugsData() {
+    private void refreshReportBugsData() {
         urlExecutor.start(WebReference.ALL_REPORT_BUGS, HttpCall.METHOD_POST);
     }
-    
+
     private void refreshDocumentData() {
 
         urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);

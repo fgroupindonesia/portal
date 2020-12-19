@@ -15,7 +15,7 @@ import javax.swing.JLabel;
 public class BarcodeGenerator {
 
     JLabel refElement;
-    String filename = "\\demo.png";
+    String filename = "\\qrcode.png";
     String path = PathReference.DirName + filename;
 
     // Function to create the QR code
@@ -45,16 +45,19 @@ public class BarcodeGenerator {
         // the JLabel for showing the image
         refElement = element;
         refElement.setText("");
-        
-        // The path where the image will get saved
 
+        // The path where the image will get saved
         File file = new File(PathReference.DirName);
 
         // true if the directory was created, false otherwise
-        if (file.mkdirs()) {
-            System.out.println("Directory is created!");
-        } else {
-            System.out.println("Failed to create directory!");
+        if (file.isDirectory() && !file.exists()) {
+
+            if (file.mkdirs()) {
+                System.out.println("Directory is created!");
+            } else {
+                System.out.println("Directory for barcode is ready!");
+            }
+
         }
 
         // Encoding charset
