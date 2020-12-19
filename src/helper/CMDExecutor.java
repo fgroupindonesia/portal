@@ -21,6 +21,32 @@ import java.util.Date;
  */
 public class CMDExecutor {
 
+    public static String getMachineUniqueID() {
+
+        // command for obtaining specific windows unique ID
+        String command = "wmic csproduct get UUID";
+        StringBuffer output = new StringBuffer();
+        String val = null;
+
+        try {
+
+            Process SerNumProcess = Runtime.getRuntime().exec(command);
+            BufferedReader sNumReader = new BufferedReader(new InputStreamReader(SerNumProcess.getInputStream()));
+
+            String line = "";
+            while ((line = sNumReader.readLine()) != null) {
+                output.append(line + "\n");
+            }
+            val = output.toString().substring(output.indexOf("\n"), output.length()).trim();;
+
+        } catch (Exception ex) {
+            UIEffect.popup("Error while obtaining Machine Unique ID " + ex.getMessage(), null);
+        }
+
+        return val;
+
+    }
+
     public static void openPicture(File fileIn) {
         try {
             Desktop.getDesktop().open(fileIn);

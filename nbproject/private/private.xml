@@ -41,6 +41,7 @@
             <file>file:/D:/java/desktop/Portal/src/helper/JSONChecker.java</file>
             <file>file:/D:/java/desktop/Portal/src/frames/LoginFrame.java</file>
             <file>file:/D:/java/desktop/Portal/src/helper/BarcodeGenerator.java</file>
+            <file>file:/D:/java/desktop/Portal/src/helper/CMDExecutor.java</file>
         </group>
     </open-files>
 </project-private>

@@ -10,6 +10,7 @@ import beans.User;
 
 import com.google.gson.Gson;
 import helper.BarcodeGenerator;
+import helper.CMDExecutor;
 import helper.language.Comp;
 import helper.HttpCall;
 import helper.JSONChecker;
@@ -384,7 +385,8 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         SWThreadWorker workObtain = new SWThreadWorker(this);
 
         workObtain.setWork(SWTKey.WORK_REMOTE_LOGIN_ACTIVATE);
-
+        workObtain.addData("mac_unique", CMDExecutor.getMachineUniqueID());
+        
         executorService.schedule(workObtain, 3, TimeUnit.SECONDS);
         labelLoading.setVisible(true);
     }
