@@ -1,11 +1,12 @@
 /*
- *  This is a Supplemental File from the Main Project used
- *  in Java Programming Core Fundamental I
- *  with FGroupIndonesia team.
+ *  This is a Portal Access for Client & Admin Usage
+ *  (c) FGroupIndonesia, 2020.
  */
+
 package frames;
 
 import beans.AccessToken;
+import beans.RemoteLogin;
 import beans.User;
 
 import com.google.gson.Gson;
@@ -24,11 +25,14 @@ import helper.preferences.Keys;
 import helper.preferences.SettingPreference;
 import java.awt.CardLayout;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
+import javax.swing.Timer;
 
 /**
  *
@@ -42,6 +46,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     Point initialClick;
     CardLayout cardLayouter;
     boolean internetExist, formCompleted;
+    String macID;
     LanguageSwitcher languageHelper;
 
     public LoginFrame() {
@@ -60,6 +65,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     @Override
     public void setVisible(boolean b) {
         applyLanguageUI();
+        currentlyLoggedIn = false;
         super.setVisible(b);
     }
 
@@ -319,6 +325,11 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void labelLinkNormalLoginMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkNormalLoginMouseClicked
         cardLayouter.show(panelBase, "panelLogin");
+
+        if (remoteLoginCheckWork != null) {
+            remoteLoginCheckWork.stop();
+        }
+
     }//GEN-LAST:event_labelLinkNormalLoginMouseClicked
 
     private void labelCloseMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelCloseMouseClicked
@@ -381,12 +392,25 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelLoading.setVisible(true);
     }
 
+    private void remoteLoggingCheck() {
+        SWThreadWorker workLogging = new SWThreadWorker(this);
+
+        workLogging.setWork(SWTKey.WORK_REMOTE_LOGIN_CHECK);
+        workLogging.addData("machine_unique", macID);
+
+        executorService.schedule(workLogging, 2, TimeUnit.SECONDS);
+        labelLoading.setVisible(true);
+    }
+
     private void obtainIPAddress() {
+
+        macID = CMDExecutor.getMachineUniqueID();
+
         SWThreadWorker workObtain = new SWThreadWorker(this);
 
         workObtain.setWork(SWTKey.WORK_REMOTE_LOGIN_ACTIVATE);
-        workObtain.addData("mac_unique", CMDExecutor.getMachineUniqueID());
-        
+        workObtain.addData("machine_unique", macID);
+
         executorService.schedule(workObtain, 3, TimeUnit.SECONDS);
         labelLoading.setVisible(true);
     }
@@ -583,14 +607,14 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 System.out.println("Activating Remote Login success....");
 
                 String innerData = jchecker.getValueAsString("multi_data");
-                
+
                 System.out.println("obtaining multi_data");
-                
+
                 JSONChecker jcheckerAnother = new JSONChecker(innerData);
 
                 System.out.println("using jchecker");
-                
-                String innerAnotherData = jcheckerAnother.getValueAsString("ip_address");
+
+                String innerAnotherData = jcheckerAnother.getValueAsString("machine_unique");
 
                 System.out.println("Generating QRCode...");
 
@@ -598,6 +622,79 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 qr.create(innerAnotherData, labelBarcode);
 
                 cardLayouter.show(panelBase, "panelPhoneLogin");
+
+                // now calling iteration by 10s interval for checking 'opened' remote login for this device
+                iterateRemoteLoginCheck();
+
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.REMOTE_LOGIN_CHECK)) {
+
+                // check the respond back returned
+                String innerData = jchecker.getValueAsString("multi_data");
+
+                System.out.println("remotelogincheck got " + innerData);
+
+                JSONChecker anotherJCheck = new JSONChecker(innerData);
+                RemoteLogin dataIn = null;
+
+                if (anotherJCheck.isObject()) {
+                    // this must be a 'ready' state not 'opened' yet
+                    System.out.println("data is object");
+                    dataIn = objectG.fromJson(innerData, RemoteLogin.class);
+                } else {
+                    // this must be a 'opened' state in an array form
+                    System.out.println("data is array");
+                    String tempRemoteData = anotherJCheck.getArrayValue(0).toString();
+                    dataIn = objectG.fromJson(tempRemoteData, RemoteLogin.class);
+
+                    if (dataIn.getStatus().equalsIgnoreCase("opened")) {
+
+                        System.out.println("it is opened");
+
+                        String tempTokenData = anotherJCheck.getArrayValue(1).toString();
+
+                        AccessToken tokenDataCheck = objectG.fromJson(tempTokenData, AccessToken.class);
+
+                        System.out.println("Updating Configuration locally from Remote Login....");
+
+                        // update for this token
+                        configuration.setValue(Keys.TOKEN_API, tokenDataCheck.getToken());
+                        configuration.setValue(Keys.DATE_EXPIRED_TOKEN, tokenDataCheck.getExpired_date());
+
+                        // and proceed to the next UI frames
+                        if (dataIn.getUsername().equalsIgnoreCase("admin")) {
+                            AdminFrame nextFrame = new AdminFrame(this);
+                            nextFrame.setVisible(true);
+                        } else {
+                            // password we make it empty
+                            User person = new User(dataIn.getUsername(), "");
+                            ClientFrame nextFrame = new ClientFrame(this, person);
+                            nextFrame.setVisible(true);
+                        }
+
+                        // show back the UI to login UI
+                        cardLayouter.show(panelBase, "panelLogin");
+
+                        // dont let the button leave alone
+                        // hide the login UI
+                        buttonLogin.setEnabled(true);
+                        this.setVisible(false);
+
+                    }
+
+                }
+
+                System.out.println("The status is " + dataIn.getStatus());
+
+                if (dataIn.getStatus().equalsIgnoreCase("opened")) {
+                    currentlyLoggedIn = true;
+                    // for the timer to be stopped later automatically
+
+                } else {
+                    // if it is still 'ready' not 'opened' yet
+                    // will keep the timer working on 
+                    currentlyLoggedIn = false;
+                }
+
             }
 
         } else {
@@ -620,4 +717,36 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         }
 
     }
+
+    Timer remoteLoginCheckWork;
+    boolean currentlyLoggedIn = false;
+
+    private void iterateRemoteLoginCheck() {
+
+        // by 10 seconds to wait
+        int sec = 10;
+        int timeWait = 1000 * sec;
+
+        remoteLoginCheckWork = new Timer(timeWait, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                if (currentlyLoggedIn) {
+                    // stop me here
+                    // but if it is not yet then keep checking
+                    remoteLoginCheckWork.stop();
+                } else {
+
+                    // post again
+                    remoteLoggingCheck();
+
+                }
+
+            }
+
+        });
+        remoteLoginCheckWork.start();
+
+    }
+
 }

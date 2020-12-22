@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 10, 2020 at 05:25 AM
+-- Generation Time: Dec 22, 2020 at 08:25 AM
 -- Server version: 5.5.39
 -- PHP Version: 5.4.31
 
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `data_document` (
   `username` varchar(75) NOT NULL,
   `url` varchar(200) NOT NULL,
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `data_document`
@@ -94,7 +94,8 @@ CREATE TABLE IF NOT EXISTS `data_document` (
 
 INSERT INTO `data_document` (`id`, `title`, `description`, `filename`, `username`, `url`, `date_created`) VALUES
 (3, 'Corel+Data', 'Corel+Data', 'bitplay.mp4', 'udin', 'http://fgroupindonesia.com/downloadable/bitplay.mp4', '2020-11-30 17:11:16'),
-(4, 'kuliah', 'kuliah desc', 'pencil.png', 'udin', 'http://fgroupindonesia.com/downloadable/pencil.png', '2020-11-30 17:05:55');
+(4, 'kuliah', 'kuliah desc', 'pencil.png', 'udin', 'http://fgroupindonesia.com/downloadable/pencil.png', '2020-11-30 17:05:55'),
+(5, 'Youtube - Modul 1', 'contoh', NULL, 'udin', 'https://www.youtube.com/watch?v=_B5QM1ZkPZk', '2020-12-10 09:00:25');
 
 -- --------------------------------------------------------
 
@@ -107,7 +108,7 @@ CREATE TABLE IF NOT EXISTS `data_history` (
   `username` varchar(75) NOT NULL,
   `description` varchar(200) NOT NULL,
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=23 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=52 ;
 
 --
 -- Dumping data for table `data_history`
@@ -131,7 +132,36 @@ INSERT INTO `data_history` (`id`, `username`, `description`, `date_created`) VAL
 (19, 'udin', 'changing schedule [ monday 12:14] to [selasa]', '2020-12-09 10:01:14'),
 (20, 'udin', 'reporting bugs [asd]', '2020-12-09 17:54:09'),
 (21, 'udin', 'reporting bugs [cccc]', '2020-12-09 17:54:22'),
-(22, 'udin', 'reporting bugs [asdasd]', '2020-12-09 17:54:42');
+(22, 'udin', 'reporting bugs [asdasd]', '2020-12-09 17:54:42'),
+(23, 'udin', 'logging in successfuly', '2020-12-10 09:00:44'),
+(24, 'udin', 'logging in successfuly', '2020-12-10 09:02:11'),
+(25, 'udin', 'logging in successfuly', '2020-12-10 09:03:40'),
+(26, 'udin', 'logging in successfuly', '2020-12-10 09:04:29'),
+(27, 'udin', 'opening youtube [https://www.youtube.com/watch?v=_B5QM1ZkPZk]', '2020-12-10 09:04:33'),
+(28, 'udin', 'opening youtube [https://www.youtube.com/watch?v=_B5QM1ZkPZk]', '2020-12-10 09:04:46'),
+(29, 'udin', 'opening document [bitplay.mp4]', '2020-12-10 09:05:47'),
+(30, 'udin', 'logging in successfuly', '2020-12-10 09:10:17'),
+(31, 'udin', 'opening youtube [https://www.youtube.com/watch?v=_B5QM1ZkPZk]', '2020-12-10 09:11:04'),
+(32, 'udin', 'logging in successfuly', '2020-12-10 09:15:53'),
+(33, 'udin', 'opening youtube [https://www.youtube.com/watch?v=_B5QM1ZkPZk]', '2020-12-10 09:16:28'),
+(34, 'udin', 'opening youtube [https://www.youtube.com/watch?v=_B5QM1ZkPZk]', '2020-12-10 09:16:52'),
+(35, 'udin', 'logging in successfuly', '2020-12-10 09:22:34'),
+(36, 'udin', 'logging in successfuly', '2020-12-10 09:23:29'),
+(37, 'udin', 'logging in successfuly', '2020-12-10 09:24:39'),
+(38, 'udin', 'logging in successfuly', '2020-12-10 09:43:59'),
+(39, 'udin', 'opening youtube [https://www.youtube.com/watch?v=_B5QM1ZkPZk]', '2020-12-10 09:44:39'),
+(40, 'udin', 'opening document [pencil.png]', '2020-12-10 09:45:44'),
+(41, 'udin', 'opening teamviewer', '2020-12-10 09:46:47'),
+(42, 'udin', 'logging in successfuly', '2020-12-10 10:22:46'),
+(43, 'udin', 'logging in successfuly', '2020-12-10 10:26:07'),
+(44, 'udin', 'logging in successfuly', '2020-12-21 04:48:00'),
+(45, 'udin', 'logging in successfuly', '2020-12-22 03:40:22'),
+(46, 'udin', 'logging in successfuly', '2020-12-22 03:43:33'),
+(47, 'udin', 'logging in successfuly', '2020-12-22 03:44:19'),
+(48, 'udin', 'logging in successfuly', '2020-12-22 04:35:14'),
+(49, 'udin', 'logging in successfuly', '2020-12-22 04:35:56'),
+(50, 'udin', 'logging in successfuly', '2020-12-22 04:38:15'),
+(51, 'udin', 'logging in successfuly', '2020-12-22 07:18:14');
 
 -- --------------------------------------------------------
 
@@ -159,6 +189,35 @@ INSERT INTO `data_payment` (`id`, `username`, `amount`, `method`, `screenshot`, 
 (12, 'udin', 900000, 'Transfer Bank', '1607497879_LOGO_RTH.jpg', '2020-12-09 07:11:19'),
 (13, 'dede', 900000, 'Cash', 'not available', '2020-12-09 07:35:58'),
 (14, 'udin', 500000, 'Transfer Bank', '1607500780_123a.png', '2020-12-09 07:59:40');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `data_remote_login`
+--
+
+CREATE TABLE IF NOT EXISTS `data_remote_login` (
+`id` int(4) NOT NULL,
+  `username` varchar(75) DEFAULT NULL,
+  `machine_unique` varchar(100) NOT NULL,
+  `country` varchar(75) NOT NULL,
+  `region` varchar(75) NOT NULL,
+  `city` varchar(75) NOT NULL,
+  `isp` varchar(75) NOT NULL,
+  `isp_as` varchar(75) NOT NULL,
+  `ip_address` varchar(25) NOT NULL,
+  `status` varchar(25) NOT NULL,
+  `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+
+--
+-- Dumping data for table `data_remote_login`
+--
+
+INSERT INTO `data_remote_login` (`id`, `username`, `machine_unique`, `country`, `region`, `city`, `isp`, `isp_as`, `ip_address`, `status`, `date_created`) VALUES
+(1, NULL, '4B435451-394A-3043-4631-14DAE9AD8243', 'Indonesia', 'West Java', 'Bandung', 'Indonesia Broadband Communications', 'AS55699 PT. Cemerlang Multimedia', '103.247.197.4', 'ready', '2020-12-20 03:12:14'),
+(3, 'udin', '4B435451-394A-3043-4631-14DAE9AD8243', 'Indonesia', 'West Java', 'Bandung', 'Indonesia Broadband Communications', 'AS55699 PT. Cemerlang Multimedia', '103.247.197.4', 'opened', '2020-12-21 04:50:02'),
+(4, 'udin', '4B435451-394A-3043-4631-14DAE9AD8243', 'Indonesia', 'West Java', 'Bandung', 'Indonesia Broadband Communications', 'AS55699 PT. Cemerlang Multimedia', '103.247.197.4', 'opened', '2020-12-22 04:21:17');
 
 -- --------------------------------------------------------
 
@@ -220,7 +279,7 @@ CREATE TABLE IF NOT EXISTS `data_token` (
   `token` varchar(75) NOT NULL,
   `created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `expired_date` datetime NOT NULL
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=37 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=45 ;
 
 --
 -- Dumping data for table `data_token`
@@ -249,7 +308,14 @@ INSERT INTO `data_token` (`id`, `username`, `token`, `created_date`, `expired_da
 (33, 'udin', 'd8f897a9980cb87b088b5916a68f1830c377bca1', '2020-12-08 07:24:16', '2020-12-09 14:12:16'),
 (34, 'admin', '630aa0c9c101fbce344937c527d55676fc60814c', '2020-12-09 03:54:53', '2020-12-10 11:20:23'),
 (35, 'udin', '1cf9d86d4d6c67d02ed411a5ae15b9b92e236a75', '2020-12-09 07:15:23', '2020-12-10 14:12:23'),
-(36, 'dede', '95de77ce50fa4fc423c680f2b06152a2e5149f79', '2020-12-09 07:27:58', '2020-12-10 14:12:58');
+(36, 'dede', '95de77ce50fa4fc423c680f2b06152a2e5149f79', '2020-12-09 07:27:58', '2020-12-10 14:12:58'),
+(37, 'admin', '39417f91a0d6e4801cade05f7cb88c18735bc89f', '2020-12-10 08:55:17', '2020-12-11 15:12:17'),
+(38, 'udin', 'c5ba427050c0dd9d8c45ff48d7f99f102d0b6574', '2020-12-10 09:00:42', '2020-12-11 16:12:42'),
+(39, 'admin', '69d355856e533c80f4cc317fd5b19ead99e558f4', '2020-12-15 03:51:00', '2020-12-16 10:12:00'),
+(40, 'admin', 'd9e8043bf74c795694866f61fe2f2b7b529319b4', '2020-12-16 04:52:20', '2020-12-17 11:12:20'),
+(41, 'admin', 'b3000f2de104d044d0b62a5590ccc51ca0d4be72', '2020-12-17 04:18:49', '2020-12-18 11:12:49'),
+(42, 'admin', 'a24b70c4de297ef2ec6f43c3121a59a81c551eef', '2020-12-18 16:43:54', '2020-12-19 23:12:54'),
+(44, 'udin', 'a7bff0d547956f416db368fcfb820969d2a1c9fa', '2020-12-22 04:01:11', '2020-12-23 10:59:17');
 
 -- --------------------------------------------------------
 
@@ -294,7 +360,7 @@ CREATE TABLE IF NOT EXISTS `data_user` (
 --
 
 INSERT INTO `data_user` (`id`, `username`, `pass`, `email`, `address`, `propic`, `mobile`, `tmv_id`, `tmv_pass`, `date_created`) VALUES
-(1, 'admin', 'admin', 'home@home.com', 'bdg', 'default.png', 'not available', 'not available', 'not available', '2020-10-22 08:25:09'),
+(1, 'admin', 'admin', 'sya@yqhoo.com', 'bdg jakartaaa\nluar syaaaa', '1608179927_images.jpeg', 'not available', 'not available', 'not available\r\n\r\n', '2020-12-17 04:38:47'),
 (37, 'dede', 'dede', 'dddd@ymail.com', 'hehehe', 'default.png', '123-123', '432996191', 'sosoais', '2020-12-09 07:36:21'),
 (38, 'udin', '123', 'udin@udin.com', 'jakarta singapur', 'default.png', '1231', '432996191', 'test', '2020-11-30 15:33:32');
 
@@ -330,6 +396,12 @@ ALTER TABLE `data_history`
 -- Indexes for table `data_payment`
 --
 ALTER TABLE `data_payment`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `data_remote_login`
+--
+ALTER TABLE `data_remote_login`
  ADD PRIMARY KEY (`id`);
 
 --
@@ -380,17 +452,22 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
 -- AUTO_INCREMENT for table `data_document`
 --
 ALTER TABLE `data_document`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `data_history`
 --
 ALTER TABLE `data_history`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=23;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=52;
 --
 -- AUTO_INCREMENT for table `data_payment`
 --
 ALTER TABLE `data_payment`
 MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=15;
+--
+-- AUTO_INCREMENT for table `data_remote_login`
+--
+ALTER TABLE `data_remote_login`
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `data_report_bugs`
 --
@@ -405,7 +482,7 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=11;
 -- AUTO_INCREMENT for table `data_token`
 --
 ALTER TABLE `data_token`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=37;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=45;
 --
 -- AUTO_INCREMENT for table `data_tools`
 --

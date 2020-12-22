@@ -1,3 +1,8 @@
+/*
+ *  This is a Portal Access for Client & Admin Usage
+ *  (c) FGroupIndonesia, 2020.
+ */
+
 package helper.jxbrowser;
 
 /**

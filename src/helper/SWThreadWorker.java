@@ -1,7 +1,6 @@
 /*
- *  This is a Supplemental File from the Main Project used
- *  in Java Programming Core Fundamental I
- *  with FGrnoupIndonesia team.
+ *  This is a Portal Access for Client & Admin Usage
+ *  (c) FGroupIndonesia, 2020.
  */
 package helper;
 
@@ -440,7 +439,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
     
     private void remoteLoginCheck() {
-        // urlExecutor.start(WebReference.REMOTE_LOGIN_ACTIVATE, HttpCall.METHOD_POST);
+         urlExecutor.start(WebReference.REMOTE_LOGIN_CHECK, HttpCall.METHOD_POST);
         // in progress
     }
     

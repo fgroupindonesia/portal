@@ -1,10 +1,10 @@
 /*
- *  This is a Supplemental File from the Main Project used
- *  in Java Programming Core Fundamental I
- *  with FGroupIndonesia team.
+ *  This is a Portal Access for Client & Admin Usage
+ *  (c) FGroupIndonesia, 2020.
  */
 package helper;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -15,13 +15,20 @@ import com.google.gson.JsonParser;
 public class JSONChecker {
 
     private JsonObject jsonObject;
+    private JsonArray jsonArray;
 
     public JSONChecker() {
 
     }
 
     public JSONChecker(String resp) {
-        jsonObject = new JsonParser().parse(resp).getAsJsonObject();
+        try {
+            jsonObject = new JsonParser().parse(resp).getAsJsonObject();
+            System.out.println("This is jsonobject");
+        } catch (Exception ex) {
+            jsonArray = new JsonParser().parse(resp).getAsJsonArray();
+            System.out.println("This is jsonarray");
+        }
         //System.out.println("val " + jsonObject.get("status").getAsString());
     }
 
@@ -34,6 +41,15 @@ public class JSONChecker {
 
     }
 
+    public JsonObject getArrayValue(int i) {
+        //jsonArray = jsonObject.getAsJsonArray();
+        if (jsonArray != null) {
+            return jsonArray.get(i).getAsJsonObject();
+        }
+
+        return null;
+    }
+
     public String getValueAsString(String keyName) {
         String val = null;
 
@@ -43,9 +59,9 @@ public class JSONChecker {
 
                 if (jsonObject.get(keyName).isJsonArray()) {
                     val = jsonObject.get(keyName).getAsJsonArray().toString();
-                } else if(jsonObject.get(keyName).isJsonObject()) {
+                } else if (jsonObject.get(keyName).isJsonObject()) {
                     val = jsonObject.get(keyName).getAsJsonObject().toString();
-                }else {
+                } else {
                     val = jsonObject.get(keyName).getAsString();
                 }
 
@@ -64,10 +80,10 @@ public class JSONChecker {
 
         try {
 
-            if(jsonObject.has(keyName)){
+            if (jsonObject.has(keyName)) {
                 stat = jsonObject.get(keyName).getAsBoolean();
             }
-            
+
         } catch (Exception ex) {
 
         }
@@ -77,6 +93,25 @@ public class JSONChecker {
 
     public JsonObject getJSON() {
         return jsonObject;
+    }
+
+    public boolean isObject() {
+        if(jsonObject!=null){
+        return jsonObject.isJsonObject();
+        } 
+        
+        return false;
+    }
+
+    public boolean isArray() {
+        boolean stat = false;
+        
+        if(jsonArray!=null){
+            stat = true;
+        }
+        
+        return stat;
+
     }
 
 }

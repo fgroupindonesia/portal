@@ -1,7 +1,6 @@
 /*
- *  This is a Supplemental File from the Main Project used
- *  in Java Programming Core Fundamental II
- *  with FGroupIndonesia team.
+ *  This is a Portal Access for Client & Admin Usage
+ *  (c) FGroupIndonesia, 2020.
  */
 package helper;
 
