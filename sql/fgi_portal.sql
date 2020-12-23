@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 22, 2020 at 08:25 AM
+-- Generation Time: Dec 23, 2020 at 11:14 AM
 -- Server version: 5.5.39
 -- PHP Version: 5.4.31
 
@@ -47,6 +47,29 @@ INSERT INTO `data_attendance` (`id`, `username`, `class_registered`, `status`, `
 (11, 'dddd', 'java desktop', 'idzin', 'not available', '2020-11-25 10:58:08', '2020-11-30 04:37:00'),
 (12, 'dddd', 'java desktop', 'idzin', 'not available', '2020-11-25 10:58:18', '2020-11-25 03:58:18'),
 (13, 'dddd', 'java web', 'hadir', 'not available', '2020-11-25 11:32:17', '2020-11-25 04:32:17');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `data_bill`
+--
+
+CREATE TABLE IF NOT EXISTS `data_bill` (
+`id` int(4) NOT NULL,
+  `amount` double NOT NULL,
+  `description` varchar(100) NOT NULL,
+  `username` varchar(75) NOT NULL,
+  `status` varchar(75) NOT NULL,
+  `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+
+--
+-- Dumping data for table `data_bill`
+--
+
+INSERT INTO `data_bill` (`id`, `amount`, `description`, `username`, `status`, `date_created`) VALUES
+(1, 7500, 'bayaran nov 2020', 'udin', 'pending', '2020-12-23 09:41:01'),
+(2, 7500, 'bayaran nov 2020', 'udin', 'unpaid', '2020-12-23 09:33:55');
 
 -- --------------------------------------------------------
 
@@ -176,7 +199,7 @@ CREATE TABLE IF NOT EXISTS `data_payment` (
   `method` varchar(45) NOT NULL,
   `screenshot` varchar(75) NOT NULL DEFAULT 'not available',
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=15 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=16 ;
 
 --
 -- Dumping data for table `data_payment`
@@ -188,7 +211,8 @@ INSERT INTO `data_payment` (`id`, `username`, `amount`, `method`, `screenshot`, 
 (11, 'udin', 750000, 'Transfer+Bank', '1606763748_youtube.jpg', '2020-11-30 19:15:48'),
 (12, 'udin', 900000, 'Transfer Bank', '1607497879_LOGO_RTH.jpg', '2020-12-09 07:11:19'),
 (13, 'dede', 900000, 'Cash', 'not available', '2020-12-09 07:35:58'),
-(14, 'udin', 500000, 'Transfer Bank', '1607500780_123a.png', '2020-12-09 07:59:40');
+(14, 'udin', 500000, 'Transfer Bank', '1607500780_123a.png', '2020-12-09 07:59:40'),
+(15, 'udin', 7500, 'Transfer Bank', '1608716461_cash.jpg', '2020-12-23 09:41:01');
 
 -- --------------------------------------------------------
 
@@ -208,7 +232,7 @@ CREATE TABLE IF NOT EXISTS `data_remote_login` (
   `ip_address` varchar(25) NOT NULL,
   `status` varchar(25) NOT NULL,
   `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
 
 --
 -- Dumping data for table `data_remote_login`
@@ -216,8 +240,7 @@ CREATE TABLE IF NOT EXISTS `data_remote_login` (
 
 INSERT INTO `data_remote_login` (`id`, `username`, `machine_unique`, `country`, `region`, `city`, `isp`, `isp_as`, `ip_address`, `status`, `date_created`) VALUES
 (1, NULL, '4B435451-394A-3043-4631-14DAE9AD8243', 'Indonesia', 'West Java', 'Bandung', 'Indonesia Broadband Communications', 'AS55699 PT. Cemerlang Multimedia', '103.247.197.4', 'ready', '2020-12-20 03:12:14'),
-(3, 'udin', '4B435451-394A-3043-4631-14DAE9AD8243', 'Indonesia', 'West Java', 'Bandung', 'Indonesia Broadband Communications', 'AS55699 PT. Cemerlang Multimedia', '103.247.197.4', 'opened', '2020-12-21 04:50:02'),
-(4, 'udin', '4B435451-394A-3043-4631-14DAE9AD8243', 'Indonesia', 'West Java', 'Bandung', 'Indonesia Broadband Communications', 'AS55699 PT. Cemerlang Multimedia', '103.247.197.4', 'opened', '2020-12-22 04:21:17');
+(5, NULL, '4B435451-394A-3043-4631-14DAE9AD8243', 'Indonesia', 'West Java', 'Bandung', 'Indonesia Broadband Communications', 'AS55699 PT. Cemerlang Multimedia', '103.247.197.4', 'ready', '2020-12-22 07:36:38');
 
 -- --------------------------------------------------------
 
@@ -315,7 +338,7 @@ INSERT INTO `data_token` (`id`, `username`, `token`, `created_date`, `expired_da
 (40, 'admin', 'd9e8043bf74c795694866f61fe2f2b7b529319b4', '2020-12-16 04:52:20', '2020-12-17 11:12:20'),
 (41, 'admin', 'b3000f2de104d044d0b62a5590ccc51ca0d4be72', '2020-12-17 04:18:49', '2020-12-18 11:12:49'),
 (42, 'admin', 'a24b70c4de297ef2ec6f43c3121a59a81c551eef', '2020-12-18 16:43:54', '2020-12-19 23:12:54'),
-(44, 'udin', 'a7bff0d547956f416db368fcfb820969d2a1c9fa', '2020-12-22 04:01:11', '2020-12-23 10:59:17');
+(44, 'udin', 'a7bff0d547956f416db368fcfb820969d2a1c9fa', '2020-12-23 09:30:05', '2020-12-24 10:59:17');
 
 -- --------------------------------------------------------
 
@@ -372,6 +395,12 @@ INSERT INTO `data_user` (`id`, `username`, `pass`, `email`, `address`, `propic`,
 -- Indexes for table `data_attendance`
 --
 ALTER TABLE `data_attendance`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `data_bill`
+--
+ALTER TABLE `data_bill`
  ADD PRIMARY KEY (`id`);
 
 --
@@ -444,6 +473,11 @@ ALTER TABLE `data_user`
 ALTER TABLE `data_attendance`
 MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=14;
 --
+-- AUTO_INCREMENT for table `data_bill`
+--
+ALTER TABLE `data_bill`
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
+--
 -- AUTO_INCREMENT for table `data_class_room`
 --
 ALTER TABLE `data_class_room`
@@ -462,12 +496,12 @@ MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=52;
 -- AUTO_INCREMENT for table `data_payment`
 --
 ALTER TABLE `data_payment`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=15;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=16;
 --
 -- AUTO_INCREMENT for table `data_remote_login`
 --
 ALTER TABLE `data_remote_login`
-MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
+MODIFY `id` int(4) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `data_report_bugs`
 --
