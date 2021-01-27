@@ -1,5 +1,5 @@
 git add .
-git commit -m "Creating new Bill Tables in DB."
+git commit -m "Updating the SQL table structure"
 git push origin main
 git gc --prune
 git pull

@@ -2880,8 +2880,7 @@ dataIn = objectG.fromJson(innerData, User.class
 }
 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
-                Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class
-);
+                Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
 
                 ImageIcon calendarIcon = new ImageIcon(getClass().getResource("/images/calendar16.png"));
                 ImageIcon classIcon = new ImageIcon(getClass().getResource("/images/class.png"));
