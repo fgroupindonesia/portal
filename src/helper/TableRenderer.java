@@ -6,9 +6,11 @@ package helper;
 
 import beans.Attendance;
 import beans.Document;
+import beans.ExamCategory;
 import beans.Payment;
 import beans.RBugs;
 import beans.Schedule;
+import beans.SubExamCategory;
 import beans.User;
 import java.util.ArrayList;
 import javax.swing.JTable;
@@ -135,6 +137,24 @@ public class TableRenderer {
 
     }
 
+    public void render(JTable el, ExamCategory[] dataCome) {
+
+        DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
+
+        tableModel.setRowCount(0);
+
+        for (ExamCategory d : dataCome) {
+            Object[] dataBaru = new Object[]{
+                false,
+                d.getId(),
+                d.getTitle(),
+                d.getCode()
+            };
+            tableModel.addRow(dataBaru);
+        }
+
+    }
+    
     public void render(JTable el, RBugs[] dataCome) {
 
         DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
@@ -218,6 +238,29 @@ public class TableRenderer {
     // this is for UTF-8 decoder
     private static String decode(String val) {
         return UIEffect.decodeSafe(val);
+    }
+
+    public static DefaultTableModel clearData(JTable jtab) {
+        DefaultTableModel model = (DefaultTableModel) jtab.getModel();
+        model.setRowCount(0);
+
+        return model;
+    }
+
+    public static void render(JTable el, ArrayList<SubExamCategory> items) {
+
+        DefaultTableModel tableModel = clearData(el);
+        for (SubExamCategory sb : items) {
+
+            Object[] dataBaru = new Object[]{
+                false,
+                sb.getId(),
+                sb.getTitle()
+            };
+            tableModel.addRow(dataBaru);
+
+        }
+
     }
 
     public void render(JTable el, Attendance[] dataCome) {

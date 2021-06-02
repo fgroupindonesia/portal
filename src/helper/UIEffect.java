@@ -26,9 +26,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Timer;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -281,6 +283,14 @@ public class UIEffect {
 
     public static void setPopupListener(PopupAction p) {
         listener = p;
+    }
+
+    public static String popupInput(String message, JFrame ref) {
+
+        String mes = JOptionPane.showInputDialog(ref, message);
+
+        return mes;
+
     }
 
     public static void popupConfirm(String[] dataCombobox, String message, String title, JFrame ref) {

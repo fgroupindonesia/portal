@@ -15,6 +15,7 @@ public class SWTKey {
 
     public static final int WORK_BROWSER_PREPARE = 1;
 
+    
     public static final int WORK_REFRESH_DOCUMENT = 2;
     public static final int WORK_REFRESH_ATTENDANCE = 3;
     public static final int WORK_REFRESH_PAYMENT = 4;
@@ -34,6 +35,8 @@ public class SWTKey {
     public static final int WORK_REFRESH_DASHBOARD = 8;
     public static final int WORK_REFRESH_HISTORY = 9;
     public static final int WORK_REFRESH_REPORT_BUGS = 91;
+    
+    public static final int WORK_REFRESH_EXAM_CATEGORY = 900;
 
     public static final int WORK_LOGIN = 10;
     public static final int WORK_TEST_INTERNET = 11;
@@ -55,14 +58,12 @@ public class SWTKey {
     public static final int WORK_SCHEDULE_SAVE = 21;
     public static final int WORK_SCHEDULE_UPDATE = 22;
 
-    // edit is actually obtaining the data
     public static final int WORK_ATTENDANCE_EDIT = 23;
     public static final int WORK_ATTENDANCE_DELETE = 24;
     public static final int WORK_DELETE_SIGNATURE = 241;
     public static final int WORK_ATTENDANCE_SAVE = 25;
     public static final int WORK_ATTENDANCE_UPDATE = 26;
 
-    // edit is actually obtaining the data
     public static final int WORK_PAYMENT_EDIT = 27;
     public static final int WORK_PAYMENT_DELETE = 28;
     public static final int WORK_DELETE_SCREENSHOT_PAYMENT = 281;
@@ -79,5 +80,10 @@ public class SWTKey {
     public static final int WORK_REMOTE_LOGIN_ACTIVATE = 36;
     public static final int WORK_REMOTE_LOGIN_CHECK = 37;
     public static final int WORK_REMOTE_LOGIN_VERIFY = 38;
+    
+    public static final int WORK_EXAM_CATEGORY_EDIT = 39;
+    public static final int WORK_EXAM_CATEGORY_DELETE = 40;
+    public static final int WORK_EXAM_CATEGORY_SAVE = 41;
+    public static final int WORK_EXAM_CATEGORY_UPDATE = 42;
 
 }

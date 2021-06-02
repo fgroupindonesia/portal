@@ -12,6 +12,8 @@ public class WebReference {
 
     public static final String REMOTE = "http://api.portal.fgroupindonesia.com/";
     public static final String BLANK = "http://api.portal.fgroupindonesia.com/test/blank";
+    public static final String ALL_EXAM_CATEGORY = REMOTE + "examcategory/all";
+    public static final String ALL_EXAM_SUB_CATEGORY = REMOTE + "examsubcategory/all";
     public static final String ALL_DOCUMENT = REMOTE + "document/all";
     public static final String ALL_USER = REMOTE + "user/all";
     public static final String ALL_PAYMENT = REMOTE + "payment/all";
@@ -42,6 +44,16 @@ public class WebReference {
     public static final String DELETE_DOCUMENT = REMOTE + "document/delete";
     public static final String UPDATE_DOCUMENT = REMOTE + "document/update";
     public static final String ADD_DOCUMENT = REMOTE + "document/add";
+    
+    public static final String DETAIL_EXAM_CATEGORY = REMOTE + "examcategory/detail";
+    public static final String DELETE_EXAM_CATEGORY = REMOTE + "examcategory/delete";
+    public static final String UPDATE_EXAM_CATEGORY = REMOTE + "examcategory/update";
+    public static final String ADD_EXAM_CATEGORY = REMOTE + "examcategory/add";
+    
+    public static final String DETAIL_EXAM_SUBCATEGORY = REMOTE + "examsubcategory/detail";
+    public static final String DELETE_EXAM_SUBCATEGORY = REMOTE + "examsubcategory/delete";
+    public static final String UPDATE_EXAM_SUBCATEGORY = REMOTE + "examsubcategory/update";
+    public static final String ADD_EXAM_SUBCATEGORY = REMOTE + "examsubcategory/add";
 
     public static final String DETAIL_ATTENDANCE = REMOTE + "attendance/detail";
     public static final String DELETE_ATTENDANCE = REMOTE + "attendance/delete";

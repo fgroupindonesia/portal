@@ -190,6 +190,18 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_SIGNATURE:
                 name = "refresh_signature";
                 break;
+            case SWTKey.WORK_REFRESH_EXAM_CATEGORY:
+                name = "refresh_exam_category";
+                break;
+            case SWTKey.WORK_EXAM_CATEGORY_DELETE:
+                name = "exam_category_delete";
+                break;
+            case SWTKey.WORK_EXAM_CATEGORY_UPDATE:
+                name = "exam_category_update";
+                break;
+            case SWTKey.WORK_EXAM_CATEGORY_SAVE:
+                name = "exam_category_save";
+                break;
             case SWTKey.WORK_LOGIN:
                 name = "login";
                 break;
@@ -353,6 +365,18 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_SIGNATURE:
                 refreshSignatureData();
                 break;
+            case SWTKey.WORK_REFRESH_EXAM_CATEGORY:
+                refreshExamCategoryData();
+                break;
+            case SWTKey.WORK_EXAM_CATEGORY_DELETE:
+                examCategoryDelete();
+                break;
+            case SWTKey.WORK_EXAM_CATEGORY_UPDATE:
+                examCategoryUpdate();
+                break;
+            case SWTKey.WORK_EXAM_CATEGORY_SAVE:
+                examCategorySave();
+                break;
             case SWTKey.WORK_LOGIN:
                 userLogin();
                 break;
@@ -437,17 +461,17 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void remoteLoginActivate() {
         urlExecutor.start(WebReference.REMOTE_LOGIN_ACTIVATE, HttpCall.METHOD_POST);
     }
-    
+
     private void remoteLoginCheck() {
-         urlExecutor.start(WebReference.REMOTE_LOGIN_CHECK, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.REMOTE_LOGIN_CHECK, HttpCall.METHOD_POST);
         // in progress
     }
-    
+
     private void remoteLoginVerify() {
         // urlExecutor.start(WebReference.REMOTE_LOGIN_ACTIVATE, HttpCall.METHOD_POST);
         // in progress
     }
-    
+
     private void userLogin() {
         urlExecutor.start(WebReference.LOGIN_USER, HttpCall.METHOD_POST);
     }
@@ -609,6 +633,22 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.UPDATE_SCHEDULE, HttpCall.METHOD_POST);
     }
 
+    private void examCategoryDelete() {
+        urlExecutor.start(WebReference.DELETE_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+
+    private void examCategorySave() {
+        urlExecutor.start(WebReference.ADD_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+
+    private void examCategoryEdit() {
+        urlExecutor.start(WebReference.DETAIL_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+
+    private void examCategoryUpdate() {
+        urlExecutor.start(WebReference.UPDATE_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+    
     private void refreshHistoryData() {
 
         urlExecutor.start(WebReference.LAST_HISTORY, HttpCall.METHOD_POST);
@@ -681,6 +721,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
     }
 
+     private void refreshExamCategoryData() {
+        urlExecutor.start(WebReference.ALL_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+    
     private void refreshScheduleData() {
 
         urlExecutor.start(WebReference.ALL_SCHEDULE, HttpCall.METHOD_POST);
