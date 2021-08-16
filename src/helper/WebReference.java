@@ -13,7 +13,7 @@ public class WebReference {
     public static final String REMOTE = "http://api.portal.fgroupindonesia.com/";
     public static final String BLANK = "http://api.portal.fgroupindonesia.com/test/blank";
     public static final String ALL_EXAM_CATEGORY = REMOTE + "examcategory/all";
-    public static final String ALL_EXAM_SUB_CATEGORY = REMOTE + "examsubcategory/all";
+    public static final String ALL_EXAM_SUBCATEGORY = REMOTE + "examsubcategory/all";
     public static final String ALL_DOCUMENT = REMOTE + "document/all";
     public static final String ALL_USER = REMOTE + "user/all";
     public static final String ALL_PAYMENT = REMOTE + "payment/all";

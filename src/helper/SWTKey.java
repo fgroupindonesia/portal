@@ -37,6 +37,7 @@ public class SWTKey {
     public static final int WORK_REFRESH_REPORT_BUGS = 91;
     
     public static final int WORK_REFRESH_EXAM_CATEGORY = 900;
+    public static final int WORK_REFRESH_EXAM_SUBCATEGORY = 9000;
 
     public static final int WORK_LOGIN = 10;
     public static final int WORK_TEST_INTERNET = 11;
@@ -85,5 +86,10 @@ public class SWTKey {
     public static final int WORK_EXAM_CATEGORY_DELETE = 40;
     public static final int WORK_EXAM_CATEGORY_SAVE = 41;
     public static final int WORK_EXAM_CATEGORY_UPDATE = 42;
+    
+    public static final int WORK_EXAM_SUBCATEGORY_EDIT = 43;
+    public static final int WORK_EXAM_SUBCATEGORY_DELETE = 44;
+    public static final int WORK_EXAM_SUBCATEGORY_SAVE = 45;
+    public static final int WORK_EXAM_SUBCATEGORY_UPDATE = 46;
 
 }

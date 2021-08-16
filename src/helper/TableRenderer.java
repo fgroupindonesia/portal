@@ -10,7 +10,7 @@ import beans.ExamCategory;
 import beans.Payment;
 import beans.RBugs;
 import beans.Schedule;
-import beans.SubExamCategory;
+import beans.ExamSubCategory;
 import beans.User;
 import java.util.ArrayList;
 import javax.swing.JTable;
@@ -137,6 +137,23 @@ public class TableRenderer {
 
     }
 
+    public void render(JTable el, ExamSubCategory[] dataCome) {
+
+        DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
+
+        tableModel.setRowCount(0);
+
+        for (ExamSubCategory d : dataCome) {
+            Object[] dataBaru = new Object[]{
+                false,
+                d.getId(),
+                d.getTitle()
+            };
+            tableModel.addRow(dataBaru);
+        }
+
+    }
+    
     public void render(JTable el, ExamCategory[] dataCome) {
 
         DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
@@ -247,10 +264,10 @@ public class TableRenderer {
         return model;
     }
 
-    public static void render(JTable el, ArrayList<SubExamCategory> items) {
+    public static void render(JTable el, ArrayList<ExamSubCategory> items) {
 
         DefaultTableModel tableModel = clearData(el);
-        for (SubExamCategory sb : items) {
+        for (ExamSubCategory sb : items) {
 
             Object[] dataBaru = new Object[]{
                 false,

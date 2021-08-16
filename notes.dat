@@ -1,4 +1,19 @@
 
+Table:
+**data_exam_qa**
+is actually the exam questions data bank
+jenis 		= 3 types = 1 (pg abcd), 2 (pg ab), 3 (essay)
+preview 	= image file name stored on server
+answer 		= a/b/c/d
+
+**data_exam_student**
+is actually the student exam answers data bank
+exam_qa_id	= integer index
+answer 		= (essay) or (a/b/c/d)
+status		= (valid)
+
+**data_exam_sco
+
 AutoUpdate Tool procedures:
 - run at certain hours: 08:00 / 12:00 / 18:00 / 22:00
 - comparing local version with server version

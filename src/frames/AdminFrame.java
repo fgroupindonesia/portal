@@ -2,6 +2,7 @@
  *  This is a Portal Access for Client & Admin Usage
  *  (c) FGroupIndonesia, 2020.
  */
+
 package frames;
 
 import beans.Attendance;
@@ -11,7 +12,7 @@ import beans.ExamCategory;
 import beans.Payment;
 import beans.RBugs;
 import beans.Schedule;
-import beans.SubExamCategory;
+import beans.ExamSubCategory;
 import beans.User;
 import com.google.gson.Gson;
 import helper.CMDExecutor;
@@ -73,7 +74,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 // for every entity form has this edit mode
     boolean editMode;
 
-    ArrayList isiSubCategory;
+    ArrayList <ExamSubCategory> isiSubCategory;
 
     /**
      * Creates new form MainAdminFrame
@@ -243,6 +244,29 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void renderExamCategoryForm(ExamCategory dataCome) {
+
+        idForm = (short) dataCome.getId();
+
+        textfieldTitleExamCategory.setText(dataCome.getTitle());
+        textfieldCodeExamCategory.setText(dataCome.getCode());
+        
+        // the locking mechanism will be called by the next call
+        // returned by calling examsubcategory
+        
+        /*
+        lockExamCategoryForm(false);
+        hideLoadingStatus();
+        */
+        
+        // we better do some clearing 
+        // mechanism for the table here
+        TableRenderer.clearData(tableExamSubCategory);
+        
+        getAllExamSubCategory(""+dataCome.getId());
+        
+    }
+    
     private void refreshUserPicture(String filename) {
 
         // set the path temporarily 
@@ -390,6 +414,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         prepareToken(workUser);
         executorService.schedule(workUser, 2, TimeUnit.SECONDS);
 
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tableUserData);
+
     }
 
     private void refreshAttendance() {
@@ -400,6 +428,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         prepareToken(workAttendance);
         executorService.schedule(workAttendance, 2, TimeUnit.SECONDS);
+
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tableAttendanceData);
 
     }
 
@@ -412,8 +444,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         prepareToken(workExamCat);
         executorService.schedule(workExamCat, 2, TimeUnit.SECONDS);
 
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tableExamCategoryData);
+
     }
-    
+
     private void refreshScheduleByDay(String dayName) {
 
         SWThreadWorker workSchedule = new SWThreadWorker(this);
@@ -421,6 +457,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workSchedule.addData("day_schedule", dayName);
         prepareToken(workSchedule);
         executorService.schedule(workSchedule, 2, TimeUnit.SECONDS);
+
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tableScheduleData);
 
     }
 
@@ -432,6 +472,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         prepareToken(workDoc);
         executorService.schedule(workDoc, 2, TimeUnit.SECONDS);
 
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tableDocumentData);
+
     }
 
     private void refreshPayment() {
@@ -441,6 +485,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workPay.addData("username", "admin");
         prepareToken(workPay);
         executorService.schedule(workPay, 2, TimeUnit.SECONDS);
+
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tablePaymentData);
 
     }
 
@@ -452,6 +500,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         prepareToken(workBugs);
         executorService.schedule(workBugs, 2, TimeUnit.SECONDS);
 
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tableBugsReportedData);
+
     }
 
     private void refreshSchedule() {
@@ -461,6 +513,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workSched.addData("username", "admin");
         prepareToken(workSched);
         executorService.schedule(workSched, 2, TimeUnit.SECONDS);
+
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tableScheduleData);
 
     }
 
@@ -503,6 +559,19 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    // this is sub call
+    private void getAllExamSubCategory(String idIn) {
+
+        // the id come here is the main parent
+        // exam category id as reference
+        SWThreadWorker workExamSubCat = new SWThreadWorker(this);
+        workExamSubCat.setWork(SWTKey.WORK_REFRESH_EXAM_SUBCATEGORY);
+        workExamSubCat.addData("exam_category_id", idIn);
+        prepareToken(workExamSubCat);
+        executorService.schedule(workExamSubCat, 2, TimeUnit.SECONDS);
+
+    }
+    
     private void getDocument(int anID) {
 
         SWThreadWorker workDoc = new SWThreadWorker(this);
@@ -651,6 +720,41 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         prepareToken(workAttendanceEntity);
         executorService.schedule(workAttendanceEntity, 2, TimeUnit.SECONDS);
+
+    }
+
+    private void saveExamCategory() {
+
+        showLoadingStatus();
+
+        SWThreadWorker workExamCategoryEntity = new SWThreadWorker(this);
+
+        // check whether this is edit or new form?
+        if (editMode) {
+            // updating data
+            workExamCategoryEntity.setWork(SWTKey.WORK_EXAM_CATEGORY_UPDATE);
+            workExamCategoryEntity.addData("id", idForm + "");
+        } else {
+            // saving new data
+            workExamCategoryEntity.setWork(SWTKey.WORK_EXAM_CATEGORY_SAVE);
+            
+            // we also push the sub_category data here
+            String dataJSON = new Gson().toJson(isiSubCategory);
+            
+            System.err.println(dataJSON);
+            
+            workExamCategoryEntity.addData("json", dataJSON);
+            
+            
+        }
+
+        System.out.println("Adding a data before executing API Request...");
+
+        workExamCategoryEntity.addData("title", textfieldTitleExamCategory.getText());
+        workExamCategoryEntity.addData("code", textfieldCodeExamCategory.getText());
+
+        prepareToken(workExamCategoryEntity);
+        executorService.schedule(workExamCategoryEntity, 2, TimeUnit.SECONDS);
 
     }
 
@@ -2525,6 +2629,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         editExamSubCategory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/edit24.png"))); // NOI18N
         editExamSubCategory.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         editExamSubCategory.setEnabled(false);
+        editExamSubCategory.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                editExamSubCategoryMouseClicked(evt);
+            }
+        });
         panelExamCategoryForm.add(editExamSubCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 40, -1, -1));
 
         addExamSubCategory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/add24.png"))); // NOI18N
@@ -2539,6 +2648,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         deleteExamSubCategory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/delete24.png"))); // NOI18N
         deleteExamSubCategory.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         deleteExamSubCategory.setEnabled(false);
+        deleteExamSubCategory.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                deleteExamSubCategoryMouseClicked(evt);
+            }
+        });
         panelExamCategoryForm.add(deleteExamSubCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 40, -1, -1));
 
         panelExam.add(panelExamCategoryForm, "panelExamCategoryForm");
@@ -3392,7 +3506,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void buttonEditExamCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditExamCategoryActionPerformed
         // ## Edit Item from Management
-        ArrayList dataExam = tabRender.getCheckedRows(tableExamCategoryData, 2);
+        ArrayList dataExam = tabRender.getCheckedRows(tableExamCategoryData, 1);
 
         if (dataExam.size() == 1) {
             // go to examCategoryForm
@@ -3446,7 +3560,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_labelRefreshExamCategoryManagementMouseExited
 
     private void buttonCancelExamCategoryFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelExamCategoryFormActionPerformed
-        // TODO add your handling code here:
+        // clear all from ArrayList
+        isiSubCategory.clear();
+
+        cardLayoutEntity.show(panelExam, "panelExamCategoryManagement");
+        labelBackToHome.setVisible(true);
     }//GEN-LAST:event_buttonCancelExamCategoryFormActionPerformed
 
     private void textfieldTitleExamCategoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textfieldTitleExamCategoryKeyReleased
@@ -3466,7 +3584,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_textfieldCodeExamCategoryKeyTyped
 
     private void buttonSaveExamCategoryFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveExamCategoryFormActionPerformed
-        // TODO add your handling code here:
+        // ## save everything but in the following order
+        // first the exam category
+        // second is the exam sub category
+
+        // ## Save UI Form
+        cardLayoutEntity.show(panelExam, "panelExamCategoryManagement");
+        saveExamCategory();
+
     }//GEN-LAST:event_buttonSaveExamCategoryFormActionPerformed
 
     private void refreshSubCategoryTable() {
@@ -3482,14 +3607,17 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void addExamSubCategoryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addExamSubCategoryMouseClicked
 
         // adding item to sub category table
-        String jawaban = UIEffect.popupInput("Sub Category Title : ", this);
-        if (!jawaban.isEmpty()) {
-            // add from the input to array
-            // then forward to the jtable
-            isiSubCategory.add(new SubExamCategory(jawaban));
-            refreshSubCategoryTable();
+        if (addExamSubCategory.isEnabled()) {
+            String jawaban = UIEffect.popupInput("Sub Category Title : ", this);
+            if (jawaban != null) {
+                if (!jawaban.isEmpty()) {
+                    // add from the input to array
+                    // then forward to the jtable
+                    isiSubCategory.add(new ExamSubCategory(jawaban));
+                    refreshSubCategoryTable();
+                }
+            }
         }
-
     }//GEN-LAST:event_addExamSubCategoryMouseClicked
 
     private void tableExamSubCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tableExamSubCategoryFocusGained
@@ -3503,6 +3631,23 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         deleteExamSubCategory.setEnabled(false);
 
     }//GEN-LAST:event_tableExamSubCategoryFocusLost
+
+    private void editExamSubCategoryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editExamSubCategoryMouseClicked
+
+        if(editExamSubCategory.isEnabled()){
+            
+        }
+        
+    }//GEN-LAST:event_editExamSubCategoryMouseClicked
+
+    private void deleteExamSubCategoryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteExamSubCategoryMouseClicked
+
+        if(deleteExamSubCategory.isEnabled()){
+            
+            
+        }
+        
+    }//GEN-LAST:event_deleteExamSubCategoryMouseClicked
 
     private void enableUserFormSave() {
 
@@ -4009,12 +4154,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         editMode = editWork;
 
+        isiSubCategory = new ArrayList<ExamSubCategory>();
+       
         textfieldTitleExamCategory.setText("");
         textfieldCodeExamCategory.setText("");
 
         // this is default entry
-        TableRenderer.clearData(tableExamCategoryData);
-
+        TableRenderer.clearData(tableExamSubCategory);
+        
         if (editMode) {
             // we lock first
             // so later it will be unlocked by async success call
@@ -4183,7 +4330,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
                         hideLoadingStatus();
 
-                    }  else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
                         Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
                         tabRender.render(tableScheduleData, dataIn);
 
@@ -4306,6 +4453,21 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         Schedule dataIn = objectG.fromJson(innerData, Schedule.class);
                         renderScheduleForm(dataIn);
 
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_EXAM_CATEGORY)) {
+
+                        // we got the single exam category data here
+                        ExamCategory dataIn = objectG.fromJson(innerData, ExamCategory.class);
+                        renderExamCategoryForm(dataIn);
+
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_SUBCATEGORY)) {
+
+                        // we may got many exam sub category or even less
+                        ExamSubCategory[] dataIn = objectG.fromJson(innerData, ExamSubCategory[].class);
+                        tabRender.render(tableExamSubCategory, dataIn);
+
+                        lockExamCategoryForm(false);
+                        hideLoadingStatus();
+
                     }
 
                 }
@@ -4329,8 +4491,26 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                     || urlTarget.equalsIgnoreCase(WebReference.REGISTER_USER)
                     || urlTarget.equalsIgnoreCase(WebReference.ADD_SCHEDULE)) {
                 showErrorStatus("saving new entry");
-            }
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_CATEGORY)
+                    || urlTarget.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)
+                    || urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)
+                    || urlTarget.equalsIgnoreCase(WebReference.ALL_PAYMENT)
+                    || urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE)
+                    || urlTarget.equalsIgnoreCase(WebReference.ALL_USER)
+                    || urlTarget.equalsIgnoreCase(WebReference.ALL_REPORT_BUGS)) {
 
+                // hide the loading at the moment
+                // from the previous call
+                hideLoadingStatus();
+
+            } else if(urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_SUBCATEGORY)){
+                
+                // since the sub category of the exam is not exist
+                // thus, we just turn on the form from here
+                lockExamCategoryForm(false);
+                hideLoadingStatus();
+                
+            }
         }
     }
 

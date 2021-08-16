@@ -8,13 +8,13 @@ package beans;
  *
  * @author ASUS
  */
-public class SubExamCategory {
+public class ExamSubCategory {
     
     private int id;
     private int exam_category_id;
     private String title;
 
-    public SubExamCategory(String title){
+    public ExamSubCategory(String title){
         this.title = title;
     }
     
