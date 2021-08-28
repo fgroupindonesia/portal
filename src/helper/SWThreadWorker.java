@@ -402,22 +402,22 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 refreshSignatureData();
                 break;
             case SWTKey.WORK_REFRESH_EXAM_QUESTIONS:
-                xrefreshExamCategoryData();
+                refreshExamQuestionData();
                 break;
             case SWTKey.WORK_DELETE_EXAM_PREVIEW:
-                xpictureDelete();
+                examPreviewDelete();
                 break;
             case SWTKey.WORK_EXAM_QUESTION_DELETE:
-                xexamCategoryDelete();
+                examQuestionDelete();
                 break;
             case SWTKey.WORK_EXAM_QUESTION_UPDATE:
-                xexamCategoryUpdate();
+                examQuestionUpdate();
                 break;
             case SWTKey.WORK_EXAM_QUESTION_SAVE:
-                xexamCategorySave();
+                examQuestionSave();
                 break;
             case SWTKey.WORK_EXAM_QUESTION_EDIT:
-                xexamCategoryEdit();
+                examQuestionEdit();
                 break;
             case SWTKey.WORK_REFRESH_EXAM_CATEGORY:
                 refreshExamCategoryData();
@@ -613,6 +613,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void pictureDelete() {
         urlExecutor.start(WebReference.DELETE_PICTURE_USER, HttpCall.METHOD_POST);
     }
+    
+    // this is for exam preview 
+    private void examPreviewDelete() {
+        urlExecutor.start(WebReference.DELETE_PREVIEW_EXAM, HttpCall.METHOD_POST);
+    }
 
     // this is for payment picture
     private void screenshotDelete() {
@@ -705,6 +710,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.UPDATE_SCHEDULE, HttpCall.METHOD_POST);
     }
 
+    private void examQuestionDelete() {
+        urlExecutor.start(WebReference.DELETE_EXAM_QUESTION, HttpCall.METHOD_POST);
+    }
+    
     private void examCategoryDelete() {
         urlExecutor.start(WebReference.DELETE_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
@@ -728,13 +737,25 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void examCategorySave() {
         urlExecutor.start(WebReference.ADD_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
+    
+    private void examQuestionSave() {
+        urlExecutor.start(WebReference.ADD_EXAM_QUESTION, HttpCall.METHOD_POST);
+    }
 
     private void examCategoryEdit() {
         urlExecutor.start(WebReference.DETAIL_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
+    
+    private void examQuestionEdit() {
+        urlExecutor.start(WebReference.DETAIL_EXAM_QUESTION, HttpCall.METHOD_POST);
+    }
 
     private void examCategoryUpdate() {
         urlExecutor.start(WebReference.UPDATE_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+    
+    private void examQuestionUpdate() {
+        urlExecutor.start(WebReference.UPDATE_EXAM_QUESTION, HttpCall.METHOD_POST);
     }
 
     private void refreshHistoryData() {
@@ -809,6 +830,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
     }
 
+    private void refreshExamQuestionData() {
+        urlExecutor.start(WebReference.ALL_EXAM_QUESTION, HttpCall.METHOD_POST);
+    }
+    
     private void refreshExamCategoryData() {
         urlExecutor.start(WebReference.ALL_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
