@@ -190,6 +190,24 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_SIGNATURE:
                 name = "refresh_signature";
                 break;
+            case SWTKey.WORK_REFRESH_EXAM_QUESTIONS:
+                name = "refresh_exam_question";
+                break;
+            case SWTKey.WORK_DELETE_EXAM_PREVIEW:
+                name = "delete_exam_question_preview";
+                break;
+            case SWTKey.WORK_EXAM_QUESTION_DELETE:
+                name = "exam_question_delete";
+                break;
+            case SWTKey.WORK_EXAM_QUESTION_UPDATE:
+                name = "exam_question_update";
+                break;
+            case SWTKey.WORK_EXAM_QUESTION_SAVE:
+                name = "exam_question_save";
+                break;
+            case SWTKey.WORK_EXAM_QUESTION_EDIT:
+                name = "exam_question_edit";
+                break;
             case SWTKey.WORK_REFRESH_EXAM_CATEGORY:
                 name = "refresh_exam_category";
                 break;
@@ -382,6 +400,24 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_REFRESH_SIGNATURE:
                 refreshSignatureData();
+                break;
+            case SWTKey.WORK_REFRESH_EXAM_QUESTIONS:
+                xrefreshExamCategoryData();
+                break;
+            case SWTKey.WORK_DELETE_EXAM_PREVIEW:
+                xpictureDelete();
+                break;
+            case SWTKey.WORK_EXAM_QUESTION_DELETE:
+                xexamCategoryDelete();
+                break;
+            case SWTKey.WORK_EXAM_QUESTION_UPDATE:
+                xexamCategoryUpdate();
+                break;
+            case SWTKey.WORK_EXAM_QUESTION_SAVE:
+                xexamCategorySave();
+                break;
+            case SWTKey.WORK_EXAM_QUESTION_EDIT:
+                xexamCategoryEdit();
                 break;
             case SWTKey.WORK_REFRESH_EXAM_CATEGORY:
                 refreshExamCategoryData();

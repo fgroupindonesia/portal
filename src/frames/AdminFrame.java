@@ -5705,6 +5705,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         Schedule dataIn = objectG.fromJson(innerData, Schedule.class);
                         renderScheduleForm(dataIn);
 
+                    }  else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_EXAM_QUESTION)) {
+
+                        // we got the single exam category data here
+                        ExamCategory dataIn = objectG.fromJson(innerData, ExamCategory.class);
+                        renderExamCategoryForm(dataIn);
+                        
+                       
+
                     } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_EXAM_CATEGORY)) {
 
                         // we got the single exam category data here
