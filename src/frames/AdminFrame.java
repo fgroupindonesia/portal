@@ -1238,6 +1238,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jLabel45 = new javax.swing.JLabel();
         radiobuttonMultipleChoiceExamQuestion = new javax.swing.JRadioButton();
         radiobuttonEssayExamQuestion = new javax.swing.JRadioButton();
+        jPanel5 = new javax.swing.JPanel();
+        labelPreviewExamQuestion = new javax.swing.JLabel();
+        labelBrowseExamPreviewImage = new javax.swing.JLabel();
         panelCertificateStudent = new javax.swing.JPanel();
         panelCertificateStudentManagement = new javax.swing.JPanel();
         panelCertificateStudentControl = new javax.swing.JPanel();
@@ -3075,10 +3078,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonCancelExamCategoryForm1ActionPerformed(evt);
             }
         });
-        panelExamQuestionForm.add(buttonCancelExamCategoryForm1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
+        panelExamQuestionForm.add(buttonCancelExamCategoryForm1, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 260, -1, -1));
 
         jLabel41.setText("Score Point :");
-        panelExamQuestionForm.add(jLabel41, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 90, 150, -1));
+        panelExamQuestionForm.add(jLabel41, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 80, 150, -1));
 
         buttonSaveExamCategoryForm1.setText("Save");
         buttonSaveExamCategoryForm1.addActionListener(new java.awt.event.ActionListener() {
@@ -3086,7 +3089,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonSaveExamCategoryForm1ActionPerformed(evt);
             }
         });
-        panelExamQuestionForm.add(buttonSaveExamCategoryForm1, new org.netbeans.lib.awtextra.AbsoluteConstraints(555, 250, 60, -1));
+        panelExamQuestionForm.add(buttonSaveExamCategoryForm1, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 260, 60, -1));
 
         jLabel42.setText("Category :");
         panelExamQuestionForm.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 150, -1));
@@ -3173,7 +3176,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         panelExamQuestionForm.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 80, 150, -1));
 
         textfieldScorePointExamQuestion.setText("0");
-        panelExamQuestionForm.add(textfieldScorePointExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 110, 110, -1));
+        panelExamQuestionForm.add(textfieldScorePointExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 100, 110, -1));
 
         jLabel44.setText("Sub Category :");
         panelExamQuestionForm.add(jLabel44, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 150, -1));
@@ -3200,6 +3203,33 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         radioButtonGroupTypeExamQuestion.add(radiobuttonEssayExamQuestion);
         radiobuttonEssayExamQuestion.setText("Essay");
         panelExamQuestionForm.add(radiobuttonEssayExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 100, -1, -1));
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Preview Image"));
+        jPanel5.setLayout(new java.awt.BorderLayout());
+
+        labelPreviewExamQuestion.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelPreviewExamQuestion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user.png"))); // NOI18N
+        labelPreviewExamQuestion.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelPreviewExamQuestion.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        labelPreviewExamQuestion.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelPreviewExamQuestionMouseClicked(evt);
+            }
+        });
+        jPanel5.add(labelPreviewExamQuestion, java.awt.BorderLayout.CENTER);
+
+        panelExamQuestionForm.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 130, 120, 120));
+
+        labelBrowseExamPreviewImage.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
+        labelBrowseExamPreviewImage.setForeground(new java.awt.Color(0, 0, 204));
+        labelBrowseExamPreviewImage.setText("<html><u>Browse Picture</u></html>");
+        labelBrowseExamPreviewImage.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelBrowseExamPreviewImage.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelBrowseExamPreviewImageMouseClicked(evt);
+            }
+        });
+        panelExamQuestionForm.add(labelBrowseExamPreviewImage, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 150, -1, -1));
 
         panelExamQuestions.add(panelExamQuestionForm, "panelExamQuestionForm");
 
@@ -4675,6 +4705,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }//GEN-LAST:event_comboboxCategoryExamQuestionActionPerformed
 
+    private void labelPreviewExamQuestionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelPreviewExamQuestionMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelPreviewExamQuestionMouseClicked
+
+    private void labelBrowseExamPreviewImageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBrowseExamPreviewImageMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelBrowseExamPreviewImageMouseClicked
+
     private void enableUserFormSave() {
 
         if (editMode) {
@@ -4901,6 +4939,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane11;
@@ -4923,6 +4962,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel labelAttendanceManagement1;
     private javax.swing.JLabel labelBackToHome;
     private javax.swing.JLabel labelBottomPadding;
+    private javax.swing.JLabel labelBrowseExamPreviewImage;
     private javax.swing.JLabel labelBrowseScreenshotBugsReported;
     private javax.swing.JLabel labelBrowseScreenshotPayment;
     private javax.swing.JLabel labelBrowseSignatureAttendance;
@@ -4936,6 +4976,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel labelLinkChangePicture;
     private javax.swing.JLabel labelLoadingStatus;
     private javax.swing.JLabel labelMinimize;
+    private javax.swing.JLabel labelPreviewExamQuestion;
     private javax.swing.JLabel labelPreviewPicture;
     private javax.swing.JLabel labelRefreshAttendance;
     private javax.swing.JLabel labelRefreshBugsReported;
@@ -5087,6 +5128,23 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             UIEffect.iconChanger(labelScreenshotPayment, (propic));
             // change the browse link
             labelBrowseScreenshotPayment.setText(UIEffect.underline("Delete"));
+        }
+
+    }
+    private void loadExamPreviewLocally() {
+
+        String propic = configuration.getStringValue(Keys.EXAM_QUESTION_PREVIEW);
+
+        System.out.println("Trying to load " + propic);
+
+        lockExamQuestionForm(false);
+        hideLoadingStatus();
+
+        if (!propic.contains("not available")) {
+            // set the propic
+            UIEffect.iconChanger(labelPreviewExamQuestion, (propic));
+            // change the browse link
+            labelBrowseExamPreviewImage.setText(UIEffect.underline("Delete"));
         }
 
     }
@@ -5602,7 +5660,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         System.out.println("Obtaining Screenshot Picture from web is success...\nNow applying it locally.");
                         loadScreenshotPaymentLocally();
 
-                    } else if (urlTarget.contains(WebReference.PICTURE_USER) && !urlTarget.contains("delete")) {
+                    } else if (urlTarget.contains(WebReference.PREVIEW_EXAM) && !urlTarget.contains("delete")) {
+
+                        System.out.println("Obtaining Exam Preview Picture from web is success...\nNow applying it locally.");
+                        loadExamPreviewLocally();
+
+                    }  else if (urlTarget.contains(WebReference.PICTURE_USER) && !urlTarget.contains("delete")) {
 
                         System.out.println("Obtaining User Picture from web is success...\nNow applying it locally.");
                         loadUserPictureLocally();

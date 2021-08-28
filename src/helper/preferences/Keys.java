@@ -23,6 +23,7 @@ public class Keys {
     public static final String TOKEN_API = "api_token";
     public static final String DATE_EXPIRED_TOKEN = "expired_date";
     public static final String USER_PROPIC = "user_propic";
+    public static final String EXAM_QUESTION_PREVIEW = "examqa_preview";
     public static final String SIGNATURE_ATTENDANCE = "signature_attendance";
     public static final String SCREENSHOT_LAST_PAYMENT = "payment_screenshot";
     public static final String SCREENSHOT_REPORT_BUGS = "reportbugs_screenshot";
