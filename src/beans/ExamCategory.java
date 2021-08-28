@@ -15,6 +15,7 @@ public class ExamCategory {
     private int id;
     private String title;
     private String code;
+    private int score_base;
     private String date_created;
 
     /**
@@ -72,6 +73,22 @@ public class ExamCategory {
     public void setDate_created(String date_created) {
         this.date_created = date_created;
     }
+
+    /**
+     * @return the score_base
+     */
+    public int getScore_base() {
+        return score_base;
+    }
+
+    /**
+     * @param score_base the score_base to set
+     */
+    public void setScore_base(int score_base) {
+        this.score_base = score_base;
+    }
+
+  
     
     
 }

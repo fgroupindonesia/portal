@@ -136,7 +136,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_SCHEDULE_BY_DAY:
                 name = "refresh_schedule_by_day";
                 break;
-            case SWTKey.WORK_DELETE_PICTURE:
+            case SWTKey.WORK_DELETE_USER_PICTURE:
                 name = "delete_picture";
                 break;
             case SWTKey.WORK_REFRESH_USER:
@@ -332,7 +332,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_DOCUMENT_DOWNLOAD:
                 documentDownload();
                 break;
-            case SWTKey.WORK_DELETE_PICTURE:
+            case SWTKey.WORK_DELETE_USER_PICTURE:
                 pictureDelete();
                 break;
             case SWTKey.WORK_REFRESH_USER:
@@ -575,7 +575,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     // this is for user picture
     private void pictureDelete() {
-        urlExecutor.start(WebReference.DELETE_PICTURE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_PICTURE_USER, HttpCall.METHOD_POST);
     }
 
     // this is for payment picture
@@ -672,35 +672,35 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void examCategoryDelete() {
         urlExecutor.start(WebReference.DELETE_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
-    
-     private void examSubCategoryDelete() {
+
+    private void examSubCategoryDelete() {
         urlExecutor.start(WebReference.DELETE_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
+    }
+
+    private void examSubCategorySave() {
+        urlExecutor.start(WebReference.ADD_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
+    }
+
+    private void examSubCategoryUpdate() {
+        urlExecutor.start(WebReference.UPDATE_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
+    }
+
+    private void examSubCategoryEdit() {
+        urlExecutor.start(WebReference.DETAIL_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
     }
 
     private void examCategorySave() {
         urlExecutor.start(WebReference.ADD_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
-    
-     private void examSubCategorySave() {
-        urlExecutor.start(WebReference.ADD_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
-    }
 
     private void examCategoryEdit() {
         urlExecutor.start(WebReference.DETAIL_EXAM_CATEGORY, HttpCall.METHOD_POST);
-    }
-    
-     private void examSubCategoryEdit() {
-        urlExecutor.start(WebReference.DETAIL_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
     }
 
     private void examCategoryUpdate() {
         urlExecutor.start(WebReference.UPDATE_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
 
-    private void examSubCategoryUpdate() {
-        urlExecutor.start(WebReference.UPDATE_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
-    }
-    
     private void refreshHistoryData() {
 
         urlExecutor.start(WebReference.LAST_HISTORY, HttpCall.METHOD_POST);
@@ -776,7 +776,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void refreshExamCategoryData() {
         urlExecutor.start(WebReference.ALL_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
-    
+
     private void refreshExamSubCategoryData() {
         urlExecutor.start(WebReference.ALL_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
     }

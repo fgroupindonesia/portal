@@ -285,6 +285,14 @@ public class UIEffect {
         listener = p;
     }
 
+    public static String popupInput(String message, String defaultValue, JFrame ref) {
+
+        String mes = JOptionPane.showInputDialog(ref, message, defaultValue);
+
+        return mes;
+
+    }
+
     public static String popupInput(String message, JFrame ref) {
 
         String mes = JOptionPane.showInputDialog(ref, message);

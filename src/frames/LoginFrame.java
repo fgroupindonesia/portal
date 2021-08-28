@@ -143,7 +143,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelUsernameLogin.setText("Username:");
         panelLogin.add(labelUsernameLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 70, 150, -1));
 
-        textfieldUsername.setText("udin");
+        textfieldUsername.setText("admin");
         textfieldUsername.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 textfieldUsernameFocusGained(evt);
@@ -233,7 +233,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock64.png"))); // NOI18N
         panelLogin.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 80, 110));
 
-        textfieldPass.setText("123");
+        textfieldPass.setText("admin");
         textfieldPass.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 textfieldPassFocusGained(evt);

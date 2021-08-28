@@ -7,6 +7,7 @@ package helper;
 import beans.Attendance;
 import beans.Document;
 import beans.ExamCategory;
+import beans.ExamQuestion;
 import beans.Payment;
 import beans.RBugs;
 import beans.Schedule;
@@ -21,6 +22,18 @@ import javax.swing.table.DefaultTableModel;
  * @author ASUS
  */
 public class TableRenderer {
+
+    public boolean isTableEmpty(JTable data) {
+
+        boolean y = true;
+
+        if (data.getRowCount() > 0) {
+            y = false;
+        }
+
+        return y;
+
+    }
 
     public String getSelectedRowValue(JTable el, int colFind) {
 
@@ -96,14 +109,18 @@ public class TableRenderer {
         DefaultTableModel model = (DefaultTableModel) el.getModel();
 
         int totalRow = model.getRowCount();
+       
         for (int x = 0; x < totalRow; x++) {
             row = x;
             // checked is always at the 0th index
             boolean b = (Boolean) model.getValueAt(row, 0);
 
             if (b) {
-                // the targeted column is exist here
-                Object dat = model.getValueAt(row, column);
+                Object dat = null;
+                
+                    // the targeted column is exist here
+                    dat = model.getValueAt(row, column);
+               
                 if (dat != null) {
                     String val = dat.toString();
                     data.add(val);
@@ -136,6 +153,27 @@ public class TableRenderer {
         }
 
     }
+    
+    public void render(JTable el, ExamQuestion[] dataCome) {
+
+        DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
+
+        tableModel.setRowCount(0);
+
+        for (ExamQuestion d : dataCome) {
+            Object[] dataBaru = new Object[]{
+                false,
+                d.getId(),
+                UIEffect.decodeSafe(d.getQuestion()),
+                d.getJenis(),
+                UIEffect.decodeSafe(d.getAnswer()),
+                d.getScore_point(),
+                d.getPreview()
+            };
+            tableModel.addRow(dataBaru);
+        }
+
+    }
 
     public void render(JTable el, ExamSubCategory[] dataCome) {
 
@@ -153,7 +191,7 @@ public class TableRenderer {
         }
 
     }
-    
+
     public void render(JTable el, ExamCategory[] dataCome) {
 
         DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
@@ -171,7 +209,7 @@ public class TableRenderer {
         }
 
     }
-    
+
     public void render(JTable el, RBugs[] dataCome) {
 
         DefaultTableModel tableModel = (DefaultTableModel) el.getModel();

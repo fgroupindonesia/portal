@@ -2,13 +2,13 @@
  *  This is a Portal Access for Client & Admin Usage
  *  (c) FGroupIndonesia, 2020.
  */
-
 package frames;
 
 import beans.Attendance;
 import beans.ClassRoom;
 import beans.Document;
 import beans.ExamCategory;
+import beans.ExamQuestion;
 import beans.Payment;
 import beans.RBugs;
 import beans.Schedule;
@@ -74,7 +74,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 // for every entity form has this edit mode
     boolean editMode;
 
-    ArrayList <ExamSubCategory> isiSubCategory;
+    ArrayList<ExamSubCategory> isiSubCategory;
+    ArrayList<String> isiExamQuestionOptions;
 
     /**
      * Creates new form MainAdminFrame
@@ -250,23 +251,21 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         textfieldTitleExamCategory.setText(dataCome.getTitle());
         textfieldCodeExamCategory.setText(dataCome.getCode());
-        
+        textfieldBaseScoreExamCategory.setText("" + dataCome.getScore_base());
         // the locking mechanism will be called by the next call
         // returned by calling examsubcategory
-        
         /*
         lockExamCategoryForm(false);
         hideLoadingStatus();
-        */
-        
+         */
         // we better do some clearing 
         // mechanism for the table here
-        TableRenderer.clearData(tableExamSubCategory);
-        
-        getAllExamSubCategory(""+dataCome.getId());
-        
+        TableRenderer.clearData(tableExamSubCategoryData);
+
+        getAllExamSubCategory("" + dataCome.getId());
+
     }
-    
+
     private void refreshUserPicture(String filename) {
 
         // set the path temporarily 
@@ -379,7 +378,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         SWThreadWorker workPropic = new SWThreadWorker(this);
 
         // execute the download picture process
-        workPropic.setWork(SWTKey.WORK_DELETE_PICTURE);
+        workPropic.setWork(SWTKey.WORK_DELETE_USER_PICTURE);
         workPropic.addData("id", idForm + "");
 
         prepareToken(workPropic);
@@ -432,6 +431,21 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         // we clear up the table first manually
         // since not all API call will return value
         TableRenderer.clearData(tableAttendanceData);
+
+    }
+
+  private void refreshExamQuestions() {
+
+        SWThreadWorker workExamQ = new SWThreadWorker(this);
+        workExamQ.setWork(SWTKey.WORK_REFRESH_EXAM_QUESTIONS);
+        //workExamCat.addData("username", "admin");
+
+        prepareToken(workExamQ);
+        executorService.schedule(workExamQ, 2, TimeUnit.SECONDS);
+
+        // we clear up the table first manually
+        // since not all API call will return value
+        TableRenderer.clearData(tableExamQuestionData);
 
     }
 
@@ -571,7 +585,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         executorService.schedule(workExamSubCat, 2, TimeUnit.SECONDS);
 
     }
-    
+
     private void getDocument(int anID) {
 
         SWThreadWorker workDoc = new SWThreadWorker(this);
@@ -737,21 +751,24 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         } else {
             // saving new data
             workExamCategoryEntity.setWork(SWTKey.WORK_EXAM_CATEGORY_SAVE);
-            
-            // we also push the sub_category data here
-            String dataJSON = new Gson().toJson(isiSubCategory);
-            
-            System.err.println(dataJSON);
-            
-            workExamCategoryEntity.addData("json", dataJSON);
-            
-            
+
+        }
+
+        // we also push the sub_category data here
+        if (isiSubCategory != null) {
+            if (isiSubCategory.size() > 0) {
+
+                String dataJSON = new Gson().toJson(isiSubCategory);
+                System.err.println("we have a sub category data too " + dataJSON);
+                workExamCategoryEntity.addData("json", dataJSON);
+            }
         }
 
         System.out.println("Adding a data before executing API Request...");
 
         workExamCategoryEntity.addData("title", textfieldTitleExamCategory.getText());
         workExamCategoryEntity.addData("code", textfieldCodeExamCategory.getText());
+        workExamCategoryEntity.addData("score_base", textfieldBaseScoreExamCategory.getText());
 
         prepareToken(workExamCategoryEntity);
         executorService.schedule(workExamCategoryEntity, 2, TimeUnit.SECONDS);
@@ -859,6 +876,19 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+     private void deleteExamQuestion(ArrayList<String> dataIn) {
+
+        // for exam category usage the d is actually a number (Integer)
+        for (String d : dataIn) {
+            SWThreadWorker workExamQ = new SWThreadWorker(this);
+            workExamQ.addData("id", d);
+            workExamQ.setWork(SWTKey.WORK_EXAM_QUESTION_DELETE);
+            prepareToken(workExamQ);
+            executorService.schedule(workExamQ, 1, TimeUnit.SECONDS);
+        }
+
+    }
+    
     private void deleteExamCategory(ArrayList<String> dataIn) {
 
         // for exam category usage the d is actually a number (Integer)
@@ -869,6 +899,17 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             prepareToken(workExamCat);
             executorService.schedule(workExamCat, 1, TimeUnit.SECONDS);
         }
+
+    }
+
+    private void deleteExamSubCategory(int anID) {
+
+        // for exam sub category usage the d is actually a number (Integer)
+        SWThreadWorker workExamSubCat = new SWThreadWorker(this);
+        workExamSubCat.addData("id", "" + anID);
+        workExamSubCat.setWork(SWTKey.WORK_EXAM_SUBCATEGORY_DELETE);
+        prepareToken(workExamSubCat);
+        executorService.schedule(workExamSubCat, 1, TimeUnit.SECONDS);
 
     }
 
@@ -934,6 +975,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void initComponents() {
 
         fileChooser = new javax.swing.JFileChooser();
+        radioButtonGroupTypeExamQuestion = new javax.swing.ButtonGroup();
         panelHeader = new javax.swing.JPanel();
         labelClose = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -941,7 +983,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelMinimize = new javax.swing.JLabel();
         panelCenter = new javax.swing.JPanel();
         panelInnerCenter = new javax.swing.JPanel();
-        panelHome = new javax.swing.JPanel();
+        panelHomeMenu = new javax.swing.JPanel();
         buttonUserManagement = new javax.swing.JButton();
         buttonDocumentManagement = new javax.swing.JButton();
         buttonAttendance = new javax.swing.JButton();
@@ -1108,7 +1150,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonExamCategory = new javax.swing.JButton();
         buttonExamStudentAnswer = new javax.swing.JButton();
         buttonExamQuestions = new javax.swing.JButton();
-        buttonXX = new javax.swing.JButton();
+        buttonStudentCertificate = new javax.swing.JButton();
         buttonXXX = new javax.swing.JButton();
         buttonXXXX = new javax.swing.JButton();
         buttonBugsReported1 = new javax.swing.JButton();
@@ -1133,7 +1175,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonSaveExamCategoryForm = new javax.swing.JButton();
         jLabel34 = new javax.swing.JLabel();
         jScrollPane12 = new javax.swing.JScrollPane();
-        tableExamSubCategory = new javax.swing.JTable();
+        tableExamSubCategoryData = new javax.swing.JTable();
         editExamSubCategory = new javax.swing.JLabel();
         addExamSubCategory = new javax.swing.JLabel();
         deleteExamSubCategory = new javax.swing.JLabel();
@@ -1166,7 +1208,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jLabel38 = new javax.swing.JLabel();
         StudentAnswerStatusCustomOK = new javax.swing.JLabel();
         panelExamQuestions = new javax.swing.JPanel();
-        panelExamQuestionManagement = new javax.swing.JPanel();
+        panelExamQuestionsManagement = new javax.swing.JPanel();
         panelExamQuestionControl = new javax.swing.JPanel();
         buttonAddExamQuestion = new javax.swing.JButton();
         buttonEditExamQuestion = new javax.swing.JButton();
@@ -1184,18 +1226,45 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jLabel42 = new javax.swing.JLabel();
         jScrollPane17 = new javax.swing.JScrollPane();
         tableExamQuestionOptions = new javax.swing.JTable();
-        editExamSubCategory1 = new javax.swing.JLabel();
-        addExamSubCategory1 = new javax.swing.JLabel();
-        deleteExamSubCategory1 = new javax.swing.JLabel();
+        editOptionsExamQuestion = new javax.swing.JLabel();
+        addOptionsExamQuestion = new javax.swing.JLabel();
+        deleteOptionsExamQuestion = new javax.swing.JLabel();
         jLabel43 = new javax.swing.JLabel();
-        textfieldBaseScoreExamCategory1 = new javax.swing.JTextField();
+        textfieldScorePointExamQuestion = new javax.swing.JTextField();
         jLabel44 = new javax.swing.JLabel();
-        comboboxExamQuestionSubCategory = new javax.swing.JComboBox<>();
-        comboboxExamQuestionCategory = new javax.swing.JComboBox<>();
+        comboboxSubCategoryExamQuestion = new javax.swing.JComboBox<>();
+        comboboxCategoryExamQuestion = new javax.swing.JComboBox<>();
         textfieldExamQuestion = new javax.swing.JTextField();
         jLabel45 = new javax.swing.JLabel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        radiobuttonMultipleChoiceExamQuestion = new javax.swing.JRadioButton();
+        radiobuttonEssayExamQuestion = new javax.swing.JRadioButton();
+        panelCertificateStudent = new javax.swing.JPanel();
+        panelCertificateStudentManagement = new javax.swing.JPanel();
+        panelCertificateStudentControl = new javax.swing.JPanel();
+        buttonAddCertificateStudent = new javax.swing.JButton();
+        buttonEditCertificateStudent = new javax.swing.JButton();
+        buttonDeleteCertificateStudent = new javax.swing.JButton();
+        labelCertificateStudentManagement = new javax.swing.JLabel();
+        labelRefreshCertificateStudentManagement = new javax.swing.JLabel();
+        panelCertificateStudentTable = new javax.swing.JPanel();
+        jScrollPane18 = new javax.swing.JScrollPane();
+        tableCertificateStudentData = new javax.swing.JTable();
+        panelCertificateStudentForm = new javax.swing.JPanel();
+        jLabel46 = new javax.swing.JLabel();
+        buttonCancelCertificateStudentForm = new javax.swing.JButton();
+        jLabel47 = new javax.swing.JLabel();
+        buttonSaveCertificateStudentForm = new javax.swing.JButton();
+        jLabel48 = new javax.swing.JLabel();
+        addFileCertificateStudent = new javax.swing.JLabel();
+        deleteFileCertificateStudent = new javax.swing.JLabel();
+        jLabel49 = new javax.swing.JLabel();
+        textfieldBaseScoreExamCategory2 = new javax.swing.JTextField();
+        jLabel50 = new javax.swing.JLabel();
+        comboboxCertificateStudentUsername = new javax.swing.JComboBox<>();
+        comboboxCertificateStudentCategory = new javax.swing.JComboBox<>();
+        radioButtonCertificateStudentWaiting = new javax.swing.JRadioButton();
+        radioButtonCertificateStudentReleased = new javax.swing.JRadioButton();
+        textfieldCertificateStudentFilename = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         labelBottomPadding = new javax.swing.JLabel();
         labelBackToHome = new javax.swing.JLabel();
@@ -1257,7 +1326,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelInnerCenter.setLayout(new java.awt.CardLayout());
 
-        panelHome.setLayout(new java.awt.GridLayout(2, 0, 20, 25));
+        panelHomeMenu.setLayout(new java.awt.GridLayout(2, 0, 20, 25));
 
         buttonUserManagement.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/user.png"))); // NOI18N
         buttonUserManagement.setText("Users");
@@ -1269,7 +1338,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonUserManagementActionPerformed(evt);
             }
         });
-        panelHome.add(buttonUserManagement);
+        panelHomeMenu.add(buttonUserManagement);
 
         buttonDocumentManagement.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/file.png"))); // NOI18N
         buttonDocumentManagement.setText("Documents");
@@ -1281,7 +1350,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonDocumentManagementActionPerformed(evt);
             }
         });
-        panelHome.add(buttonDocumentManagement);
+        panelHomeMenu.add(buttonDocumentManagement);
 
         buttonAttendance.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/calendar64.png"))); // NOI18N
         buttonAttendance.setText("Attendance");
@@ -1293,7 +1362,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonAttendanceActionPerformed(evt);
             }
         });
-        panelHome.add(buttonAttendance);
+        panelHomeMenu.add(buttonAttendance);
 
         buttonPayment.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cash64.png"))); // NOI18N
         buttonPayment.setText("Payment");
@@ -1305,7 +1374,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonPaymentActionPerformed(evt);
             }
         });
-        panelHome.add(buttonPayment);
+        panelHomeMenu.add(buttonPayment);
 
         buttonSchedule.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time64.png"))); // NOI18N
         buttonSchedule.setText("Schedule");
@@ -1317,7 +1386,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonScheduleActionPerformed(evt);
             }
         });
-        panelHome.add(buttonSchedule);
+        panelHomeMenu.add(buttonSchedule);
 
         buttonExam.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/option64.png"))); // NOI18N
         buttonExam.setText("Exam");
@@ -1329,7 +1398,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonExamActionPerformed(evt);
             }
         });
-        panelHome.add(buttonExam);
+        panelHomeMenu.add(buttonExam);
 
         buttonBugsReported.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/bug64.png"))); // NOI18N
         buttonBugsReported.setText("Bugs Reported");
@@ -1341,7 +1410,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonBugsReportedActionPerformed(evt);
             }
         });
-        panelHome.add(buttonBugsReported);
+        panelHomeMenu.add(buttonBugsReported);
 
         buttonLogout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock64.png"))); // NOI18N
         buttonLogout.setText("Logout");
@@ -1353,9 +1422,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 buttonLogoutActionPerformed(evt);
             }
         });
-        panelHome.add(buttonLogout);
+        panelHomeMenu.add(buttonLogout);
 
-        panelInnerCenter.add(panelHome, "panelHome");
+        panelInnerCenter.add(panelHomeMenu, "panelHomeMenu");
 
         panelUser.setLayout(new java.awt.CardLayout());
 
@@ -2442,21 +2511,22 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         });
         panelExamMenu.add(buttonExamQuestions);
 
-        buttonXX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/warning64.png"))); // NOI18N
-        buttonXX.setText("-");
-        buttonXX.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        buttonXX.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        buttonXX.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        buttonXX.addActionListener(new java.awt.event.ActionListener() {
+        buttonStudentCertificate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cert.png"))); // NOI18N
+        buttonStudentCertificate.setText("Student Certificates");
+        buttonStudentCertificate.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        buttonStudentCertificate.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        buttonStudentCertificate.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        buttonStudentCertificate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonXXActionPerformed(evt);
+                buttonStudentCertificateActionPerformed(evt);
             }
         });
-        panelExamMenu.add(buttonXX);
+        panelExamMenu.add(buttonStudentCertificate);
 
         buttonXXX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/warning64.png"))); // NOI18N
         buttonXXX.setText("-");
         buttonXXX.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        buttonXXX.setEnabled(false);
         buttonXXX.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonXXX.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonXXX.addActionListener(new java.awt.event.ActionListener() {
@@ -2469,6 +2539,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonXXXX.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/warning64.png"))); // NOI18N
         buttonXXXX.setText("-");
         buttonXXXX.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        buttonXXXX.setEnabled(false);
         buttonXXXX.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonXXXX.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonXXXX.addActionListener(new java.awt.event.ActionListener() {
@@ -2481,6 +2552,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonBugsReported1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/warning64.png"))); // NOI18N
         buttonBugsReported1.setText("-");
         buttonBugsReported1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        buttonBugsReported1.setEnabled(false);
         buttonBugsReported1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonBugsReported1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonBugsReported1.addActionListener(new java.awt.event.ActionListener() {
@@ -2493,6 +2565,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonLogout1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/warning64.png"))); // NOI18N
         buttonLogout1.setText("-");
         buttonLogout1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        buttonLogout1.setEnabled(false);
         buttonLogout1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         buttonLogout1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         buttonLogout1.addActionListener(new java.awt.event.ActionListener() {
@@ -2642,7 +2715,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jLabel34.setText("Title :");
         panelExamCategoryForm.add(jLabel34, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 150, -1));
 
-        tableExamSubCategory.setModel(new javax.swing.table.DefaultTableModel(
+        tableExamSubCategoryData.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -2665,22 +2738,22 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 return canEdit [columnIndex];
             }
         });
-        tableExamSubCategory.addFocusListener(new java.awt.event.FocusAdapter() {
+        tableExamSubCategoryData.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                tableExamSubCategoryFocusGained(evt);
+                tableExamSubCategoryDataFocusGained(evt);
             }
             public void focusLost(java.awt.event.FocusEvent evt) {
-                tableExamSubCategoryFocusLost(evt);
+                tableExamSubCategoryDataFocusLost(evt);
             }
         });
-        jScrollPane12.setViewportView(tableExamSubCategory);
-        if (tableExamSubCategory.getColumnModel().getColumnCount() > 0) {
-            tableExamSubCategory.getColumnModel().getColumn(0).setMinWidth(30);
-            tableExamSubCategory.getColumnModel().getColumn(0).setPreferredWidth(30);
-            tableExamSubCategory.getColumnModel().getColumn(0).setMaxWidth(30);
-            tableExamSubCategory.getColumnModel().getColumn(1).setMinWidth(0);
-            tableExamSubCategory.getColumnModel().getColumn(1).setPreferredWidth(0);
-            tableExamSubCategory.getColumnModel().getColumn(1).setMaxWidth(0);
+        jScrollPane12.setViewportView(tableExamSubCategoryData);
+        if (tableExamSubCategoryData.getColumnModel().getColumnCount() > 0) {
+            tableExamSubCategoryData.getColumnModel().getColumn(0).setMinWidth(30);
+            tableExamSubCategoryData.getColumnModel().getColumn(0).setPreferredWidth(30);
+            tableExamSubCategoryData.getColumnModel().getColumn(0).setMaxWidth(30);
+            tableExamSubCategoryData.getColumnModel().getColumn(1).setMinWidth(0);
+            tableExamSubCategoryData.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tableExamSubCategoryData.getColumnModel().getColumn(1).setMaxWidth(0);
         }
 
         panelExamCategoryForm.add(jScrollPane12, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 70, 380, 140));
@@ -2812,7 +2885,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelExamStudentAnswerManagement.add(panelExamStudentAnswerTable, java.awt.BorderLayout.CENTER);
 
-        panelExamStudentAnswer.add(panelExamStudentAnswerManagement, "panelExamCategoryManagement");
+        panelExamStudentAnswer.add(panelExamStudentAnswerManagement, "panelExamStudentAnswerManagement");
 
         panelExamStudentAnswerForm.setBorder(javax.swing.BorderFactory.createTitledBorder("Exam Student Answer Form"));
         panelExamStudentAnswerForm.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -2896,13 +2969,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         });
         panelExamStudentAnswerForm.add(StudentAnswerStatusCustomOK, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 220, -1, -1));
 
-        panelExamStudentAnswer.add(panelExamStudentAnswerForm, "panelExamCategoryForm");
+        panelExamStudentAnswer.add(panelExamStudentAnswerForm, "panelExamStudentAnswerForm");
 
         panelInnerCenter.add(panelExamStudentAnswer, "panelExamScoring");
 
         panelExamQuestions.setLayout(new java.awt.CardLayout());
 
-        panelExamQuestionManagement.setLayout(new java.awt.BorderLayout());
+        panelExamQuestionsManagement.setLayout(new java.awt.BorderLayout());
 
         panelExamQuestionControl.setPreferredSize(new java.awt.Dimension(658, 40));
         panelExamQuestionControl.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -2951,7 +3024,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         });
         panelExamQuestionControl.add(labelRefreshExamQuestionManagement, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 10, 70, 20));
 
-        panelExamQuestionManagement.add(panelExamQuestionControl, java.awt.BorderLayout.PAGE_START);
+        panelExamQuestionsManagement.add(panelExamQuestionControl, java.awt.BorderLayout.PAGE_START);
 
         panelExamQuestionTable.setLayout(new java.awt.BorderLayout());
 
@@ -2960,11 +3033,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
             },
             new String [] {
-                "[ x ]", "Id", "Title", "Code"
+                "[ x ]", "Id", "Question", "Jenis", "Answer", "Score Point", "Preview"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -2986,9 +3059,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelExamQuestionTable.add(jScrollPane16, java.awt.BorderLayout.CENTER);
 
-        panelExamQuestionManagement.add(panelExamQuestionTable, java.awt.BorderLayout.CENTER);
+        panelExamQuestionsManagement.add(panelExamQuestionTable, java.awt.BorderLayout.CENTER);
 
-        panelExamQuestions.add(panelExamQuestionManagement, "panelExamCategoryManagement");
+        panelExamQuestions.add(panelExamQuestionsManagement, "panelExamQuestionsManagement");
 
         panelExamQuestionForm.setBorder(javax.swing.BorderFactory.createTitledBorder("Exam Question Form"));
         panelExamQuestionForm.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -3023,14 +3096,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
             },
             new String [] {
-                "#", "ID", "Title"
+                "#", "ID", "Ops", "Answer", "Title"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                true, false, false
+                true, false, false, true, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -3057,67 +3130,243 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             tableExamQuestionOptions.getColumnModel().getColumn(1).setMinWidth(0);
             tableExamQuestionOptions.getColumnModel().getColumn(1).setPreferredWidth(0);
             tableExamQuestionOptions.getColumnModel().getColumn(1).setMaxWidth(0);
+            tableExamQuestionOptions.getColumnModel().getColumn(2).setMinWidth(25);
+            tableExamQuestionOptions.getColumnModel().getColumn(2).setPreferredWidth(25);
+            tableExamQuestionOptions.getColumnModel().getColumn(2).setMaxWidth(25);
+            tableExamQuestionOptions.getColumnModel().getColumn(3).setMinWidth(75);
+            tableExamQuestionOptions.getColumnModel().getColumn(3).setPreferredWidth(75);
+            tableExamQuestionOptions.getColumnModel().getColumn(3).setMaxWidth(75);
         }
 
         panelExamQuestionForm.add(jScrollPane17, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 190, 380, 100));
 
-        editExamSubCategory1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/edit24.png"))); // NOI18N
-        editExamSubCategory1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        editExamSubCategory1.setEnabled(false);
-        editExamSubCategory1.addMouseListener(new java.awt.event.MouseAdapter() {
+        editOptionsExamQuestion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/edit24.png"))); // NOI18N
+        editOptionsExamQuestion.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        editOptionsExamQuestion.setEnabled(false);
+        editOptionsExamQuestion.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                editExamSubCategory1MouseClicked(evt);
+                editOptionsExamQuestionMouseClicked(evt);
             }
         });
-        panelExamQuestionForm.add(editExamSubCategory1, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 160, -1, -1));
+        panelExamQuestionForm.add(editOptionsExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 160, -1, -1));
 
-        addExamSubCategory1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/add24.png"))); // NOI18N
-        addExamSubCategory1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        addExamSubCategory1.addMouseListener(new java.awt.event.MouseAdapter() {
+        addOptionsExamQuestion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/add24.png"))); // NOI18N
+        addOptionsExamQuestion.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        addOptionsExamQuestion.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                addExamSubCategory1MouseClicked(evt);
+                addOptionsExamQuestionMouseClicked(evt);
             }
         });
-        panelExamQuestionForm.add(addExamSubCategory1, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 160, -1, -1));
+        panelExamQuestionForm.add(addOptionsExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 160, -1, -1));
 
-        deleteExamSubCategory1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/delete24.png"))); // NOI18N
-        deleteExamSubCategory1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        deleteExamSubCategory1.setEnabled(false);
-        deleteExamSubCategory1.addMouseListener(new java.awt.event.MouseAdapter() {
+        deleteOptionsExamQuestion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/delete24.png"))); // NOI18N
+        deleteOptionsExamQuestion.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        deleteOptionsExamQuestion.setEnabled(false);
+        deleteOptionsExamQuestion.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                deleteExamSubCategory1MouseClicked(evt);
+                deleteOptionsExamQuestionMouseClicked(evt);
             }
         });
-        panelExamQuestionForm.add(deleteExamSubCategory1, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 160, -1, -1));
+        panelExamQuestionForm.add(deleteOptionsExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 160, -1, -1));
 
         jLabel43.setText("Type :");
         panelExamQuestionForm.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 80, 150, -1));
 
-        textfieldBaseScoreExamCategory1.setText("0");
-        panelExamQuestionForm.add(textfieldBaseScoreExamCategory1, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 110, 110, -1));
+        textfieldScorePointExamQuestion.setText("0");
+        panelExamQuestionForm.add(textfieldScorePointExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 110, 110, -1));
 
         jLabel44.setText("Sub Category :");
         panelExamQuestionForm.add(jLabel44, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 150, -1));
 
-        comboboxExamQuestionSubCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        panelExamQuestionForm.add(comboboxExamQuestionSubCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
+        comboboxSubCategoryExamQuestion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        panelExamQuestionForm.add(comboboxSubCategoryExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
 
-        comboboxExamQuestionCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        panelExamQuestionForm.add(comboboxExamQuestionCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 160, -1));
+        comboboxCategoryExamQuestion.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        comboboxCategoryExamQuestion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboboxCategoryExamQuestionActionPerformed(evt);
+            }
+        });
+        panelExamQuestionForm.add(comboboxCategoryExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 160, -1));
         panelExamQuestionForm.add(textfieldExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 50, 410, -1));
 
         jLabel45.setText("Question :");
         panelExamQuestionForm.add(jLabel45, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 30, 150, -1));
 
-        jRadioButton1.setText("Multiple Choice");
-        panelExamQuestionForm.add(jRadioButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 100, -1, -1));
+        radioButtonGroupTypeExamQuestion.add(radiobuttonMultipleChoiceExamQuestion);
+        radiobuttonMultipleChoiceExamQuestion.setText("Multiple Choice");
+        panelExamQuestionForm.add(radiobuttonMultipleChoiceExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 100, -1, -1));
 
-        jRadioButton2.setText("Essay");
-        panelExamQuestionForm.add(jRadioButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 100, -1, -1));
+        radioButtonGroupTypeExamQuestion.add(radiobuttonEssayExamQuestion);
+        radiobuttonEssayExamQuestion.setText("Essay");
+        panelExamQuestionForm.add(radiobuttonEssayExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 100, -1, -1));
 
-        panelExamQuestions.add(panelExamQuestionForm, "panelExamCategoryForm");
+        panelExamQuestions.add(panelExamQuestionForm, "panelExamQuestionForm");
 
         panelInnerCenter.add(panelExamQuestions, "panelExamQuestions");
+
+        panelCertificateStudent.setLayout(new java.awt.CardLayout());
+
+        panelCertificateStudentManagement.setLayout(new java.awt.BorderLayout());
+
+        panelCertificateStudentControl.setPreferredSize(new java.awt.Dimension(658, 40));
+        panelCertificateStudentControl.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        buttonAddCertificateStudent.setText("Add");
+        buttonAddCertificateStudent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonAddCertificateStudentActionPerformed(evt);
+            }
+        });
+        panelCertificateStudentControl.add(buttonAddCertificateStudent, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 5, 60, -1));
+
+        buttonEditCertificateStudent.setText("Edit");
+        buttonEditCertificateStudent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonEditCertificateStudentActionPerformed(evt);
+            }
+        });
+        panelCertificateStudentControl.add(buttonEditCertificateStudent, new org.netbeans.lib.awtextra.AbsoluteConstraints(514, 5, 60, -1));
+
+        buttonDeleteCertificateStudent.setText("Delete");
+        buttonDeleteCertificateStudent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonDeleteCertificateStudentActionPerformed(evt);
+            }
+        });
+        panelCertificateStudentControl.add(buttonDeleteCertificateStudent, new org.netbeans.lib.awtextra.AbsoluteConstraints(589, 5, -1, -1));
+
+        labelCertificateStudentManagement.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
+        labelCertificateStudentManagement.setText("Certificate Student Management");
+        panelCertificateStudentControl.add(labelCertificateStudentManagement, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 310, 40));
+
+        labelRefreshCertificateStudentManagement.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh16.png"))); // NOI18N
+        labelRefreshCertificateStudentManagement.setText("Refresh");
+        labelRefreshCertificateStudentManagement.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelRefreshCertificateStudentManagement.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelRefreshCertificateStudentManagementMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelRefreshCertificateStudentManagementMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                labelRefreshCertificateStudentManagementMouseExited(evt);
+            }
+        });
+        panelCertificateStudentControl.add(labelRefreshCertificateStudentManagement, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 10, 70, 20));
+
+        panelCertificateStudentManagement.add(panelCertificateStudentControl, java.awt.BorderLayout.PAGE_START);
+
+        panelCertificateStudentTable.setLayout(new java.awt.BorderLayout());
+
+        tableCertificateStudentData.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "[ x ]", "Id", "Title", "Code"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane18.setViewportView(tableCertificateStudentData);
+        if (tableCertificateStudentData.getColumnModel().getColumnCount() > 0) {
+            tableCertificateStudentData.getColumnModel().getColumn(0).setMinWidth(30);
+            tableCertificateStudentData.getColumnModel().getColumn(0).setPreferredWidth(30);
+            tableCertificateStudentData.getColumnModel().getColumn(0).setMaxWidth(30);
+            tableCertificateStudentData.getColumnModel().getColumn(1).setMinWidth(0);
+            tableCertificateStudentData.getColumnModel().getColumn(1).setPreferredWidth(0);
+            tableCertificateStudentData.getColumnModel().getColumn(1).setMaxWidth(0);
+            tableCertificateStudentData.getColumnModel().getColumn(3).setMinWidth(80);
+            tableCertificateStudentData.getColumnModel().getColumn(3).setPreferredWidth(80);
+            tableCertificateStudentData.getColumnModel().getColumn(3).setMaxWidth(80);
+        }
+
+        panelCertificateStudentTable.add(jScrollPane18, java.awt.BorderLayout.CENTER);
+
+        panelCertificateStudentManagement.add(panelCertificateStudentTable, java.awt.BorderLayout.CENTER);
+
+        panelCertificateStudent.add(panelCertificateStudentManagement, "panelCertificateStudentManagement");
+
+        panelCertificateStudentForm.setBorder(javax.swing.BorderFactory.createTitledBorder("Certificate Student Form"));
+        panelCertificateStudentForm.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel46.setText("Filename :");
+        panelCertificateStudentForm.add(jLabel46, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 160, 150, -1));
+
+        buttonCancelCertificateStudentForm.setText("Cancel");
+        buttonCancelCertificateStudentForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonCancelCertificateStudentFormActionPerformed(evt);
+            }
+        });
+        panelCertificateStudentForm.add(buttonCancelCertificateStudentForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
+
+        jLabel47.setText("Date Released :");
+        panelCertificateStudentForm.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 80, 150, -1));
+
+        buttonSaveCertificateStudentForm.setText("Save");
+        buttonSaveCertificateStudentForm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonSaveCertificateStudentFormActionPerformed(evt);
+            }
+        });
+        panelCertificateStudentForm.add(buttonSaveCertificateStudentForm, new org.netbeans.lib.awtextra.AbsoluteConstraints(555, 250, 60, -1));
+
+        jLabel48.setText("Category :");
+        panelCertificateStudentForm.add(jLabel48, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 40, 150, -1));
+
+        addFileCertificateStudent.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/add24.png"))); // NOI18N
+        addFileCertificateStudent.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        addFileCertificateStudent.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                addFileCertificateStudentMouseClicked(evt);
+            }
+        });
+        panelCertificateStudentForm.add(addFileCertificateStudent, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 180, -1, -1));
+
+        deleteFileCertificateStudent.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/delete24.png"))); // NOI18N
+        deleteFileCertificateStudent.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        deleteFileCertificateStudent.setEnabled(false);
+        deleteFileCertificateStudent.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                deleteFileCertificateStudentMouseClicked(evt);
+            }
+        });
+        panelCertificateStudentForm.add(deleteFileCertificateStudent, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 180, -1, -1));
+
+        jLabel49.setText("Status :");
+        panelCertificateStudentForm.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 80, 150, -1));
+
+        textfieldBaseScoreExamCategory2.setText("dd/mm/yyyy");
+        panelCertificateStudentForm.add(textfieldBaseScoreExamCategory2, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 100, 140, -1));
+
+        jLabel50.setText("Username :");
+        panelCertificateStudentForm.add(jLabel50, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 150, -1));
+
+        comboboxCertificateStudentUsername.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        panelCertificateStudentForm.add(comboboxCertificateStudentUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
+
+        comboboxCertificateStudentCategory.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        panelCertificateStudentForm.add(comboboxCertificateStudentCategory, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 60, 160, -1));
+
+        radioButtonCertificateStudentWaiting.setText("Waiting");
+        panelCertificateStudentForm.add(radioButtonCertificateStudentWaiting, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 100, -1, -1));
+
+        radioButtonCertificateStudentReleased.setText("Released");
+        panelCertificateStudentForm.add(radioButtonCertificateStudentReleased, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 100, -1, -1));
+        panelCertificateStudentForm.add(textfieldCertificateStudentFilename, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 180, 220, -1));
+
+        panelCertificateStudent.add(panelCertificateStudentForm, "panelCertificateStudentForm");
+
+        panelInnerCenter.add(panelCertificateStudent, "panelCertificateStudent");
 
         panelCenter.add(panelInnerCenter, new org.netbeans.lib.awtextra.AbsoluteConstraints(43, 48, 658, 297));
 
@@ -3238,7 +3487,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_buttonAddUserActionPerformed
 
     private void labelBackToHomeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelBackToHomeMouseClicked
-        cardLayoutInnerCenter.show(panelInnerCenter, "panelHome");
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelHomeMenu");
         labelBackToHome.setVisible(false);
     }//GEN-LAST:event_labelBackToHomeMouseClicked
 
@@ -3890,7 +4139,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void buttonExamCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExamCategoryActionPerformed
 
-        cardLayoutInnerCenter.show(panelInnerCenter, "panelExam");
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelExamCategory");
         cardLayoutEntity = (CardLayout) panelExamCategory.getLayout();
         cardLayoutEntity.show(panelExamCategory, "panelExamCategoryManagement");
 
@@ -3905,12 +4154,18 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_buttonExamStudentAnswerActionPerformed
 
     private void buttonExamQuestionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExamQuestionsActionPerformed
-        // TODO add your handling code here:
+       
+        cardLayoutInnerCenter.show(panelInnerCenter, "panelExamQuestions");
+        cardLayoutEntity = (CardLayout) panelExamQuestions.getLayout();
+        cardLayoutEntity.show(panelExamQuestions, "panelExamQuestionsManagement");
+
+        labelBackToHome.setVisible(true);
+        
     }//GEN-LAST:event_buttonExamQuestionsActionPerformed
 
-    private void buttonXXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonXXActionPerformed
+    private void buttonStudentCertificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonStudentCertificateActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_buttonXXActionPerformed
+    }//GEN-LAST:event_buttonStudentCertificateActionPerformed
 
     private void buttonXXXActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonXXXActionPerformed
         // TODO add your handling code here:
@@ -4054,12 +4309,19 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }//GEN-LAST:event_buttonSaveExamCategoryFormActionPerformed
 
-    private void refreshSubCategoryTable() {
+    private void refreshExamSubCategoryLocally() {
 
         if (isiSubCategory.size() > 0) {
-            TableRenderer.render(tableExamSubCategory, isiSubCategory);
+            TableRenderer.render(tableExamSubCategoryData, isiSubCategory);
+
+            // show the control buttons
+            toggleExamSubCategory(false);
+
         } else {
             UIEffect.popup("nothing to refresh...!", this);
+            
+            // disable the control buttons
+            toggleExamSubCategory(true);
         }
 
     }
@@ -4074,39 +4336,155 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                     // add from the input to array
                     // then forward to the jtable
                     isiSubCategory.add(new ExamSubCategory(jawaban));
-                    refreshSubCategoryTable();
+                    // refresh locally
+                    refreshExamSubCategoryLocally();
                 }
             }
         }
     }//GEN-LAST:event_addExamSubCategoryMouseClicked
 
-    private void tableExamSubCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tableExamSubCategoryFocusGained
+    private void tableExamSubCategoryDataFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tableExamSubCategoryDataFocusGained
         editExamSubCategory.setEnabled(true);
         deleteExamSubCategory.setEnabled(true);
-    }//GEN-LAST:event_tableExamSubCategoryFocusGained
+    }//GEN-LAST:event_tableExamSubCategoryDataFocusGained
 
-    private void tableExamSubCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tableExamSubCategoryFocusLost
+    private void tableExamSubCategoryDataFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tableExamSubCategoryDataFocusLost
 
         editExamSubCategory.setEnabled(false);
         deleteExamSubCategory.setEnabled(false);
 
-    }//GEN-LAST:event_tableExamSubCategoryFocusLost
+    }//GEN-LAST:event_tableExamSubCategoryDataFocusLost
 
     private void editExamSubCategoryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editExamSubCategoryMouseClicked
 
-        if(editExamSubCategory.isEnabled()){
-            
+        if (editExamSubCategory.isEnabled()) {
+            // ID is located at the 1st index
+            String idVal = tabRender.getCheckedRowValue(tableExamSubCategoryData, 1);
+            String initialValue = tabRender.getCheckedRowValue(tableExamSubCategoryData, 2);
+
+            if (idVal != null) {
+
+                String jawaban = null;
+                int idValNumber = Integer.parseInt(idVal);
+
+                jawaban = UIEffect.popupInput("Sub Category Title : ", initialValue, this);
+
+                if (jawaban != null) {
+                    if (!jawaban.isEmpty()) {
+                        // update as well from the arraylist
+                        updateExamSubCategory(initialValue, jawaban);
+                        refreshExamSubCategoryLocally();
+                    }
+                }
+
+            }
+
         }
-        
+
     }//GEN-LAST:event_editExamSubCategoryMouseClicked
+
+    private void updateExamSubCategory(String intialData, String newData) {
+
+        for (ExamSubCategory ex : isiSubCategory) {
+            if (intialData.equalsIgnoreCase(ex.getTitle())) {
+                ex.setTitle(newData);
+            }
+        }
+
+    }
+
+    private int getExamSubCategoryId(String titleChosen) {
+        int value = 0;
+
+        for (ExamSubCategory ex : isiSubCategory) {
+            if (titleChosen.equalsIgnoreCase(ex.getTitle())) {
+                value = ex.getId();
+            }
+        }
+
+        return value;
+    }
+
+    private String getExamSubCategory(int idChosen) {
+
+        String value = null;
+
+        for (ExamSubCategory ex : isiSubCategory) {
+            if (idChosen == ex.getId()) {
+                value = ex.getTitle();
+            }
+        }
+
+        return value;
+    }
+
+    private void removeExamSubCategory(int idNa) {
+        ExamSubCategory found = null;
+
+        for (ExamSubCategory ex : isiSubCategory) {
+            if (ex.getId() == idNa) {
+                found = ex;
+            }
+        }
+
+        if (found != null) {
+            isiSubCategory.remove(found);
+        }
+    }
+
+    private void removeExamSubCategory(String judulNa) {
+        ExamSubCategory fnd = null;
+
+        for (ExamSubCategory ex : isiSubCategory) {
+            if (ex.getTitle().equalsIgnoreCase(judulNa)) {
+                fnd = ex;
+            }
+        }
+
+        if (fnd != null) {
+            isiSubCategory.remove(fnd);
+        }
+    }
+
 
     private void deleteExamSubCategoryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteExamSubCategoryMouseClicked
 
-        if(deleteExamSubCategory.isEnabled()){
-            
-            
+        if (deleteExamSubCategory.isEnabled()) {
+            // removing from the table UI 
+            // ID is located at the 1st index
+            // TITLE is located at the 2nd index
+            ArrayList dataExam = tabRender.getCheckedRows(tableExamSubCategoryData, 2);
+
+            if (dataExam.isEmpty()) {
+                UIEffect.popup("Please select the data first!", this);
+            } else {
+                // locking the control
+                toggleExamSubCategory(true);
+                showLoadingStatus();
+
+                // passing title only
+                // to the server for deleting purposes
+                for (Object obj : dataExam) {
+
+                    Integer val = getExamSubCategoryId(obj.toString());
+                    if (val != 0) {
+                        // calling server delete command
+
+                        deleteExamSubCategory(val);
+                        // removal based on its INDEX
+                        removeExamSubCategory(val);
+                    } else {
+                        // removal based on its TITLE
+                        removeExamSubCategory(obj.toString());
+                    }
+
+                }
+
+            }
+
+            // and add-into the array for Server list (tobe deleted)
         }
-        
+
     }//GEN-LAST:event_deleteExamSubCategoryMouseClicked
 
     private void buttonAddExamStudentAnswerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddExamStudentAnswerActionPerformed
@@ -4162,19 +4540,58 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_StudentAnswerStatusCustomOKMouseClicked
 
     private void buttonAddExamQuestionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddExamQuestionActionPerformed
-        // TODO add your handling code here:
+
+        // ## Add New from Management
+        cardLayoutEntity.show(panelExamQuestions, "panelExamQuestionForm");
+        // clean but not for editing mode
+        cleanUpExamQuestionForm(false);
+        
     }//GEN-LAST:event_buttonAddExamQuestionActionPerformed
 
     private void buttonEditExamQuestionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditExamQuestionActionPerformed
-        // TODO add your handling code here:
+
+           // ## Edit Item from Management
+        ArrayList dataExam = tabRender.getCheckedRows(tableExamQuestionData, 1);
+
+        if (dataExam.size() == 1) {
+            // go to examCategoryForm
+            cardLayoutEntity.show(panelExamQuestions, "panelExamQuestionForm");
+
+            // clean the form but for editing mode
+            cleanUpExamQuestionForm(true);
+
+            // show the loading bar
+            showLoadingStatus();
+        } else {
+            UIEffect.popup("please select 1 single data only!", this);
+        }
+        
     }//GEN-LAST:event_buttonEditExamQuestionActionPerformed
 
     private void buttonDeleteExamQuestionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteExamQuestionActionPerformed
-        // TODO add your handling code here:
+
+           ArrayList dataExam = tabRender.getCheckedRows(tableExamQuestionData, 1);
+
+        if (dataExam.isEmpty()) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing id only
+
+            deleteExamQuestion(dataExam);
+            showLoadingStatus();
+        }
+        
     }//GEN-LAST:event_buttonDeleteExamQuestionActionPerformed
 
     private void labelRefreshExamQuestionManagementMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshExamQuestionManagementMouseClicked
-        // TODO add your handling code here:
+
+        // ## Refresh on Management
+        // change to loading icon
+        labelRefreshExamQuestionManagement.setIcon(loadingImage);
+
+        // refresh the table
+        refreshExamQuestions();
+        
     }//GEN-LAST:event_labelRefreshExamQuestionManagementMouseClicked
 
     private void labelRefreshExamQuestionManagementMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshExamQuestionManagementMouseEntered
@@ -4201,17 +4618,65 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         // TODO add your handling code here:
     }//GEN-LAST:event_tableExamQuestionOptionsFocusLost
 
-    private void editExamSubCategory1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editExamSubCategory1MouseClicked
+    private void editOptionsExamQuestionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editOptionsExamQuestionMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_editExamSubCategory1MouseClicked
+    }//GEN-LAST:event_editOptionsExamQuestionMouseClicked
 
-    private void addExamSubCategory1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addExamSubCategory1MouseClicked
+    private void addOptionsExamQuestionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addOptionsExamQuestionMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_addExamSubCategory1MouseClicked
+    }//GEN-LAST:event_addOptionsExamQuestionMouseClicked
 
-    private void deleteExamSubCategory1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteExamSubCategory1MouseClicked
+    private void deleteOptionsExamQuestionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteOptionsExamQuestionMouseClicked
         // TODO add your handling code here:
-    }//GEN-LAST:event_deleteExamSubCategory1MouseClicked
+    }//GEN-LAST:event_deleteOptionsExamQuestionMouseClicked
+
+    private void buttonAddCertificateStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddCertificateStudentActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonAddCertificateStudentActionPerformed
+
+    private void buttonEditCertificateStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditCertificateStudentActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonEditCertificateStudentActionPerformed
+
+    private void buttonDeleteCertificateStudentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteCertificateStudentActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonDeleteCertificateStudentActionPerformed
+
+    private void labelRefreshCertificateStudentManagementMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshCertificateStudentManagementMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshCertificateStudentManagementMouseClicked
+
+    private void labelRefreshCertificateStudentManagementMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshCertificateStudentManagementMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshCertificateStudentManagementMouseEntered
+
+    private void labelRefreshCertificateStudentManagementMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshCertificateStudentManagementMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelRefreshCertificateStudentManagementMouseExited
+
+    private void buttonCancelCertificateStudentFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonCancelCertificateStudentFormActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonCancelCertificateStudentFormActionPerformed
+
+    private void buttonSaveCertificateStudentFormActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveCertificateStudentFormActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonSaveCertificateStudentFormActionPerformed
+
+    private void addFileCertificateStudentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_addFileCertificateStudentMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_addFileCertificateStudentMouseClicked
+
+    private void deleteFileCertificateStudentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_deleteFileCertificateStudentMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_deleteFileCertificateStudentMouseClicked
+
+    private void comboboxCategoryExamQuestionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboboxCategoryExamQuestionActionPerformed
+        
+        
+        
+        
+        
+    }//GEN-LAST:event_comboboxCategoryExamQuestionActionPerformed
 
     private void enableUserFormSave() {
 
@@ -4298,8 +4763,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel StudentAnswerStatusWrong;
     private javax.swing.JLabel addExamStudentAnswerStatusOK;
     private javax.swing.JLabel addExamSubCategory;
-    private javax.swing.JLabel addExamSubCategory1;
+    private javax.swing.JLabel addFileCertificateStudent;
+    private javax.swing.JLabel addOptionsExamQuestion;
     private javax.swing.JButton buttonAddAttendance;
+    private javax.swing.JButton buttonAddCertificateStudent;
     private javax.swing.JButton buttonAddDocument;
     private javax.swing.JButton buttonAddExamCategory;
     private javax.swing.JButton buttonAddExamQuestion;
@@ -4312,6 +4779,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonBugsReported1;
     private javax.swing.JButton buttonCancelAttendanceForm;
     private javax.swing.JButton buttonCancelBugsReportedForm;
+    private javax.swing.JButton buttonCancelCertificateStudentForm;
     private javax.swing.JButton buttonCancelDocumentForm;
     private javax.swing.JButton buttonCancelExamCategoryForm;
     private javax.swing.JButton buttonCancelExamCategoryForm1;
@@ -4321,6 +4789,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonCancelUserForm;
     private javax.swing.JButton buttonDeleteAttendance;
     private javax.swing.JButton buttonDeleteBugsReported;
+    private javax.swing.JButton buttonDeleteCertificateStudent;
     private javax.swing.JButton buttonDeleteDocument;
     private javax.swing.JButton buttonDeleteExamCategory;
     private javax.swing.JButton buttonDeleteExamQuestion;
@@ -4330,6 +4799,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonDeleteUser;
     private javax.swing.JButton buttonDocumentManagement;
     private javax.swing.JButton buttonEditAttendance;
+    private javax.swing.JButton buttonEditCertificateStudent;
     private javax.swing.JButton buttonEditDocument;
     private javax.swing.JButton buttonEditExamCategory;
     private javax.swing.JButton buttonEditExamQuestion;
@@ -4346,6 +4816,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonPayment;
     private javax.swing.JButton buttonSaveAttendanceForm;
     private javax.swing.JButton buttonSaveBugsReportedForm;
+    private javax.swing.JButton buttonSaveCertificateStudentForm;
     private javax.swing.JButton buttonSaveDocumentForm;
     private javax.swing.JButton buttonSaveExamCategoryForm;
     private javax.swing.JButton buttonSaveExamCategoryForm1;
@@ -4354,28 +4825,31 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonSaveScheduleForm;
     private javax.swing.JButton buttonSaveUserForm;
     private javax.swing.JButton buttonSchedule;
+    private javax.swing.JButton buttonStudentCertificate;
     private javax.swing.JButton buttonUserManagement;
     private javax.swing.JButton buttonViewBugsReported;
-    private javax.swing.JButton buttonXX;
     private javax.swing.JButton buttonXXX;
     private javax.swing.JButton buttonXXXX;
     private javax.swing.JComboBox<String> comboboxAppNameBugsReported;
+    private javax.swing.JComboBox<String> comboboxCategoryExamQuestion;
+    private javax.swing.JComboBox<String> comboboxCertificateStudentCategory;
+    private javax.swing.JComboBox<String> comboboxCertificateStudentUsername;
     private javax.swing.JComboBox<String> comboboxClassRegAttendance;
     private javax.swing.JComboBox<String> comboboxClassRegSched;
     private javax.swing.JComboBox<String> comboboxDaySched;
-    private javax.swing.JComboBox<String> comboboxExamQuestionCategory;
-    private javax.swing.JComboBox<String> comboboxExamQuestionSubCategory;
     private javax.swing.JComboBox<String> comboboxMethodPayment;
     private javax.swing.JComboBox<String> comboboxStatusAttendance;
+    private javax.swing.JComboBox<String> comboboxSubCategoryExamQuestion;
     private javax.swing.JComboBox<String> comboboxUsernameAttendance;
     private javax.swing.JComboBox<String> comboboxUsernameBugsReported;
     private javax.swing.JComboBox<String> comboboxUsernameDoc;
     private javax.swing.JComboBox<String> comboboxUsernamePayment;
     private javax.swing.JComboBox<String> comboboxUsernameSched;
     private javax.swing.JLabel deleteExamSubCategory;
-    private javax.swing.JLabel deleteExamSubCategory1;
+    private javax.swing.JLabel deleteFileCertificateStudent;
+    private javax.swing.JLabel deleteOptionsExamQuestion;
     private javax.swing.JLabel editExamSubCategory;
-    private javax.swing.JLabel editExamSubCategory1;
+    private javax.swing.JLabel editOptionsExamQuestion;
     private javax.swing.JFileChooser fileChooser;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -4416,7 +4890,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel jLabel43;
     private javax.swing.JLabel jLabel44;
     private javax.swing.JLabel jLabel45;
+    private javax.swing.JLabel jLabel46;
+    private javax.swing.JLabel jLabel47;
+    private javax.swing.JLabel jLabel48;
+    private javax.swing.JLabel jLabel49;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel50;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -4425,8 +4904,6 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane11;
@@ -4436,6 +4913,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JScrollPane jScrollPane15;
     private javax.swing.JScrollPane jScrollPane16;
     private javax.swing.JScrollPane jScrollPane17;
+    private javax.swing.JScrollPane jScrollPane18;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
@@ -4452,6 +4930,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel labelBrowseScreenshotPayment;
     private javax.swing.JLabel labelBrowseSignatureAttendance;
     private javax.swing.JLabel labelBugsReportedManagement;
+    private javax.swing.JLabel labelCertificateStudentManagement;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelExamCategoryManagement;
     private javax.swing.JLabel labelExamCategoryManagement1;
@@ -4463,6 +4942,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel labelPreviewPicture;
     private javax.swing.JLabel labelRefreshAttendance;
     private javax.swing.JLabel labelRefreshBugsReported;
+    private javax.swing.JLabel labelRefreshCertificateStudentManagement;
     private javax.swing.JLabel labelRefreshDocument;
     private javax.swing.JLabel labelRefreshExamCategoryManagement;
     private javax.swing.JLabel labelRefreshExamQuestionManagement;
@@ -4487,6 +4967,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel panelBugsReportedForm;
     private javax.swing.JPanel panelBugsReportedManagement;
     private javax.swing.JPanel panelCenter;
+    private javax.swing.JPanel panelCertificateStudent;
+    private javax.swing.JPanel panelCertificateStudentControl;
+    private javax.swing.JPanel panelCertificateStudentForm;
+    private javax.swing.JPanel panelCertificateStudentManagement;
+    private javax.swing.JPanel panelCertificateStudentTable;
     private javax.swing.JPanel panelDocument;
     private javax.swing.JPanel panelDocumentControl;
     private javax.swing.JPanel panelDocumentForm;
@@ -4500,16 +4985,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel panelExamMenu;
     private javax.swing.JPanel panelExamQuestionControl;
     private javax.swing.JPanel panelExamQuestionForm;
-    private javax.swing.JPanel panelExamQuestionManagement;
     private javax.swing.JPanel panelExamQuestionTable;
     private javax.swing.JPanel panelExamQuestions;
+    private javax.swing.JPanel panelExamQuestionsManagement;
     private javax.swing.JPanel panelExamStudentAnswer;
     private javax.swing.JPanel panelExamStudentAnswerControl;
     private javax.swing.JPanel panelExamStudentAnswerForm;
     private javax.swing.JPanel panelExamStudentAnswerManagement;
     private javax.swing.JPanel panelExamStudentAnswerTable;
     private javax.swing.JPanel panelHeader;
-    private javax.swing.JPanel panelHome;
+    private javax.swing.JPanel panelHomeMenu;
     private javax.swing.JPanel panelInnerCenter;
     private javax.swing.JPanel panelPayment;
     private javax.swing.JPanel panelPaymentControl;
@@ -4528,16 +5013,22 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel panelUserForm;
     private javax.swing.JPanel panelUserManagement;
     private javax.swing.JPanel panelUserTable;
+    private javax.swing.JRadioButton radioButtonCertificateStudentReleased;
+    private javax.swing.JRadioButton radioButtonCertificateStudentWaiting;
+    private javax.swing.ButtonGroup radioButtonGroupTypeExamQuestion;
+    private javax.swing.JRadioButton radiobuttonEssayExamQuestion;
+    private javax.swing.JRadioButton radiobuttonMultipleChoiceExamQuestion;
     private javax.swing.JSpinner spinnerHourSched;
     private javax.swing.JSpinner spinnerMinutesSched;
     private javax.swing.JTable tableAttendanceData;
     private javax.swing.JTable tableBugsReportedData;
+    private javax.swing.JTable tableCertificateStudentData;
     private javax.swing.JTable tableDocumentData;
     private javax.swing.JTable tableExamCategoryData;
     private javax.swing.JTable tableExamQuestionData;
     private javax.swing.JTable tableExamQuestionOptions;
     private javax.swing.JTable tableExamStudentAnswerData;
-    private javax.swing.JTable tableExamSubCategory;
+    private javax.swing.JTable tableExamSubCategoryData;
     private javax.swing.JTable tablePaymentData;
     private javax.swing.JTable tableScheduleData;
     private javax.swing.JTable tableUserData;
@@ -4548,7 +5039,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JTextArea textareaQuestionExamStudentAnswer;
     private javax.swing.JTextField textfieldAmountPayment;
     private javax.swing.JTextField textfieldBaseScoreExamCategory;
-    private javax.swing.JTextField textfieldBaseScoreExamCategory1;
+    private javax.swing.JTextField textfieldBaseScoreExamCategory2;
+    private javax.swing.JTextField textfieldCertificateStudentFilename;
     private javax.swing.JTextField textfieldCodeExamCategory;
     private javax.swing.JTextField textfieldEmail;
     private javax.swing.JTextField textfieldExamQuestion;
@@ -4556,6 +5048,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JTextField textfieldIPAddressBugsReported;
     private javax.swing.JTextField textfieldMobile;
     private javax.swing.JTextField textfieldPass;
+    private javax.swing.JTextField textfieldScorePointExamQuestion;
     private javax.swing.JTextField textfieldTitleBugsReported;
     private javax.swing.JTextField textfieldTitleDoc;
     private javax.swing.JTextField textfieldTitleExamCategory;
@@ -4664,13 +5157,27 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         //labelBrowseSignatureAttendance.setVisible(!b);
     }
 
+     private void lockExamQuestionForm(boolean b) {
+        comboboxCategoryExamQuestion.setEnabled(!b);
+        comboboxSubCategoryExamQuestion.setEnabled(!b);
+        textfieldExamQuestion.setEnabled(!b);
+        textfieldScorePointExamQuestion.setEnabled(!b);
+
+        radiobuttonEssayExamQuestion.setEnabled(!b);
+        radiobuttonMultipleChoiceExamQuestion.setEnabled(!b);
+        
+        addOptionsExamQuestion.setEnabled(!b);
+
+    }
+
+    
     private void lockExamCategoryForm(boolean b) {
         textfieldTitleExamCategory.setEnabled(!b);
         textfieldCodeExamCategory.setEnabled(!b);
+        textfieldBaseScoreExamCategory.setEnabled(!b);
 
         addExamSubCategory.setEnabled(!b);
-        editExamSubCategory.setEnabled(!b);
-        deleteExamSubCategory.setEnabled(!b);
+
     }
 
     private void lockScheduleForm(boolean b) {
@@ -4778,13 +5285,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         editMode = editWork;
 
         isiSubCategory = new ArrayList<ExamSubCategory>();
-       
+
         textfieldTitleExamCategory.setText("");
         textfieldCodeExamCategory.setText("");
 
         // this is default entry
-        TableRenderer.clearData(tableExamSubCategory);
-        
+        TableRenderer.clearData(tableExamSubCategoryData);
+
         if (editMode) {
             // we lock first
             // so later it will be unlocked by async success call
@@ -4795,6 +5302,42 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void fillComboboxExamCategoryName(ExamCategory [] entries){
+        
+        // into dropdown combobox under every form related
+        comboboxCategoryExamQuestion.removeAllItems();
+        
+        for(ExamCategory es: entries){
+           comboboxCategoryExamQuestion.addItem(es.getTitle());
+        }
+        
+    }
+    
+     private void cleanUpExamQuestionForm(boolean editWork) {
+
+        editMode = editWork;
+
+        isiExamQuestionOptions = new ArrayList<String>();
+
+        textfieldExamQuestion.setText("");
+        textfieldScorePointExamQuestion.setText("0");
+
+        radiobuttonEssayExamQuestion.setSelected(true);
+        comboboxCategoryExamQuestion.setSelectedIndex(0);
+                
+        // this is default entry
+        TableRenderer.clearData(tableExamQuestionOptions);
+
+        if (editMode) {
+            // we lock first
+            // so later it will be unlocked by async success call
+
+            lockExamQuestionForm(editMode);
+            showLoadingStatus();
+        }
+
+    }
+    
     private void cleanUpScheduleForm(boolean editWork) {
 
         editMode = editWork;
@@ -4881,6 +5424,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+    private void toggleExamSubCategory(boolean emptyness) {
+        editExamSubCategory.setEnabled(!emptyness);
+        deleteExamSubCategory.setEnabled(!emptyness);
+    }
+
     private void renderUsernameForCombobox(User[] dataIn, JComboBox jc) {
         jc.removeAllItems();
 
@@ -4952,6 +5500,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         tabRender.render(tableExamCategoryData, dataIn);
 
                         hideLoadingStatus();
+                        
+                        // filling in another form that needs the data as well
+                        fillComboboxExamCategoryName(dataIn);
 
                     } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
                         Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
@@ -4971,6 +5522,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
                         hideLoadingStatus();
 
+                    }  else if (urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_QUESTION)) {
+                        ExamQuestion[] dataIn = objectG.fromJson(innerData, ExamQuestion[].class);
+                        tabRender.render(tableExamQuestionData, dataIn);
+
+                        hideLoadingStatus();
+
                     } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
                         Document[] dataIn = objectG.fromJson(innerData, Document[].class);
                         tabRender.render(tableDocumentData, dataIn);
@@ -4981,6 +5538,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
                         tabRender.render(tablePaymentData, dataIn);
 
+                        hideLoadingStatus();
+
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.DELETE_EXAM_SUBCATEGORY)) {
+                        // once exam sub is deleted
+                        // thus we refresh the table
+                        refreshExamSubCategoryLocally();
                         hideLoadingStatus();
 
                     } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_EXAM_CATEGORY)
@@ -5086,7 +5649,18 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
                         // we may got many exam sub category or even less
                         ExamSubCategory[] dataIn = objectG.fromJson(innerData, ExamSubCategory[].class);
-                        tabRender.render(tableExamSubCategory, dataIn);
+                        tabRender.render(tableExamSubCategoryData, dataIn);
+
+                        // we also put 'em inside an array
+                        // for editing purposes later
+                        isiSubCategory.clear();
+
+                        for (ExamSubCategory dataSatuan : dataIn) {
+                            isiSubCategory.add(dataSatuan);
+                        }
+
+                        // when the data is filled up we unlock the button
+                        toggleExamSubCategory(tabRender.isTableEmpty(tableExamSubCategoryData));
 
                         lockExamCategoryForm(false);
                         hideLoadingStatus();
@@ -5126,13 +5700,18 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 // from the previous call
                 hideLoadingStatus();
 
-            } else if(urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_SUBCATEGORY)){
-                
+            } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_SUBCATEGORY)) {
+
                 // since the sub category of the exam is not exist
                 // thus, we just turn on the form from here
                 lockExamCategoryForm(false);
                 hideLoadingStatus();
-                
+
+                // clear also the subcategory table
+                TableRenderer.clearData(tableExamSubCategoryData);
+
+                refreshExamSubCategoryLocally();
+
             }
         }
     }

@@ -1,0 +1,55 @@
+
+// REFRESH
+	
+        // ## Refresh on Management
+        // change to loading icon
+        labelRefreshExamCategoryManagement.setIcon(loadingImage);
+
+        // refresh the table
+        refreshExamCategory();
+		
+		
+// ADD
+
+
+        // ## Add New from Management
+        cardLayoutEntity.show(panelExamCategory, "panelExamCategoryForm");
+        // clean but not for editing mode
+        cleanUpExamCategoryForm(false);
+
+
+// EDIT
+
+        // ## Edit Item from Management
+        ArrayList dataExam = tabRender.getCheckedRows(tableExamCategoryData, 1);
+
+        if (dataExam.size() == 1) {
+            // go to examCategoryForm
+            cardLayoutEntity.show(panelExamCategory, "panelExamCategoryForm");
+
+            // clean the form but for editing mode
+            cleanUpExamCategoryForm(true);
+
+            // call the API with id passed
+            getExamCategory(dataExam.get(0).toString());
+
+            // show the loading bar
+            showLoadingStatus();
+        } else {
+            UIEffect.popup("please select 1 single data only!", this);
+        }
+
+
+// DELETE
+
+
+        ArrayList dataExam = tabRender.getCheckedRows(tableExamCategoryData, 1);
+
+        if (dataExam.isEmpty()) {
+            UIEffect.popup("Please select the row first!", this);
+        } else {
+            // passing id only
+
+            deleteExamCategory(dataExam);
+            showLoadingStatus();
+        }
