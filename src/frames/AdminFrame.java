@@ -434,7 +434,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
-  private void refreshExamQuestions() {
+    private void refreshExamQuestions() {
 
         SWThreadWorker workExamQ = new SWThreadWorker(this);
         workExamQ.setWork(SWTKey.WORK_REFRESH_EXAM_QUESTIONS);
@@ -876,7 +876,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
-     private void deleteExamQuestion(ArrayList<String> dataIn) {
+    private void deleteExamQuestion(ArrayList<String> dataIn) {
 
         // for exam category usage the d is actually a number (Integer)
         for (String d : dataIn) {
@@ -888,7 +888,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         }
 
     }
-    
+
     private void deleteExamCategory(ArrayList<String> dataIn) {
 
         // for exam category usage the d is actually a number (Integer)
@@ -4154,13 +4154,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_buttonExamStudentAnswerActionPerformed
 
     private void buttonExamQuestionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExamQuestionsActionPerformed
-       
+
         cardLayoutInnerCenter.show(panelInnerCenter, "panelExamQuestions");
         cardLayoutEntity = (CardLayout) panelExamQuestions.getLayout();
         cardLayoutEntity.show(panelExamQuestions, "panelExamQuestionsManagement");
 
         labelBackToHome.setVisible(true);
-        
+
     }//GEN-LAST:event_buttonExamQuestionsActionPerformed
 
     private void buttonStudentCertificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonStudentCertificateActionPerformed
@@ -4319,7 +4319,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         } else {
             UIEffect.popup("nothing to refresh...!", this);
-            
+
             // disable the control buttons
             toggleExamSubCategory(true);
         }
@@ -4545,12 +4545,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         cardLayoutEntity.show(panelExamQuestions, "panelExamQuestionForm");
         // clean but not for editing mode
         cleanUpExamQuestionForm(false);
-        
+
     }//GEN-LAST:event_buttonAddExamQuestionActionPerformed
 
     private void buttonEditExamQuestionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonEditExamQuestionActionPerformed
 
-           // ## Edit Item from Management
+        // ## Edit Item from Management
         ArrayList dataExam = tabRender.getCheckedRows(tableExamQuestionData, 1);
 
         if (dataExam.size() == 1) {
@@ -4565,12 +4565,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         } else {
             UIEffect.popup("please select 1 single data only!", this);
         }
-        
+
     }//GEN-LAST:event_buttonEditExamQuestionActionPerformed
 
     private void buttonDeleteExamQuestionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDeleteExamQuestionActionPerformed
 
-           ArrayList dataExam = tabRender.getCheckedRows(tableExamQuestionData, 1);
+        ArrayList dataExam = tabRender.getCheckedRows(tableExamQuestionData, 1);
 
         if (dataExam.isEmpty()) {
             UIEffect.popup("Please select the row first!", this);
@@ -4580,7 +4580,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             deleteExamQuestion(dataExam);
             showLoadingStatus();
         }
-        
+
     }//GEN-LAST:event_buttonDeleteExamQuestionActionPerformed
 
     private void labelRefreshExamQuestionManagementMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshExamQuestionManagementMouseClicked
@@ -4591,7 +4591,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // refresh the table
         refreshExamQuestions();
-        
+
     }//GEN-LAST:event_labelRefreshExamQuestionManagementMouseClicked
 
     private void labelRefreshExamQuestionManagementMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelRefreshExamQuestionManagementMouseEntered
@@ -4671,11 +4671,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_deleteFileCertificateStudentMouseClicked
 
     private void comboboxCategoryExamQuestionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboboxCategoryExamQuestionActionPerformed
-        
-        
-        
-        
-        
+
+
     }//GEN-LAST:event_comboboxCategoryExamQuestionActionPerformed
 
     private void enableUserFormSave() {
@@ -5157,7 +5154,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         //labelBrowseSignatureAttendance.setVisible(!b);
     }
 
-     private void lockExamQuestionForm(boolean b) {
+    private void lockExamQuestionForm(boolean b) {
         comboboxCategoryExamQuestion.setEnabled(!b);
         comboboxSubCategoryExamQuestion.setEnabled(!b);
         textfieldExamQuestion.setEnabled(!b);
@@ -5165,12 +5162,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         radiobuttonEssayExamQuestion.setEnabled(!b);
         radiobuttonMultipleChoiceExamQuestion.setEnabled(!b);
-        
+
         addOptionsExamQuestion.setEnabled(!b);
 
     }
 
-    
     private void lockExamCategoryForm(boolean b) {
         textfieldTitleExamCategory.setEnabled(!b);
         textfieldCodeExamCategory.setEnabled(!b);
@@ -5302,18 +5298,18 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
-    private void fillComboboxExamCategoryName(ExamCategory [] entries){
-        
+    private void fillComboboxExamCategoryName(ExamCategory[] entries) {
+
         // into dropdown combobox under every form related
         comboboxCategoryExamQuestion.removeAllItems();
-        
-        for(ExamCategory es: entries){
-           comboboxCategoryExamQuestion.addItem(es.getTitle());
+
+        for (ExamCategory es : entries) {
+            comboboxCategoryExamQuestion.addItem(es.getTitle());
         }
-        
+
     }
-    
-     private void cleanUpExamQuestionForm(boolean editWork) {
+
+    private void cleanUpExamQuestionForm(boolean editWork) {
 
         editMode = editWork;
 
@@ -5324,7 +5320,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         radiobuttonEssayExamQuestion.setSelected(true);
         comboboxCategoryExamQuestion.setSelectedIndex(0);
-                
+
         // this is default entry
         TableRenderer.clearData(tableExamQuestionOptions);
 
@@ -5337,7 +5333,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         }
 
     }
-    
+
     private void cleanUpScheduleForm(boolean editWork) {
 
         editMode = editWork;
@@ -5500,8 +5496,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         tabRender.render(tableExamCategoryData, dataIn);
 
                         hideLoadingStatus();
-                        
+
                         // filling in another form that needs the data as well
+                        // for obtaining its name
                         fillComboboxExamCategoryName(dataIn);
 
                     } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
@@ -5522,7 +5519,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
                         hideLoadingStatus();
 
-                    }  else if (urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_QUESTION)) {
+                    } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_QUESTION)) {
                         ExamQuestion[] dataIn = objectG.fromJson(innerData, ExamQuestion[].class);
                         tabRender.render(tableExamQuestionData, dataIn);
 
@@ -5546,6 +5543,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         refreshExamSubCategoryLocally();
                         hideLoadingStatus();
 
+                    }else if (urlTarget.equalsIgnoreCase(WebReference.ADD_EXAM_QUESTION)
+                            || urlTarget.equalsIgnoreCase(WebReference.DELETE_EXAM_QUESTION)
+                            || urlTarget.equalsIgnoreCase(WebReference.UPDATE_EXAM_QUESTION)) {
+                        // once new exam question given
+                        // thus we refresh the table
+                        refreshExamQuestions();
                     } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_EXAM_CATEGORY)
                             || urlTarget.equalsIgnoreCase(WebReference.DELETE_EXAM_CATEGORY)
                             || urlTarget.equalsIgnoreCase(WebReference.UPDATE_EXAM_CATEGORY)) {
@@ -5644,6 +5647,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         // we got the single exam category data here
                         ExamCategory dataIn = objectG.fromJson(innerData, ExamCategory.class);
                         renderExamCategoryForm(dataIn);
+                        
+                       
 
                     } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_SUBCATEGORY)) {
 
@@ -5651,6 +5656,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         ExamSubCategory[] dataIn = objectG.fromJson(innerData, ExamSubCategory[].class);
                         tabRender.render(tableExamSubCategoryData, dataIn);
 
+                        
                         // we also put 'em inside an array
                         // for editing purposes later
                         isiSubCategory.clear();
@@ -5684,11 +5690,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 showErrorStatus("updating");
             } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_ATTENDANCE)
                     || urlTarget.equalsIgnoreCase(WebReference.ADD_DOCUMENT)
+                    || urlTarget.equalsIgnoreCase(WebReference.ADD_EXAM_QUESTION)
                     || urlTarget.equalsIgnoreCase(WebReference.ADD_EXAM_CATEGORY)
                     || urlTarget.equalsIgnoreCase(WebReference.REGISTER_USER)
                     || urlTarget.equalsIgnoreCase(WebReference.ADD_SCHEDULE)) {
                 showErrorStatus("saving new entry");
             } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_CATEGORY)
+                    || urlTarget.equalsIgnoreCase(WebReference.ALL_EXAM_QUESTION)
                     || urlTarget.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)
                     || urlTarget.equalsIgnoreCase(WebReference.ALL_DOCUMENT)
                     || urlTarget.equalsIgnoreCase(WebReference.ALL_PAYMENT)
