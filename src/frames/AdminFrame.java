@@ -6185,7 +6185,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         // thus we refresh the table
                         refreshExamSubCategoryLocally();
                         hideLoadingStatus();
-
+x
                     } else if (urlTarget.equalsIgnoreCase(WebReference.ADD_EXAM_)
                             || urlTarget.equalsIgnoreCase(WebReference.DELETE_EXAM_QUESTION)
                             || urlTarget.equalsIgnoreCase(WebReference.UPDATE_EXAM_QUESTION)) {
