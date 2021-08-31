@@ -28,6 +28,7 @@ public class SWTKey {
     public static final int WORK_REFRESH_SIGNATURE = 70;
     public static final int WORK_REFRESH_SCREENSHOT_PAYMENT = 701;
     public static final int WORK_REFRESH_SCREENSHOT_REPORT_BUGS = 7001;
+    public static final int WORK_REFRESH_EXAM_QUESTION_PREVIEW = 70001;
 
     public static final int WORK_REFRESH_CLASSROOM = 71;
 
@@ -37,7 +38,8 @@ public class SWTKey {
 
     public static final int WORK_REFRESH_EXAM_CATEGORY = 900;
     public static final int WORK_REFRESH_EXAM_SUBCATEGORY = 9000;
-    public static final int WORK_REFRESH_EXAM_QUESTIONS = 90000;
+    public static final int WORK_REFRESH_EXAM_QUESTIONS = 90001;
+    public static final int WORK_REFRESH_EXAM_STUDENT_ANS = 90000;
 
     public static final int WORK_LOGIN = 10;
     public static final int WORK_TEST_INTERNET = 11;
@@ -96,7 +98,13 @@ public class SWTKey {
     public static final int WORK_EXAM_QUESTION_DELETE = 48;
     public static final int WORK_EXAM_QUESTION_SAVE = 49;
     public static final int WORK_EXAM_QUESTION_UPDATE = 50;
-    public static final int WORK_EXAM_QUESTION_DOWNLOAD = 51;
-    public static final int WORK_DELETE_EXAM_PREVIEW = 511;
+
+    public static final int WORK_DELETE_EXAM_QUESTION_PREVIEW = 511;
+
+    public static final int WORK_EXAM_STUDENT_ANS_EDIT = 52;
+    public static final int WORK_EXAM_STUDENT_ANS_DELETE = 53;
+    public static final int WORK_EXAM_STUDENT_ANS_SAVE = 54;
+    public static final int WORK_EXAM_STUDENT_ANS_UPDATE = 55;
+    
 
 }

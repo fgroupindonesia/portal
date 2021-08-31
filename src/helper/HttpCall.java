@@ -238,14 +238,17 @@ public class HttpCall {
             }
             // is this want to be writable?
             if (isWriteToDisk()) {
-                System.out.println("We got propic " + getData("propic"));
+                System.out.println("----- We got file to be downloaded! -----");
 
                 // set the complete path locally
                 String fileName = null;
                 if (urlTarget.contains(WebReference.SIGNATURE_ATTENDANCE)) {
                     PathReference.setSignatureFileName(getData("signature"));
                     fileName = PathReference.SignaturePath;
-                } else if (urlTarget.contains(WebReference.PICTURE_USER)) {
+                } else if (urlTarget.contains(WebReference.PREVIEW_EXAM)) {
+                    PathReference.setExamQuestionPreviewFileName(getData("preview"));
+                    fileName = PathReference.ExamQuestionPreviewPath;
+                }else if (urlTarget.contains(WebReference.PICTURE_USER)) {
                     PathReference.setPropicFileName(getData("propic"));
                     fileName = PathReference.UserPropicPath;
                 }else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT)) {

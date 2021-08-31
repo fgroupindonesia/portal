@@ -4,6 +4,7 @@
  */
 package helper;
 
+import beans.ExamMultipleChoice;
 import frames.ClientFrame;
 import helper.language.LanguageSwitcher;
 import java.awt.BorderLayout;
@@ -288,6 +289,21 @@ public class UIEffect {
     public static String popupInput(String message, String defaultValue, JFrame ref) {
 
         String mes = JOptionPane.showInputDialog(ref, message, defaultValue);
+
+        return mes;
+
+    }
+    public static ExamMultipleChoice popupMultipleChoiceDialog(JFrame ref, String opsUsed) {
+
+        ExamMultipleChoice mes = new ExamMultipleChoiceDialog(ref, true, opsUsed).showFrame();
+
+        return mes;
+
+    }
+    
+    public static ExamMultipleChoice popupMultipleChoiceDialog(JFrame ref, String  opsUsed, String defaultValue) {
+
+        ExamMultipleChoice mes = new ExamMultipleChoiceDialog(ref, true, opsUsed, defaultValue).showFrame();
 
         return mes;
 

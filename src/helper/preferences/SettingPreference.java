@@ -35,6 +35,7 @@ public class SettingPreference {
             this.setValue(Keys.NOTIF_CLASS_START, "1 Hour before".toLowerCase());
             this.setValue(Keys.NOTIF_SESSION_LIMIT, "At least 1".toLowerCase());
             this.setValue(Keys.USER_PROPIC, "default");
+            this.setValue(Keys.EXAM_QUESTION_PREVIEW, "exam-prev-default");
 
         }
 

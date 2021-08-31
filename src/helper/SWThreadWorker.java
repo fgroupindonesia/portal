@@ -193,7 +193,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_EXAM_QUESTIONS:
                 name = "refresh_exam_question";
                 break;
-            case SWTKey.WORK_DELETE_EXAM_PREVIEW:
+            case SWTKey.WORK_REFRESH_EXAM_QUESTION_PREVIEW:
+                name = "refresh_exam_question_preview";
+                break;
+            case SWTKey.WORK_DELETE_EXAM_QUESTION_PREVIEW:
                 name = "delete_exam_question_preview";
                 break;
             case SWTKey.WORK_EXAM_QUESTION_DELETE:
@@ -404,7 +407,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_EXAM_QUESTIONS:
                 refreshExamQuestionData();
                 break;
-            case SWTKey.WORK_DELETE_EXAM_PREVIEW:
+            case SWTKey.WORK_REFRESH_EXAM_QUESTION_PREVIEW:
+                examPreviewDownload();
+                break;
+            case SWTKey.WORK_DELETE_EXAM_QUESTION_PREVIEW:
                 examPreviewDelete();
                 break;
             case SWTKey.WORK_EXAM_QUESTION_DELETE:
@@ -576,6 +582,14 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String urlManual = UIEffect.decodeSafe(urlExecutor.getData("url"));
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
+    
+    private void examPreviewDownload() {
+
+        // the url is manually defined here
+        String urlManual = WebReference.PREVIEW_EXAM + "?preview=" + urlExecutor.getData("preview");
+        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        
+    }
 
     private void documentSave() {
         if (hasFile()) {
@@ -613,7 +627,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void pictureDelete() {
         urlExecutor.start(WebReference.DELETE_PICTURE_USER, HttpCall.METHOD_POST);
     }
-    
+
     // this is for exam preview 
     private void examPreviewDelete() {
         urlExecutor.start(WebReference.DELETE_PREVIEW_EXAM, HttpCall.METHOD_POST);
@@ -713,7 +727,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void examQuestionDelete() {
         urlExecutor.start(WebReference.DELETE_EXAM_QUESTION, HttpCall.METHOD_POST);
     }
-    
+
     private void examCategoryDelete() {
         urlExecutor.start(WebReference.DELETE_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
@@ -737,15 +751,20 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void examCategorySave() {
         urlExecutor.start(WebReference.ADD_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
-    
+
     private void examQuestionSave() {
-        urlExecutor.start(WebReference.ADD_EXAM_QUESTION, HttpCall.METHOD_POST);
+        if (hasFile()) {
+            urlExecutor.start(WebReference.ADD_EXAM_QUESTION, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.ADD_EXAM_QUESTION, HttpCall.METHOD_POST);
+        }
+
     }
 
     private void examCategoryEdit() {
         urlExecutor.start(WebReference.DETAIL_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
-    
+
     private void examQuestionEdit() {
         urlExecutor.start(WebReference.DETAIL_EXAM_QUESTION, HttpCall.METHOD_POST);
     }
@@ -753,9 +772,14 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void examCategoryUpdate() {
         urlExecutor.start(WebReference.UPDATE_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
-    
+
     private void examQuestionUpdate() {
-        urlExecutor.start(WebReference.UPDATE_EXAM_QUESTION, HttpCall.METHOD_POST);
+
+        if (hasFile()) {
+            urlExecutor.start(WebReference.UPDATE_EXAM_QUESTION, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.UPDATE_EXAM_QUESTION, HttpCall.METHOD_POST);
+        }
     }
 
     private void refreshHistoryData() {
@@ -833,7 +857,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void refreshExamQuestionData() {
         urlExecutor.start(WebReference.ALL_EXAM_QUESTION, HttpCall.METHOD_POST);
     }
-    
+
     private void refreshExamCategoryData() {
         urlExecutor.start(WebReference.ALL_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
