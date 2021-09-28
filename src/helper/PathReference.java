@@ -18,6 +18,7 @@ public class PathReference {
     public static String CertificateDirName = DirName + "\\certificates";
     public static String BugsReportedDirName = DirName + "\\bugs";
     public static String ScreenshotPaymentDirName = DirName + "\\screenshots";
+  
     public static String JXBrowserDirName = DirName + "\\jxbrowser";
     public static String TeamviewerPath = ToolsDirName + "\\TeamViewer_Setup.exe";
     public static String LogoPath = DirName + "\\fgroup.jpg";

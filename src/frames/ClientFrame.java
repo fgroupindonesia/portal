@@ -37,8 +37,12 @@ import helper.WebReference;
 import helper.language.Comp;
 import helper.language.LanguageSwitcher;
 import helper.preferences.Keys;
+import java.awt.AWTException;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.Robot;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -49,6 +53,8 @@ import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -100,6 +106,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     ImageIcon refreshImage = new ImageIcon(getClass().getResource("/images/refresh24.png"));
     ImageIcon browseImage = new ImageIcon(getClass().getResource("/images/file.png"));
     ImageIcon loadingBookImage = new ImageIcon(getClass().getResource("/images/loadingprelcircular.gif"));
+    ImageIcon screenshotImage = new ImageIcon(getClass().getResource("/images/camera24.png"));
 
     User personLogged;
 
@@ -111,6 +118,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     public ClientFrame() {
         processNicely();
+       
     }
 
     // this functionallity is under consideration 2020-dec-08
@@ -124,6 +132,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void processNicely() {
         initComponents();
 
+        
+        
+        // hiding screenshot, typing, and browse for the first time
+        // from Exam UI
+        labelScreenshot.setVisible(false);
+        labelTyping.setVisible(false);
+        buttonBrowseFileExam.setVisible(false);
+        
+        // showing the username
+        labelUsernameText.setText(personLogged.getUsername());
+        
         // hide time interval for first time
         labelTimeIntervalSchedule.setVisible(false);
         
@@ -181,6 +200,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         prepareBrowserNow();
 
         saveHistory("logging in successfuly");
+         configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, "0");
     }
 
     SWThreadWorker prepbrowser = new SWThreadWorker(this);
@@ -443,6 +463,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelContent = new javax.swing.JPanel();
         panelMenu = new javax.swing.JPanel();
         labelPropicUser = new javax.swing.JLabel();
+        labelUsernameText = new javax.swing.JLabel();
         buttonProfile = new javax.swing.JButton();
         buttonTools = new javax.swing.JButton();
         buttonDocument = new javax.swing.JButton();
@@ -588,9 +609,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         jScrollPane7 = new javax.swing.JScrollPane();
         textareaExamQuestionAnswerEssay = new javax.swing.JTextArea();
         labelExamQuestionPreview = new javax.swing.JLabel();
+        labelTyping = new javax.swing.JLabel();
+        buttonBrowseFileExam = new javax.swing.JButton();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
         labelNavHome = new javax.swing.JLabel();
+        labelScreenshot = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Portal Access - FGroupIndonesia");
@@ -682,6 +706,19 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             }
         });
         panelMenu.add(labelPropicUser);
+
+        labelUsernameText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelUsernameText.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelUsernameText.setPreferredSize(new java.awt.Dimension(120, 16));
+        labelUsernameText.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelUsernameTextMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                labelUsernameTextMouseEntered(evt);
+            }
+        });
+        panelMenu.add(labelUsernameText);
 
         buttonProfile.setText("Profile");
         buttonProfile.setPreferredSize(new java.awt.Dimension(120, 23));
@@ -1714,7 +1751,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelInnerEssayExam.setLayout(new java.awt.BorderLayout());
 
         textareaExamQuestionAnswerEssay.setColumns(20);
+        textareaExamQuestionAnswerEssay.setLineWrap(true);
         textareaExamQuestionAnswerEssay.setRows(5);
+        textareaExamQuestionAnswerEssay.setWrapStyleWord(true);
         textareaExamQuestionAnswerEssay.setOpaque(false);
         jScrollPane7.setViewportView(textareaExamQuestionAnswerEssay);
 
@@ -1727,7 +1766,21 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelExamQuestionPreview.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelExamQuestionPreview.setText("preview");
         labelExamQuestionPreview.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        panelQuestionExam.add(labelExamQuestionPreview, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 70, 240, 220));
+        panelQuestionExam.add(labelExamQuestionPreview, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 110, 240, 170));
+
+        labelTyping.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        labelTyping.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/keyboard24.png"))); // NOI18N
+        labelTyping.setText("Typing");
+        labelTyping.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelTyping.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelTypingMouseClicked(evt);
+            }
+        });
+        panelQuestionExam.add(labelTyping, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 62, 130, 29));
+
+        buttonBrowseFileExam.setText("Browse...");
+        panelQuestionExam.add(buttonBrowseFileExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 62, 100, 30));
 
         panelExamInner.add(panelQuestionExam, "panelQuestionExam");
 
@@ -1738,9 +1791,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelCenter.add(panelContentCenter, java.awt.BorderLayout.CENTER);
 
         panelHeaderCenter.setPreferredSize(new java.awt.Dimension(574, 50));
+        panelHeaderCenter.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         labelPanelViewName.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         labelPanelViewName.setText("Which Menu?");
+        panelHeaderCenter.add(labelPanelViewName, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 10, 151, 29));
 
         labelNavHome.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/home24.png"))); // NOI18N
         labelNavHome.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1749,29 +1804,18 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelNavHomeMouseClicked(evt);
             }
         });
+        panelHeaderCenter.add(labelNavHome, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 11, -1, -1));
 
-        javax.swing.GroupLayout panelHeaderCenterLayout = new javax.swing.GroupLayout(panelHeaderCenter);
-        panelHeaderCenter.setLayout(panelHeaderCenterLayout);
-        panelHeaderCenterLayout.setHorizontalGroup(
-            panelHeaderCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelHeaderCenterLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(labelNavHome)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(labelPanelViewName, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(1165, Short.MAX_VALUE))
-        );
-        panelHeaderCenterLayout.setVerticalGroup(
-            panelHeaderCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelHeaderCenterLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(panelHeaderCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(panelHeaderCenterLayout.createSequentialGroup()
-                        .addComponent(labelNavHome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(5, 5, 5))
-                    .addComponent(labelPanelViewName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
+        labelScreenshot.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        labelScreenshot.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/camera24.png"))); // NOI18N
+        labelScreenshot.setText("Screenshot");
+        labelScreenshot.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelScreenshot.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelScreenshotMouseClicked(evt);
+            }
+        });
+        panelHeaderCenter.add(labelScreenshot, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 10, 170, 29));
 
         panelCenter.add(panelHeaderCenter, java.awt.BorderLayout.PAGE_START);
 
@@ -2253,20 +2297,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         }
     }
 
-    private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
-        browser.loadURL("http://bing.com");
+    private void visitURL(String targetCompleteURL, String historyMessage){
+        browser.loadURL(targetCompleteURL);
 
         cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
-
-        saveHistory("opening embedded browser");
+        labelScreenshot.setVisible(true);
+        
+        saveHistory(historyMessage);
+    }
+    
+    private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
+                
+        visitURL("http://bing.com", "opening embedded browser");
     }//GEN-LAST:event_buttonVisitChromeActionPerformed
 
     private void buttonVisitWhatsappActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitWhatsappActionPerformed
-        browser.loadURL("http://web.whatsapp.com");
-
-        cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
-
-        saveHistory("opening embedded whatsapp");
+      
+        visitURL("http://web.whatsapp.com", "opening embedded whatsapp");
     }//GEN-LAST:event_buttonVisitWhatsappActionPerformed
 
     private void turnOffBrowser() {
@@ -2590,16 +2637,20 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void buttonVisitGoogleMeetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitGoogleMeetActionPerformed
 
-        browser.loadURL("http://meet.google.com");
-
-        cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
-
-        saveHistory("opening embedded google meet");
+        visitURL("http://meet.google.com", "opening embedded googlemeet");
         
     }//GEN-LAST:event_buttonVisitGoogleMeetActionPerformed
 
     private String todaysDate(){
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Date date = new Date();
+        String tgl = dateFormat.format(date);
+        
+        return tgl;
+        
+    }
+    private String todaysDateCombined(){
+        DateFormat dateFormat = new SimpleDateFormat("ddMMyyyyhhmmss");
         Date date = new Date();
         String tgl = dateFormat.format(date);
         
@@ -2709,6 +2760,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     
     private void showExamQuestion(){
         
+        // jenis 1 : abcd
+        // jenis 2 : essay
+        // jenis 3 : ab only
+        // jenis 4 : typing
+        // jenis 5 : praktek (submit file)
+        
         labelExamQuestion.setText("No." + (currentIndexExamQuestion+1) + " : " + userCurrentExamQ[currentIndexExamQuestion].getQuestion());
         
         // if the preview 
@@ -2750,6 +2807,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 textareaExamQuestionAnswerEssay.setText("tulis jawaban disini...");
                 cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay");   
                 break;
+            case 4:
+                labelTyping.setVisible(true);
+                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay"); 
+                textareaExamQuestionAnswerEssay.setText("tunggu hingga aplikasi typing terbuka\n"+
+                      "kini mulailah mengetik kata-kata yang bermunculan.\n"+
+                      "lakukan pengetikan selama 1 menit.\n"+
+                      "jika sudah mengetik, kemudian tekan Screenshot.\n"+
+                      "pastikan score terlihat baik di layar.\n"+
+                      "dan lanjutkan ke soalan berikutnya.");
+            
+                break;
         }
     }
     
@@ -2759,6 +2827,65 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         cardLayouterMain.show(panelContentCenter, "panelExam");
     }//GEN-LAST:event_buttonExamActionPerformed
 
+    private void labelTypingMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelTypingMouseClicked
+
+        visitURL("https://fastfingers.net/typingtest/indonesian", "opening embedded typing");
+    }//GEN-LAST:event_labelTypingMouseClicked
+
+    private String createImageFileName(){
+        return todaysDateCombined()+"_screenshot.png";
+        
+    }
+    
+    private void labelScreenshotMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScreenshotMouseClicked
+
+        labelScreenshot.setIcon(loadingImage);
+        
+        try {
+            File file = new File(PathReference.getScreenshotPath(createImageFileName()));
+            BufferedImage image = new Robot().createScreenCapture(new Rectangle(panelBase.getLocationOnScreen().x, panelBase.getLocationOnScreen().y, panelBase.getWidth(), panelBase.getHeight()));
+            ImageIO.write(image, "png", file);
+        } catch (Exception ex) {
+            System.err.println("error while screenshot panel");
+        }
+        
+        setBackScreenshotIcon();
+        
+       
+        
+    }//GEN-LAST:event_labelScreenshotMouseClicked
+
+    private void labelUsernameTextMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelUsernameTextMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelUsernameTextMouseClicked
+
+    private void labelUsernameTextMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelUsernameTextMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_labelUsernameTextMouseEntered
+
+    private void setBackScreenshotIcon(){
+        
+        new java.util.Timer().schedule( 
+        new java.util.TimerTask() {
+            @Override
+            public void run() {
+               labelScreenshot.setIcon(screenshotImage);
+                if(userCurrentExamQ != null){
+                    if(userCurrentExamQ[currentIndexExamQuestion].getJenis()==4){
+                        // return back to exam page UI
+                        cardLayouterMain.show(panelContentCenter, "panelExam");
+                        labelTyping.setVisible(false);
+                        labelScreenshot.setVisible(false);
+                        labelExamQuestion.setText("Mengetik (Typing) telah usai. Silahkan melanjutkan soalan berikutnya...");
+                    }
+                }
+            }
+        }, 
+        3000 
+);
+        
+    }
+    
     private void showChangeSchedule() {
 
         String days[] = languageHelper.getDaysData("labelMonday",
@@ -2953,6 +3080,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonAttendance;
+    private javax.swing.JButton buttonBrowseFileExam;
     private javax.swing.JButton buttonContinueExam;
     private javax.swing.JButton buttonDocument;
     private javax.swing.JButton buttonExam;
@@ -3031,6 +3159,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelScheduleDay1;
     private javax.swing.JLabel labelScheduleDay2;
     private javax.swing.JLabel labelScheduleDay3;
+    private javax.swing.JLabel labelScreenshot;
     private javax.swing.JLabel labelScreenshotPayment;
     private javax.swing.JLabel labelScreenshotPaymentForm;
     private javax.swing.JLabel labelScreenshotPictureReportBugsForm;
@@ -3043,7 +3172,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelTmvIDProfile;
     private javax.swing.JLabel labelTmvPassProfile;
     private javax.swing.JLabel labelTotalSessionCompleted;
+    private javax.swing.JLabel labelTyping;
     private javax.swing.JLabel labelUsernameProfile;
+    private javax.swing.JLabel labelUsernameText;
     private javax.swing.JLabel labelWelcomeUser;
     private javax.swing.JLabel labelWhatsappProfile;
     private javax.swing.JLabel labelYouRegisteredTimeExam;
@@ -3516,6 +3647,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         // for the schedule hover
         textChangeHover = languageHelper.getData("labelChangeSchedule");
+        
+        // for exam UI 
+        languageHelper.apply(labelScreenshot, "labelScreenshot", Comp.LABEL);
+        languageHelper.apply(labelTyping, "labelTyping", Comp.LABEL);
+        languageHelper.apply(buttonBrowseFileExam, "buttonBrowseFileExam", Comp.BUTTON);
         
         // page of @reportbugs
         languageHelper.apply(labelCaseReportBugsForm, "labelCaseReportBugsForm", Comp.LABEL);
