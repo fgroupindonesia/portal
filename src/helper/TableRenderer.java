@@ -5,10 +5,13 @@
 package helper;
 
 import beans.Attendance;
+import beans.CertificateStudent;
+import beans.ClassRoom;
 import beans.Document;
 import beans.ExamCategory;
 import beans.ExamMultipleChoice;
 import beans.ExamQuestion;
+import beans.ExamStudentAnswer;
 import beans.Payment;
 import beans.RBugs;
 import beans.Schedule;
@@ -24,11 +27,11 @@ import javax.swing.table.DefaultTableModel;
  */
 public class TableRenderer {
 
-    public String getOptionCodeFromTable(JTable tab){
-        
+    public String getOptionCodeFromTable(JTable tab) {
+
         String ops = null;
-        
-        switch (tab.getRowCount()){
+
+        switch (tab.getRowCount()) {
             case 0:
                 ops = "A";
                 break;
@@ -42,11 +45,11 @@ public class TableRenderer {
                 ops = "D";
                 break;
         }
-        
+
         return ops;
-        
+
     }
-    
+
     public boolean isTableEmpty(JTable data) {
 
         boolean y = true;
@@ -59,22 +62,22 @@ public class TableRenderer {
 
     }
 
-    public String [] collectExamQuestionOpsUsed(JTable dataTableIn, int columnPost){
-        
+    public String[] collectExamQuestionOpsUsed(JTable dataTableIn, int columnPost) {
+
         DefaultTableModel model = (DefaultTableModel) dataTableIn.getModel();
-        
-        String collectedData [] = new String[dataTableIn.getRowCount()];
-        
-        for(int x = 0; x<dataTableIn.getRowCount(); x++){
+
+        String collectedData[] = new String[dataTableIn.getRowCount()];
+
+        for (int x = 0; x < dataTableIn.getRowCount(); x++) {
             Object dat = model.getValueAt(x, columnPost);
             collectedData[x] = dat.toString();
-            
+
         }
-        
+
         return collectedData;
-        
+
     }
-    
+
     public String getValueWithID(JTable el, int anID, int columnID, int columnWanted) {
 
         DefaultTableModel model = (DefaultTableModel) el.getModel();
@@ -86,18 +89,40 @@ public class TableRenderer {
             Object dat = model.getValueAt(x, columnID);
 
             if (dat != null) {
-                if(dat.toString().equalsIgnoreCase(""+anID)){
+                if (dat.toString().equalsIgnoreCase("" + anID)) {
                     yourValue = model.getValueAt(x, columnWanted).toString();
                     break;
                 }
             }
 
         }
-        
+
         return yourValue;
 
     }
-    
+    public String getValueWithText(JTable el, String aValue, int columnID, int columnWanted) {
+
+        DefaultTableModel model = (DefaultTableModel) el.getModel();
+
+        int totalRow = model.getRowCount();
+        String yourValue = null;
+        for (int x = 0; x < totalRow; x++) {
+            // the targeted column is exist here
+            Object dat = model.getValueAt(x, columnID);
+
+            if (dat != null) {
+                if (dat.toString().equalsIgnoreCase(aValue)) {
+                    yourValue = model.getValueAt(x, columnWanted).toString();
+                    break;
+                }
+            }
+
+        }
+
+        return yourValue;
+
+    }
+
     public String getValueWithParameter(JTable el, String param, int columnParam, int columnWanted) {
 
         DefaultTableModel model = (DefaultTableModel) el.getModel();
@@ -109,14 +134,14 @@ public class TableRenderer {
             Object dat = model.getValueAt(x, columnParam);
 
             if (dat != null) {
-                if(dat.toString().equalsIgnoreCase(param)){
+                if (dat.toString().equalsIgnoreCase(param)) {
                     yourValue = model.getValueAt(x, columnWanted).toString();
                     break;
                 }
             }
 
         }
-        
+
         return yourValue;
 
     }
@@ -239,8 +264,60 @@ public class TableRenderer {
         }
 
     }
-    
-    public void renderExamMultipleChoices(JTable el, ArrayList <ExamMultipleChoice> dataCome) {
+
+    public void render(JTable el, CertificateStudent[] dataCome) {
+
+        DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
+
+        tableModel.setRowCount(0);
+
+        for (CertificateStudent d : dataCome) {
+
+            String stat = null;
+
+            if (d.getStatus() == 1) {
+                stat = "released";
+            } else {
+                stat = "waiting";
+            }
+
+            Object[] dataBaru = new Object[]{
+                false,
+                d.getId(),
+                d.getStudent_username(),
+                d.getExam_category_title(),
+                stat,
+                d.getFilename(),
+                d.getExam_date_created()
+            };
+            tableModel.addRow(dataBaru);
+        }
+
+    }
+
+    public void render(JTable el, ExamStudentAnswer[] dataCome) {
+
+        DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
+
+        tableModel.setRowCount(0);
+
+        for (ExamStudentAnswer d : dataCome) {
+            Object[] dataBaru = new Object[]{
+                false,
+                d.getId(),
+                d.getStudent_username(),
+                UIEffect.decodeSafe(d.getAnswer()),
+                d.getScore_earned(),
+                d.getStatus(),
+                d.getDate_created()
+            };
+
+            tableModel.addRow(dataBaru);
+        }
+
+    }
+
+    public void renderExamMultipleChoices(JTable el, ArrayList<ExamMultipleChoice> dataCome) {
 
         DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
 
@@ -265,12 +342,10 @@ public class TableRenderer {
         tableModel.setRowCount(0);
 
         String jenisQ = null;
-        
-        
-        
+
         for (ExamQuestion d : dataCome) {
-            
-            switch(d.getJenis()){
+
+            switch (d.getJenis()) {
                 case 1:
                     jenisQ = "ABCD";
                     break;
@@ -280,9 +355,9 @@ public class TableRenderer {
                 case 3:
                     jenisQ = "AB";
                     break;
-                    
+
             }
-            
+
             Object[] dataBaru = new Object[]{
                 false,
                 d.getId(),
@@ -350,6 +425,28 @@ public class TableRenderer {
                 d.getScreenshot(),
                 d.getDate_created()
             };
+            tableModel.addRow(dataBaru);
+        }
+
+    }
+
+    public void render(JTable el, ClassRoom[] dataCome) {
+
+        DefaultTableModel tableModel = (DefaultTableModel) el.getModel();
+
+        tableModel.setRowCount(0);
+
+        for (ClassRoom d : dataCome) {
+            Object[] dataBaru = new Object[]{
+                false,
+                d.getId(),
+                d.getName(),
+                d.getDescription(),
+                d.getInstructor_id(),
+                d.getInstructor_name(),
+                d.getDate_created()
+            };
+            
             tableModel.addRow(dataBaru);
         }
 

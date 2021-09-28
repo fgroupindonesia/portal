@@ -15,6 +15,7 @@ public class PathReference {
     public static String ToolsDirName = DirName + "\\tools";
     public static String LanguagesDirName = DirName + "\\languages";
     public static String DocumentDirName = DirName + "\\documents";
+    public static String CertificateDirName = DirName + "\\certificates";
     public static String BugsReportedDirName = DirName + "\\bugs";
     public static String ScreenshotPaymentDirName = DirName + "\\screenshots";
     public static String JXBrowserDirName = DirName + "\\jxbrowser";
@@ -26,12 +27,16 @@ public class PathReference {
     public static String SignaturePath = DirName + "\\signature.jpg";
     public static String ScreenshotPaymentPath = DirName + "\\screenshot_payment.jpg";
     public static String DocumentFilePath = DocumentDirName + "\\some.pdf";
+    public static String CertificateFilePath = CertificateDirName + "\\some.pdf";
 
     public static void setExamQuestionPreviewFileName(String name) {
         ExamQuestionPreviewPath = DirName + "\\" + name;
     }
     public static void setPropicFileName(String name) {
         UserPropicPath = DirName + "\\" + name;
+    }
+    public static void setCertificateFileName(String name) {
+        CertificateFilePath = CertificateDirName + "\\" + name;
     }
 
     public static void setSignatureFileName(String name) {
@@ -48,6 +53,9 @@ public class PathReference {
 
     public static String getDocumentPath(String fname) {
         return DocumentDirName + "\\" + fname;
+    }
+    public static String getCertificatePath(String fname) {
+        return CertificateDirName + "\\" + fname;
     }
 
     public static String getScreenshotPath(String fname) {

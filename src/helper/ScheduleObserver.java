@@ -14,7 +14,9 @@ import java.util.Date;
  */
 public class ScheduleObserver {
 
-    String dayOrder[] = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
+    String dayENOrder[] = {"sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
+    String dayIDOrder[] = {"ahad", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu"};
+
     int indexFound = -1;
     int manyDays = 0;
     String timeSet;
@@ -29,6 +31,40 @@ public class ScheduleObserver {
     SimpleDateFormat dayOnlyformatter = new SimpleDateFormat("EEEE");
 
     public ScheduleObserver() {
+
+    }
+
+    public String getDay(String dayIn, String formatDestinationCode) {
+
+        String result = null;
+
+        if (formatDestinationCode.equalsIgnoreCase("en")) {
+            // to english
+            result = find(dayIn, dayIDOrder, dayENOrder);
+        } else {
+
+            // to indonesian
+            result = find(dayIn, dayENOrder, dayIDOrder);
+        }
+
+        return result;
+
+    }
+
+    private String find(String dayLook, String[] dataSource, String[] dataMatched) {
+        String res = null;
+        int i = 0;
+        for (String hari : dataSource) {
+
+            if (hari.equalsIgnoreCase(dayLook)) {
+                res = dataMatched[i];
+                break;
+            }
+
+            i++;
+        }
+
+        return res;
 
     }
 
@@ -69,7 +105,7 @@ public class ScheduleObserver {
         int val = -1;
         indexFound = -1;
         // search once more
-        for (String name : dayOrder) {
+        for (String name : dayENOrder) {
             indexFound++;
             if (name.equalsIgnoreCase(dayFind)) {
                 val = indexFound;

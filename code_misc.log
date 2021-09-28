@@ -53,3 +53,21 @@
             deleteExamCategory(dataExam);
             showLoadingStatus();
         }
+
+// CANCEL
+
+        // clear all from ArrayList
+        isiSubCategory.clear();
+
+        cardLayoutEntity.show(panelExamCategory, "panelExamCategoryManagement");
+        labelBackToHome.setVisible(true);
+		
+// OK
+
+        // ## save everything but in the following order
+        // first the exam category
+        // second is the exam sub category
+
+        // ## Save UI Form
+        cardLayoutEntity.show(panelExamCategory, "panelExamCategoryManagement");
+        saveExamCategory();

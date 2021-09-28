@@ -166,8 +166,22 @@ public class HttpCall {
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
+                    conn.setRequestProperty("Acceptcharset", "en-us");
+                    conn.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+                    conn.setRequestProperty("charset", "EN-US");
+                    conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
                     conn.setDoOutput(true);
-                    conn.getOutputStream().write(postDataBytes);
+                    conn.setDoInput(true);
+
+                    conn.connect();
+
+                    DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
+                    wr.write(postDataBytes);
+                    wr.flush();
+                    wr.close();
+
+                    int responseCode = conn.getResponseCode();
+                    //conn.getOutputStream().write(postDataBytes);
 
                 } else if (modeCall == METHOD_POST_FILE) {
 
@@ -189,7 +203,7 @@ public class HttpCall {
                             request.writeBytes("Content-Disposition: form-data; name=\"" + fd.getKey() + "\"" + CRLF);
                             request.writeBytes("Content-Type: text/plain; charset=UTF-8" + CRLF);
                             request.writeBytes(CRLF);
-                            request.writeBytes(URLDecoder.decode(fd.getValue(),"UTF-8") + CRLF);
+                            request.writeBytes(URLDecoder.decode(fd.getValue(), "UTF-8") + CRLF);
                             request.flush();
 
                         }
@@ -236,7 +250,7 @@ public class HttpCall {
                 }
 
             }
-            // is this want to be writable?
+
             if (isWriteToDisk()) {
                 System.out.println("----- We got file to be downloaded! -----");
 
@@ -248,17 +262,19 @@ public class HttpCall {
                 } else if (urlTarget.contains(WebReference.PREVIEW_EXAM)) {
                     PathReference.setExamQuestionPreviewFileName(getData("preview"));
                     fileName = PathReference.ExamQuestionPreviewPath;
-                }else if (urlTarget.contains(WebReference.PICTURE_USER)) {
+                } else if (urlTarget.contains(WebReference.PICTURE_USER)) {
                     PathReference.setPropicFileName(getData("propic"));
                     fileName = PathReference.UserPropicPath;
-                }else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT)) {
+                } else if (urlTarget.contains(WebReference.SCREENSHOT_PAYMENT)) {
                     PathReference.setScreenshotPaymentFileName(getData("screenshot"));
                     fileName = PathReference.ScreenshotPaymentPath;
-                }else if (urlTarget.contains(WebReference.DOWNLOAD_TOOLS)) {
+                } else if (urlTarget.contains(WebReference.DOWNLOAD_TOOLS)) {
                     fileName = PathReference.TeamviewerPath;
-                }else if (urlTarget.contains(WebReference.SCREENSHOT_REPORT_BUGS)) {
+                } else if (urlTarget.contains(WebReference.SCREENSHOT_REPORT_BUGS)) {
                     fileName = PathReference.getScreenshotBugsReportedPath(getData("screenshot"));
-                }else {
+                } else if (urlTarget.contains(WebReference.PICTURE_CERTIFICATE_STUDENT)) {
+                    fileName = PathReference.getCertificatePath(getData("filename"));
+                } else {
                     // this is for downloading manual
                     PathReference.setDocumentFileName(getData("filename"));
                     fileName = PathReference.DocumentFilePath;

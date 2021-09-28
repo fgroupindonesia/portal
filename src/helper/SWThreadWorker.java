@@ -241,6 +241,56 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_EXAM_SUBCATEGORY_EDIT:
                 name = "exam_subcategory_edit";
                 break;
+            case SWTKey.WORK_EXAM_STUDENT_ANS_DELETE:
+                name = "exam_student_answer_delete";
+                break;
+            case SWTKey.WORK_EXAM_STUDENT_ANS_UPDATE:
+                name = "exam_student_answer_update";
+                break;
+            case SWTKey.WORK_EXAM_STUDENT_ANS_SAVE:
+                name = "exam_student_answer_save";
+                break;
+            case SWTKey.WORK_EXAM_STUDENT_ANS_EDIT:
+                name = "exam_student_answer_edit";
+                break;
+            case SWTKey.WORK_REFRESH_EXAM_STUDENT_ANS:
+                name = "refresh_exam_student_answer";
+                break;
+            case SWTKey.WORK_REFRESH_CERTIFICATE_PICTURE:
+                name = "certificate_student_picture_refresh";
+                break;
+            case SWTKey.WORK_DELETE_CERTIFICATE_PICTURE:
+                name = "certificate_student_picture_delete";
+                break;
+            case SWTKey.WORK_CERTIFICATE_STUDENT_DELETE:
+                name = "certificate_student_delete";
+                break;
+            case SWTKey.WORK_CERTIFICATE_STUDENT_UPDATE:
+                name = "certificate_student_update";
+                break;
+            case SWTKey.WORK_CERTIFICATE_STUDENT_SAVE:
+                name = "certificate_student_save";
+                break;
+            case SWTKey.WORK_CERTIFICATE_STUDENT_EDIT:
+                name = "certificate_student_edit";
+                break;
+            case SWTKey.WORK_REFRESH_CERTIFICATE_STUDENT:
+                name = "refresh_certificate_student";
+                break;
+          
+            case SWTKey.WORK_CLASSROOM_DELETE:
+                name = "classroom_delete";
+                break;
+            case SWTKey.WORK_CLASSROOM_UPDATE:
+                name = "classroom_update";
+                break;
+            case SWTKey.WORK_CLASSROOM_SAVE:
+                name = "classroom_save";
+                break;
+            case SWTKey.WORK_CLASSROOM_EDIT:
+                name = "classroom_edit";
+                break;
+           
             case SWTKey.WORK_LOGIN:
                 name = "login";
                 break;
@@ -254,7 +304,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     @Override
     protected Object doInBackground() throws Exception {
 
-        System.out.println("I am working on " + whatWorkAsString());
+        System.out.println("I am working on " + whatWork() + " as " + whatWorkAsString());
 
         switch (whatWork()) {
             case SWTKey.WORK_REMOTE_LOGIN_ACTIVATE:
@@ -425,6 +475,54 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_EXAM_QUESTION_EDIT:
                 examQuestionEdit();
                 break;
+            case SWTKey.WORK_REFRESH_EXAM_STUDENT_ANS:
+                refreshExamStudentAnswer();
+                break;
+            case SWTKey.WORK_EXAM_STUDENT_ANS_DELETE:
+                examStudentAnswerDelete();
+                break;
+            case SWTKey.WORK_EXAM_STUDENT_ANS_UPDATE:
+                examStudentAnswerUpdate();
+                break;
+            case SWTKey.WORK_EXAM_STUDENT_ANS_SAVE:
+                examStudentAnswerSave();
+                break;
+            case SWTKey.WORK_EXAM_STUDENT_ANS_EDIT:
+                examStudentAnswerEdit();
+                break;
+            case SWTKey.WORK_CLASSROOM_DELETE:
+                classRoomDelete();
+                break;
+            case SWTKey.WORK_CLASSROOM_UPDATE:
+                classRoomUpdate();
+                break;
+            case SWTKey.WORK_CLASSROOM_SAVE:
+                classRoomSave();
+                break;
+            case SWTKey.WORK_CLASSROOM_EDIT:
+                classRoomEdit();
+                break;
+            case SWTKey.WORK_REFRESH_CERTIFICATE_PICTURE:
+                certificatePictureDownload();
+                break;
+            case SWTKey.WORK_DELETE_CERTIFICATE_PICTURE:
+                certificatePictureDelete();
+                break;
+            case SWTKey.WORK_REFRESH_CERTIFICATE_STUDENT:
+                refreshCertificateStudent();
+                break;
+            case SWTKey.WORK_CERTIFICATE_STUDENT_DELETE:
+                certificateStudentDelete();
+                break;
+            case SWTKey.WORK_CERTIFICATE_STUDENT_UPDATE:
+                certificateStudentUpdate();
+                break;
+            case SWTKey.WORK_CERTIFICATE_STUDENT_SAVE:
+                certificateStudentSave();
+                break;
+            case SWTKey.WORK_CERTIFICATE_STUDENT_EDIT:
+                certificateStudentEdit();
+                break;
             case SWTKey.WORK_REFRESH_EXAM_CATEGORY:
                 refreshExamCategoryData();
                 break;
@@ -474,7 +572,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
         }
 
-        System.out.println("SWThreadWorker is done! " + whatWorkAsString());
+        System.out.println("SWThreadWorker is done! " + whatWork() + " " + whatWorkAsString());
     }
 
     Browser browser;
@@ -582,13 +680,21 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         String urlManual = UIEffect.decodeSafe(urlExecutor.getData("url"));
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
     }
-    
+
     private void examPreviewDownload() {
 
         // the url is manually defined here
         String urlManual = WebReference.PREVIEW_EXAM + "?preview=" + urlExecutor.getData("preview");
         urlExecutor.start(urlManual, HttpCall.METHOD_GET);
-        
+
+    }
+
+    private void certificatePictureDownload() {
+
+        // the url is manually defined here
+        String urlManual = WebReference.PICTURE_CERTIFICATE_STUDENT + "?filename=" + urlExecutor.getData("filename");
+        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+
     }
 
     private void documentSave() {
@@ -626,6 +732,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     // this is for user picture
     private void pictureDelete() {
         urlExecutor.start(WebReference.DELETE_PICTURE_USER, HttpCall.METHOD_POST);
+    }
+
+    private void certificatePictureDelete() {
+        urlExecutor.start(WebReference.DELETE_PICTURE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
     }
 
     // this is for exam preview 
@@ -728,6 +838,18 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.DELETE_EXAM_QUESTION, HttpCall.METHOD_POST);
     }
 
+    private void examStudentAnswerDelete() {
+        urlExecutor.start(WebReference.DELETE_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+    }
+
+    private void certificateStudentDelete() {
+        urlExecutor.start(WebReference.DELETE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
+    }
+
+    private void classRoomDelete() {
+        urlExecutor.start(WebReference.DELETE_CLASSROOM, HttpCall.METHOD_POST);
+    }
+    
     private void examCategoryDelete() {
         urlExecutor.start(WebReference.DELETE_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
@@ -751,6 +873,24 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void examCategorySave() {
         urlExecutor.start(WebReference.ADD_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
+    
+    private void classRoomSave() {
+        urlExecutor.start(WebReference.ADD_CLASSROOM, HttpCall.METHOD_POST);
+    }
+
+    private void certificateStudentSave() {
+
+        if (hasFile()) {
+            urlExecutor.start(WebReference.ADD_CERTIFICATE_STUDENT, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.ADD_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
+        }
+
+    }
+
+    private void examStudentAnswerSave() {
+        urlExecutor.start(WebReference.ADD_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+    }
 
     private void examQuestionSave() {
         if (hasFile()) {
@@ -761,16 +901,43 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     }
 
+    private void examStudentAnswerEdit() {
+        urlExecutor.start(WebReference.DETAIL_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+    }
+
+    private void classRoomEdit() {
+        urlExecutor.start(WebReference.DETAIL_CLASSROOM, HttpCall.METHOD_POST);
+    }
     private void examCategoryEdit() {
         urlExecutor.start(WebReference.DETAIL_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+
+    private void certificateStudentEdit() {
+        urlExecutor.start(WebReference.DETAIL_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
     }
 
     private void examQuestionEdit() {
         urlExecutor.start(WebReference.DETAIL_EXAM_QUESTION, HttpCall.METHOD_POST);
     }
 
+    private void examStudentAnswerUpdate() {
+        urlExecutor.start(WebReference.UPDATE_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+    }
+
     private void examCategoryUpdate() {
         urlExecutor.start(WebReference.UPDATE_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+    private void classRoomUpdate() {
+        urlExecutor.start(WebReference.UPDATE_CLASSROOM, HttpCall.METHOD_POST);
+    }
+
+    private void certificateStudentUpdate() {
+      
+         if (hasFile()) {
+            urlExecutor.start(WebReference.UPDATE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.UPDATE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
+        }
     }
 
     private void examQuestionUpdate() {
@@ -858,8 +1025,16 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
         urlExecutor.start(WebReference.ALL_EXAM_QUESTION, HttpCall.METHOD_POST);
     }
 
+    private void refreshExamStudentAnswer() {
+        urlExecutor.start(WebReference.ALL_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+    }
+
     private void refreshExamCategoryData() {
         urlExecutor.start(WebReference.ALL_EXAM_CATEGORY, HttpCall.METHOD_POST);
+    }
+
+    private void refreshCertificateStudent() {
+        urlExecutor.start(WebReference.ALL_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
     }
 
     private void refreshExamSubCategoryData() {

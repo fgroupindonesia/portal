@@ -14,6 +14,7 @@ public class Schedule {
         private String day_schedule;
         private String class_registered;
         private String username;
+        private boolean exam;
 
     /**
      * @return the id
@@ -83,5 +84,19 @@ public class Schedule {
      */
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    /**
+     * @return the exam
+     */
+    public boolean isExam() {
+        return exam;
+    }
+
+    /**
+     * @param exam the exam to set
+     */
+    public void setExam(boolean exam) {
+        this.exam = exam;
     }
 }

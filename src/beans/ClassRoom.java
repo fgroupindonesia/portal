@@ -11,6 +11,7 @@ package beans;
 public class ClassRoom {
     private int id;
     private int instructor_id;            
+    private String instructor_name;            
     private String name;
     private String description;
     private String date_created;
@@ -83,5 +84,19 @@ public class ClassRoom {
      */
     public void setDate_created(String date_created) {
         this.date_created = date_created;
+    }
+
+    /**
+     * @return the instructor_name
+     */
+    public String getInstructor_name() {
+        return instructor_name;
+    }
+
+    /**
+     * @param instructor_name the instructor_name to set
+     */
+    public void setInstructor_name(String instructor_name) {
+        this.instructor_name = instructor_name;
     }
 }

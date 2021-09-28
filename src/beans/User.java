@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 public class User {
     
     private int id;
+    private int access_level;
     private String username;
     private String pass;
     private String email;
@@ -175,6 +176,20 @@ public class User {
      */
     public void setTmv_id(String tmv_id) {
         this.tmv_id = tmv_id;
+    }
+
+    /**
+     * @return the access_level
+     */
+    public int getAccess_level() {
+        return access_level;
+    }
+
+    /**
+     * @param access_level the access_level to set
+     */
+    public void setAccess_level(int access_level) {
+        this.access_level = access_level;
     }
     
 }

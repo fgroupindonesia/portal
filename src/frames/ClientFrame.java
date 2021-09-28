@@ -109,6 +109,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void processNicely() {
         initComponents();
 
+        // hide time interval for first time
+        labelTimeIntervalSchedule.setVisible(false);
+        
         // hide the functions that are still under consideration
         hideNotifLimitReach();
 
@@ -360,6 +363,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         radioButtonGroupNotifClass = new javax.swing.ButtonGroup();
         radioButtonGroupNotifSessionLimit = new javax.swing.ButtonGroup();
         fileChooser = new javax.swing.JFileChooser();
+        radioButtonGroupMultipleChoiceExam = new javax.swing.ButtonGroup();
         panelBase = new javax.swing.JPanel();
         panelHeader = new javax.swing.JPanel();
         labelClose = new javax.swing.JLabel();
@@ -374,6 +378,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonTools = new javax.swing.JButton();
         buttonDocument = new javax.swing.JButton();
         buttonAttendance = new javax.swing.JButton();
+        buttonExam = new javax.swing.JButton();
         buttonPayment = new javax.swing.JButton();
         buttonSettings = new javax.swing.JButton();
         buttonLogout = new javax.swing.JButton();
@@ -441,6 +446,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonVisitChrome = new javax.swing.JButton();
         jLabel18 = new javax.swing.JLabel();
         buttonVisitWhatsapp = new javax.swing.JButton();
+        jLabel19 = new javax.swing.JLabel();
+        buttonVisitGoogleMeet = new javax.swing.JButton();
         panelPayment = new javax.swing.JPanel();
         panelPaymentForm = new javax.swing.JPanel();
         labelPaymentForm = new javax.swing.JLabel();
@@ -492,11 +499,32 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         textfieldCaseReportBugsForm = new javax.swing.JTextField();
         jScrollPane5 = new javax.swing.JScrollPane();
         textareaDescriptionReportBugsForm = new javax.swing.JTextArea();
+        panelExam = new javax.swing.JPanel();
+        buttonContinueExam = new javax.swing.JButton();
+        panelExamInner = new javax.swing.JPanel();
+        panelWelcomeExam = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        labelYouRegisteredTimeExam = new javax.swing.JLabel();
+        labelCongratulationUserExam = new javax.swing.JLabel();
+        labelYouRegisteredTitleExam = new javax.swing.JLabel();
+        panelQuestionExam = new javax.swing.JPanel();
+        jLabel9 = new javax.swing.JLabel();
+        panelInnerQuestionExam = new javax.swing.JPanel();
+        panelInnerMultipleChoiceExam = new javax.swing.JPanel();
+        radioButtonChoiceBMultipleChoice = new javax.swing.JRadioButton();
+        radioButtonChoiceAMultipleChoice = new javax.swing.JRadioButton();
+        radioButtonChoiceDMultipleChoice = new javax.swing.JRadioButton();
+        radioButtonChoiceCMultipleChoice = new javax.swing.JRadioButton();
+        panelInnerEssayExam = new javax.swing.JPanel();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jLabel7 = new javax.swing.JLabel();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
         labelNavHome = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Portal Access - FGroupIndonesia");
         setUndecorated(true);
         setPreferredSize(new java.awt.Dimension(800, 500));
 
@@ -621,6 +649,15 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             }
         });
         panelMenu.add(buttonAttendance);
+
+        buttonExam.setText("Exam");
+        buttonExam.setPreferredSize(new java.awt.Dimension(120, 23));
+        buttonExam.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonExamActionPerformed(evt);
+            }
+        });
+        panelMenu.add(buttonExam);
 
         buttonPayment.setText("Payment");
         buttonPayment.setPreferredSize(new java.awt.Dimension(120, 23));
@@ -761,7 +798,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelHistory.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createTitledBorder("History"), javax.swing.BorderFactory.createEmptyBorder(1, 5, 1, 5)));
         panelHistory.setLayout(new java.awt.CardLayout());
 
-        panelHistoryNone.setBorder(null);
         panelHistoryNone.setLayout(new java.awt.BorderLayout());
 
         jLabel1.setFont(new java.awt.Font("sansserif", 1, 12)); // NOI18N
@@ -772,13 +808,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelHistory.add(panelHistoryNone, "panelHistoryNone");
 
-        panelHistoryFound.setBorder(null);
         panelHistoryFound.setLayout(new java.awt.BorderLayout());
 
         jScrollPane6.setBorder(null);
         jScrollPane6.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 
-        jPanel1.setBorder(null);
         jPanel1.setLayout(new java.awt.GridLayout(0, 1, 100, 0));
 
         labelHistoryLast1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
@@ -1037,6 +1071,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             }
         });
         panelTools.add(buttonVisitWhatsapp, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 70, 130, -1));
+
+        jLabel19.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel19.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/googlemeet.png"))); // NOI18N
+        jLabel19.setText("Google Meet");
+        jLabel19.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel19.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        panelTools.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 200, 90, 100));
+
+        buttonVisitGoogleMeet.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/play.png"))); // NOI18N
+        buttonVisitGoogleMeet.setText("Open Now");
+        buttonVisitGoogleMeet.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        buttonVisitGoogleMeet.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonVisitGoogleMeetActionPerformed(evt);
+            }
+        });
+        panelTools.add(buttonVisitGoogleMeet, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 210, 130, -1));
 
         panelContentCenter.add(panelTools, "panelTools");
 
@@ -1534,6 +1585,84 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelContentCenter.add(panelReportBugs, "panelReportBugs");
 
+        panelExam.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        buttonContinueExam.setText("Continue");
+        buttonContinueExam.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonContinueExamActionPerformed(evt);
+            }
+        });
+        panelExam.add(buttonContinueExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 340, 80, 30));
+
+        panelExamInner.setLayout(new java.awt.CardLayout());
+
+        panelWelcomeExam.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/exam72.png"))); // NOI18N
+        panelWelcomeExam.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, 100, 130));
+
+        labelYouRegisteredTimeExam.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        labelYouRegisteredTimeExam.setText("Started at : xxx");
+        panelWelcomeExam.add(labelYouRegisteredTimeExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 130, 380, 38));
+
+        labelCongratulationUserExam.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        labelCongratulationUserExam.setText("Congratulation, xxx !");
+        panelWelcomeExam.add(labelCongratulationUserExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(33, 22, 211, 38));
+
+        labelYouRegisteredTitleExam.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        labelYouRegisteredTitleExam.setText("You're are registered for ABCD exam");
+        panelWelcomeExam.add(labelYouRegisteredTitleExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 80, 380, 38));
+
+        panelExamInner.add(panelWelcomeExam, "panelWelcomeExam");
+
+        panelQuestionExam.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel9.setText("No.1 : lorem pisum direpisumm orem pisum");
+        panelQuestionExam.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 600, 38));
+
+        panelInnerQuestionExam.setLayout(new java.awt.CardLayout());
+
+        panelInnerMultipleChoiceExam.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        radioButtonChoiceBMultipleChoice.setText("B. option...");
+        panelInnerMultipleChoiceExam.add(radioButtonChoiceBMultipleChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 50, 330, -1));
+
+        radioButtonChoiceAMultipleChoice.setText("A. option...");
+        panelInnerMultipleChoiceExam.add(radioButtonChoiceAMultipleChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 19, 330, -1));
+
+        radioButtonChoiceDMultipleChoice.setText("D. option...");
+        panelInnerMultipleChoiceExam.add(radioButtonChoiceDMultipleChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 110, 330, -1));
+
+        radioButtonChoiceCMultipleChoice.setText("C. option...");
+        panelInnerMultipleChoiceExam.add(radioButtonChoiceCMultipleChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(14, 80, 330, -1));
+
+        panelInnerQuestionExam.add(panelInnerMultipleChoiceExam, "panelMultipleChoice");
+
+        panelInnerEssayExam.setLayout(new java.awt.BorderLayout());
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane7.setViewportView(jTextArea1);
+
+        panelInnerEssayExam.add(jScrollPane7, java.awt.BorderLayout.CENTER);
+
+        panelInnerQuestionExam.add(panelInnerEssayExam, "panelEssay");
+
+        panelQuestionExam.add(panelInnerQuestionExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 360, 210));
+
+        jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel7.setText("preview");
+        jLabel7.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        panelQuestionExam.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 70, 260, 220));
+
+        panelExamInner.add(panelQuestionExam, "panelQuestionExam");
+
+        panelExam.add(panelExamInner, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 650, 300));
+
+        panelContentCenter.add(panelExam, "panelExam");
+
         panelCenter.add(panelContentCenter, java.awt.BorderLayout.CENTER);
 
         panelHeaderCenter.setPreferredSize(new java.awt.Dimension(574, 50));
@@ -1558,7 +1687,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 .addComponent(labelNavHome)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(labelPanelViewName, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(1109, Short.MAX_VALUE))
+                .addContainerGap(1165, Short.MAX_VALUE))
         );
         panelHeaderCenterLayout.setVerticalGroup(
             panelHeaderCenterLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2374,6 +2503,26 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         showChangeSchedule();
     }//GEN-LAST:event_labelScheduleDay3MouseClicked
 
+    private void buttonVisitGoogleMeetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitGoogleMeetActionPerformed
+
+        browser.loadURL("http://meet.google.com");
+
+        cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+
+        saveHistory("opening embedded google meet");
+        
+    }//GEN-LAST:event_buttonVisitGoogleMeetActionPerformed
+
+    private void buttonContinueExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonContinueExamActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_buttonContinueExamActionPerformed
+
+    private void buttonExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExamActionPerformed
+        //labelPanelViewName.setText("<< Attendance");
+        languageHelper.apply(labelPanelViewName, "labelPanelViewNameExam", Comp.LABEL);
+        cardLayouterMain.show(panelContentCenter, "panelExam");
+    }//GEN-LAST:event_buttonExamActionPerformed
+
     private void showChangeSchedule() {
 
         String days[] = languageHelper.getDaysData("labelMonday",
@@ -2552,7 +2701,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttonAttendance;
+    private javax.swing.JButton buttonContinueExam;
     private javax.swing.JButton buttonDocument;
+    private javax.swing.JButton buttonExam;
     private javax.swing.JButton buttonLogout;
     private javax.swing.JButton buttonPayment;
     private javax.swing.JButton buttonProfile;
@@ -2565,6 +2716,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JButton buttonTerminateTmv;
     private javax.swing.JButton buttonTools;
     private javax.swing.JButton buttonVisitChrome;
+    private javax.swing.JButton buttonVisitGoogleMeet;
     private javax.swing.JButton buttonVisitWhatsapp;
     private javax.swing.JCheckBox checkboxAutoupdateToolsSettings;
     private javax.swing.JComboBox<String> combobocMethodPayment;
@@ -2574,7 +2726,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -2582,6 +2738,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
+    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JLabel labelAddPayment;
     private javax.swing.JLabel labelAddressProfile;
     private javax.swing.JLabel labelAmountPaymentForm;
@@ -2590,6 +2748,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelCaseReportBugsForm;
     private javax.swing.JLabel labelClassRegistered;
     private javax.swing.JLabel labelClose;
+    private javax.swing.JLabel labelCongratulationUserExam;
     private javax.swing.JLabel labelDescReportBugsForm;
     private javax.swing.JLabel labelDownloadDocument;
     private javax.swing.JLabel labelEmailProfile;
@@ -2636,6 +2795,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelUsernameProfile;
     private javax.swing.JLabel labelWelcomeUser;
     private javax.swing.JLabel labelWhatsappProfile;
+    private javax.swing.JLabel labelYouRegisteredTimeExam;
+    private javax.swing.JLabel labelYouRegisteredTitleExam;
     private javax.swing.JPanel panelAttandanceAll;
     private javax.swing.JPanel panelAttandanceContent;
     private javax.swing.JPanel panelAttandanceStatistic;
@@ -2651,6 +2812,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JPanel panelDocument;
     private javax.swing.JPanel panelDocumentContent;
     private javax.swing.JPanel panelDocumentData;
+    private javax.swing.JPanel panelExam;
+    private javax.swing.JPanel panelExamInner;
     private javax.swing.JPanel panelHeader;
     private javax.swing.JPanel panelHeaderCenter;
     private javax.swing.JPanel panelHistory;
@@ -2658,18 +2821,28 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JPanel panelHistoryNone;
     private javax.swing.JPanel panelHome;
     private javax.swing.JPanel panelInnerBrowser;
+    private javax.swing.JPanel panelInnerEssayExam;
+    private javax.swing.JPanel panelInnerMultipleChoiceExam;
+    private javax.swing.JPanel panelInnerQuestionExam;
     private javax.swing.JPanel panelMenu;
     private javax.swing.JPanel panelPayment;
     private javax.swing.JPanel panelPaymentData;
     private javax.swing.JPanel panelPaymentForm;
     private javax.swing.JPanel panelPaymentTable;
     private javax.swing.JPanel panelProfile;
+    private javax.swing.JPanel panelQuestionExam;
     private javax.swing.JPanel panelReportBugs;
     private javax.swing.JPanel panelSchedule;
     private javax.swing.JPanel panelSettings;
     private javax.swing.JPanel panelTools;
+    private javax.swing.JPanel panelWelcomeExam;
     private javax.swing.JProgressBar progressBarDownload;
     private javax.swing.JProgressBar progressBarTotalSession;
+    private javax.swing.JRadioButton radioButtonChoiceAMultipleChoice;
+    private javax.swing.JRadioButton radioButtonChoiceBMultipleChoice;
+    private javax.swing.JRadioButton radioButtonChoiceCMultipleChoice;
+    private javax.swing.JRadioButton radioButtonChoiceDMultipleChoice;
+    private javax.swing.ButtonGroup radioButtonGroupMultipleChoiceExam;
     private javax.swing.ButtonGroup radioButtonGroupNotifClass;
     private javax.swing.ButtonGroup radioButtonGroupNotifSessionLimit;
     private javax.swing.JRadioButton radioNotifClass1DaySettings;
@@ -2691,6 +2864,33 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JTextField textfieldWhatsappProfile;
     // End of variables declaration//GEN-END:variables
 
+    private boolean isScheduledForExam(Schedule [] dataIn){
+        
+        boolean foundExam = false;
+        
+        for(Schedule singleOne : dataIn){
+            if(singleOne.isExam()){
+                foundExam = true;
+                break;
+            }
+        }
+        
+        return foundExam;
+        
+    }
+    
+    private Schedule getExamOnly(Schedule [] dataIn){
+        Schedule dataObtained = null; 
+        for(Schedule singleOne : dataIn){
+            if(singleOne.isExam()){
+                dataObtained = singleOne;
+                break;
+            }
+        }
+        
+        return dataObtained;
+    }
+    
     private void hideScheduleLabels() {
         //labelScheduleDay1.setVisible(false);
         labelScheduleDay2.setVisible(false);
@@ -2882,6 +3082,29 @@ dataIn = objectG.fromJson(innerData, User.class
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
                 Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
 
+                if(isScheduledForExam(dataIn)){
+                    // activate the Button Menu & the text welcome (exam)
+                    Schedule dataSchedExam = getExamOnly(dataIn);
+                    
+                    buttonExam.setEnabled(true);
+                    labelCongratulationUserExam.setText(languageHelper.getData("labelCongratulationUserExam").replace("xxx",personLogged.getUsername()));
+                    labelYouRegisteredTitleExam.setText(languageHelper.getData("labelYouRegisteredTitleExam").replace("xxx", dataSchedExam.getClass_registered()));
+                    
+                    if(configuration.getStringValue(Keys.SYSTEM_LANGUAGE).equalsIgnoreCase("bahasa indonesia")){
+                        ScheduleObserver sched = new ScheduleObserver();
+                        String hari = sched.getDay(dataSchedExam.getDay_schedule(), "id");
+                        labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeExam").replace("xxx",  hari + ", " + dataSchedExam.getTime_schedule()));
+                    }else{
+                        labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeExam").replace("xxx", dataSchedExam.getDay_schedule() + ", " + dataSchedExam.getTime_schedule()));
+                    }
+                    
+                    
+                    
+                }else{
+                    // lock that submission
+                    buttonExam.setEnabled(false);
+                }
+                
                 ImageIcon calendarIcon = new ImageIcon(getClass().getResource("/images/calendar16.png"));
                 ImageIcon classIcon = new ImageIcon(getClass().getResource("/images/class.png"));
 
@@ -2897,6 +3120,9 @@ dataIn = objectG.fromJson(innerData, User.class
                 schedObs.setDate(schedText);
 
                 UIEffect.setFrameRef(this);
+                
+                // showing the label text
+                labelTimeIntervalSchedule.setVisible(true);
                 UIEffect.playIntervalTimeEffect(labelTimeIntervalSchedule, schedObs.getDate());
 
                 switch (dataIn.length) {
@@ -3061,6 +3287,12 @@ dataIn = objectG.fromJson(innerData, User.class
         languageHelper.apply(labelDownloadDocument, "labelDownloadDocument", Comp.LABEL);
         languageHelper.apply(labelOpenDocument, "labelOpenDocument", Comp.LABEL);
 
+        // page @exam
+        languageHelper.apply(labelCongratulationUserExam, "labelCongratulationUserExam", Comp.LABEL);
+        languageHelper.apply(labelYouRegisteredTitleExam, "labelYouRegisteredTitleExam", Comp.LABEL);
+        languageHelper.apply(labelYouRegisteredTimeExam, "labelYouRegisteredTimeExam", Comp.LABEL);
+        languageHelper.apply(buttonContinueExam, "buttonContinueExam", Comp.BUTTON);
+        
         // table for @payment
         // column order are:
         // id, username, amount, method, screenshot, date created
