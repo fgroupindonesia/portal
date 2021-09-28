@@ -24,10 +24,12 @@ import helper.WebReference;
 import helper.preferences.Keys;
 import helper.preferences.SettingPreference;
 import java.awt.CardLayout;
+import java.awt.Desktop;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.net.URL;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -77,6 +79,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         languageHelper.apply(labelUsernameLogin, "labelUsernameLogin", Comp.LABEL);
         languageHelper.apply(labelPasswordLogin, "labelPasswordLogin", Comp.LABEL);
         languageHelper.apply(labelLinkLoginPhone, "labelLinkLoginPhone", Comp.LABEL);
+        languageHelper.apply(labelLinkNewRegister, "labelLinkNewRegister", Comp.LABEL);
         languageHelper.apply(labelLinkNormalLogin, "labelLinkNormalLogin", Comp.LABEL);
         languageHelper.apply(labelCaptureQR, "labelCaptureQR", Comp.LABEL);
 
@@ -107,6 +110,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         textfieldPass = new javax.swing.JPasswordField();
         labelSpacing = new javax.swing.JLabel();
         labelLoading = new javax.swing.JLabel();
+        labelLinkNewRegister = new javax.swing.JLabel();
         panelPhoneLogin = new javax.swing.JPanel();
         labelBarcode = new javax.swing.JLabel();
         labelLinkNormalLogin = new javax.swing.JLabel();
@@ -182,15 +186,16 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         panelLogin.add(buttonLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 200, 100, 30));
 
         labelLinkLoginPhone.setForeground(new java.awt.Color(0, 102, 255));
-        labelLinkLoginPhone.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelLinkLoginPhone.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         labelLinkLoginPhone.setText("<html><u>Logging in By Phone</u></html>");
         labelLinkLoginPhone.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelLinkLoginPhone.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
         labelLinkLoginPhone.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 labelLinkLoginPhoneMouseClicked(evt);
             }
         });
-        panelLogin.add(labelLinkLoginPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 200, 170, 30));
+        panelLogin.add(labelLinkLoginPhone, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 190, 190, 20));
 
         panelHeader.setBackground(new java.awt.Color(255, 0, 0));
 
@@ -267,6 +272,18 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelLoading.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/loadingprel.gif"))); // NOI18N
         labelLoading.setText("Loading...");
         panelLogin.add(labelLoading, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 230, 220, 30));
+
+        labelLinkNewRegister.setForeground(new java.awt.Color(0, 102, 255));
+        labelLinkNewRegister.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        labelLinkNewRegister.setText("<html><u>New Register</u></html>");
+        labelLinkNewRegister.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelLinkNewRegister.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+        labelLinkNewRegister.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelLinkNewRegisterMouseClicked(evt);
+            }
+        });
+        panelLogin.add(labelLinkNewRegister, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 210, 190, 20));
 
         panelBase.add(panelLogin, "panelLogin");
 
@@ -503,6 +520,14 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         UIDragger.mouseReleased(evt);
     }//GEN-LAST:event_panelBaseMouseReleased
 
+    private void labelLinkNewRegisterMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkNewRegisterMouseClicked
+         try {
+             Desktop.getDesktop().browse(new URL("http://fgroupindonesia.com/pendaftaran").toURI());
+         } catch (Exception ex){
+             
+         }
+    }//GEN-LAST:event_labelLinkNewRegisterMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -539,6 +564,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JLabel labelCaptureQR;
     private javax.swing.JLabel labelClose;
     private javax.swing.JLabel labelLinkLoginPhone;
+    private javax.swing.JLabel labelLinkNewRegister;
     private javax.swing.JLabel labelLinkNormalLogin;
     private javax.swing.JLabel labelLoading;
     private javax.swing.JLabel labelPasswordLogin;

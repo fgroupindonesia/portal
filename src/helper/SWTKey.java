@@ -100,24 +100,25 @@ public class SWTKey {
     public static final int WORK_EXAM_QUESTION_DELETE = 64;
     public static final int WORK_EXAM_QUESTION_SAVE = 65;
     public static final int WORK_EXAM_QUESTION_UPDATE = 66;
+    public static final int WORK_EXAM_QUESTION_BY_SCHEDULE = 67;
 
-    public static final int WORK_DELETE_EXAM_QUESTION_PREVIEW = 67;
+    public static final int WORK_DELETE_EXAM_QUESTION_PREVIEW = 68;
 
-    public static final int WORK_EXAM_STUDENT_ANS_EDIT = 68;
-    public static final int WORK_EXAM_STUDENT_ANS_DELETE = 69;
-    public static final int WORK_EXAM_STUDENT_ANS_SAVE = 70;
-    public static final int WORK_EXAM_STUDENT_ANS_UPDATE = 71;
+    public static final int WORK_EXAM_STUDENT_ANS_EDIT = 69;
+    public static final int WORK_EXAM_STUDENT_ANS_DELETE = 70;
+    public static final int WORK_EXAM_STUDENT_ANS_SAVE = 71;
+    public static final int WORK_EXAM_STUDENT_ANS_UPDATE = 72;
     
-    public static final int WORK_CERTIFICATE_STUDENT_EDIT = 72;
-    public static final int WORK_CERTIFICATE_STUDENT_DELETE = 73;
-    public static final int WORK_CERTIFICATE_STUDENT_SAVE = 74;
-    public static final int WORK_CERTIFICATE_STUDENT_UPDATE = 75;
-    public static final int WORK_DELETE_CERTIFICATE_PICTURE = 76;
+    public static final int WORK_CERTIFICATE_STUDENT_EDIT = 73;
+    public static final int WORK_CERTIFICATE_STUDENT_DELETE = 74;
+    public static final int WORK_CERTIFICATE_STUDENT_SAVE = 75;
+    public static final int WORK_CERTIFICATE_STUDENT_UPDATE = 76;
+    public static final int WORK_DELETE_CERTIFICATE_PICTURE = 77;
 
-    public static final int WORK_CLASSROOM_EDIT = 77;
-    public static final int WORK_CLASSROOM_DELETE = 78;
-    public static final int WORK_CLASSROOM_SAVE = 79;
-    public static final int WORK_CLASSROOM_UPDATE = 80;
+    public static final int WORK_CLASSROOM_EDIT = 78;
+    public static final int WORK_CLASSROOM_DELETE = 79;
+    public static final int WORK_CLASSROOM_SAVE = 80;
+    public static final int WORK_CLASSROOM_UPDATE = 81;
     
     
 }

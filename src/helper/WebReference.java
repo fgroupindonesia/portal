@@ -60,6 +60,7 @@ public class WebReference {
     public static final String DELETE_EXAM_QUESTION = REMOTE + "examqa/delete";
     public static final String UPDATE_EXAM_QUESTION = REMOTE + "examqa/update";
     public static final String ADD_EXAM_QUESTION = REMOTE + "examqa/add";
+    public static final String ALL_EXAM_QUESTION_BY_SCHEDULE = REMOTE + "examqa/by/schedule";
 
     public static final String DETAIL_EXAM_CATEGORY = REMOTE + "examcategory/detail";
     public static final String DELETE_EXAM_CATEGORY = REMOTE + "examcategory/delete";

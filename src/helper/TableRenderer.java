@@ -100,6 +100,7 @@ public class TableRenderer {
         return yourValue;
 
     }
+
     public String getValueWithText(JTable el, String aValue, int columnID, int columnWanted) {
 
         DefaultTableModel model = (DefaultTableModel) el.getModel();
@@ -123,28 +124,7 @@ public class TableRenderer {
 
     }
 
-    public String getValueWithParameter(JTable el, String param, int columnParam, int columnWanted) {
-
-        DefaultTableModel model = (DefaultTableModel) el.getModel();
-
-        int totalRow = model.getRowCount();
-        String yourValue = null;
-        for (int x = 0; x < totalRow; x++) {
-            // the targeted column is exist here
-            Object dat = model.getValueAt(x, columnParam);
-
-            if (dat != null) {
-                if (dat.toString().equalsIgnoreCase(param)) {
-                    yourValue = model.getValueAt(x, columnWanted).toString();
-                    break;
-                }
-            }
-
-        }
-
-        return yourValue;
-
-    }
+  
 
     public String getSelectedRowValue(JTable el, int colFind) {
 
@@ -437,6 +417,10 @@ public class TableRenderer {
         tableModel.setRowCount(0);
 
         for (ClassRoom d : dataCome) {
+            // 1 for yes
+            // 0 for no
+            boolean ex = (d.getFor_exam() == 1) ? true : false;
+            
             Object[] dataBaru = new Object[]{
                 false,
                 d.getId(),
@@ -444,9 +428,10 @@ public class TableRenderer {
                 d.getDescription(),
                 d.getInstructor_id(),
                 d.getInstructor_name(),
-                d.getDate_created()
+                d.getDate_created(),
+                ex
             };
-            
+
             tableModel.addRow(dataBaru);
         }
 

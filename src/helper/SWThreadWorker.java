@@ -277,7 +277,6 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REFRESH_CERTIFICATE_STUDENT:
                 name = "refresh_certificate_student";
                 break;
-          
             case SWTKey.WORK_CLASSROOM_DELETE:
                 name = "classroom_delete";
                 break;
@@ -290,7 +289,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_CLASSROOM_EDIT:
                 name = "classroom_edit";
                 break;
-           
+           case SWTKey.WORK_EXAM_QUESTION_BY_SCHEDULE:
+                name = "exam_question_by_schedule";
+                break;
             case SWTKey.WORK_LOGIN:
                 name = "login";
                 break;
@@ -553,6 +554,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_EXAM_SUBCATEGORY_EDIT:
                 examSubCategoryEdit();
                 break;
+            case SWTKey.WORK_EXAM_QUESTION_BY_SCHEDULE:
+                examQuestionBySchedule();
+                break;
             case SWTKey.WORK_LOGIN:
                 userLogin();
                 break;
@@ -650,6 +654,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     private void userLogin() {
         urlExecutor.start(WebReference.LOGIN_USER, HttpCall.METHOD_POST);
+    }
+    
+    private void examQuestionBySchedule() {
+        urlExecutor.start(WebReference.ALL_EXAM_QUESTION_BY_SCHEDULE, HttpCall.METHOD_POST);
     }
 
     private void userSave() {

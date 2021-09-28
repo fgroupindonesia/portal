@@ -7,6 +7,8 @@ package frames;
 
 import beans.Attendance;
 import beans.Document;
+import beans.ExamQuestion;
+import beans.ExamStudentAnswer;
 import beans.History;
 import beans.Payment;
 import beans.Schedule;
@@ -38,8 +40,11 @@ import helper.preferences.Keys;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.io.File;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -64,8 +69,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     /**
      * Creates new form MainFrame
      */
+    
     LoginFrame loginFrame;
-    CardLayout cardLayouterMain, cardLayouterAttendance, cardLayoutHistory;
+    CardLayout cardLayouterMain, cardLayouterAttendance, cardLayoutHistory,
+            cardLayoutExam, cardLayoutExamType;
     SettingPreference configuration = new SettingPreference();
     Browser browser = null;
     TableRenderer tabRender = new TableRenderer();
@@ -75,6 +82,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     LanguageSwitcher languageHelper = new LanguageSwitcher(configuration);
 
+    // for Exam Layout Usage
+    Schedule dataSchedExam;
+    int manyExamQuestions, currentIndexExamQuestion = -1;
+    ExamQuestion[] userCurrentExamQ;
+    ExamStudentAnswer [] allExamStudentAnswer;
+    
     File propicFile;
     File screenshotFile;
     String oldDay;
@@ -86,6 +99,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     ImageIcon okImage = new ImageIcon(getClass().getResource("/images/ok16.png"));
     ImageIcon refreshImage = new ImageIcon(getClass().getResource("/images/refresh24.png"));
     ImageIcon browseImage = new ImageIcon(getClass().getResource("/images/file.png"));
+    ImageIcon loadingBookImage = new ImageIcon(getClass().getResource("/images/loadingprelcircular.gif"));
 
     User personLogged;
 
@@ -105,6 +119,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         radioNotifSessionAtLeast1Settings.setVisible(false);
         radioNotifSessionLessThan3Settings.setVisible(false);
     }
+    
 
     private void processNicely() {
         initComponents();
@@ -249,6 +264,26 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
 
     }
+    
+    private void refreshExamQuestionPicture(String filename) {
+
+        // set the path temporarily 
+        // for later usage in locally
+        PathReference.setExamQuestionPreviewFileName(filename);
+        File dest = new File(PathReference.ExamQuestionPreviewPath);
+
+        configuration.setValue(Keys.EXAM_QUESTION_PREVIEW, dest.getAbsolutePath());
+
+        SWThreadWorker workPicture = new SWThreadWorker(this);
+        // execute the download picture process
+        workPicture.setWork(SWTKey.WORK_REFRESH_EXAM_QUESTION_PREVIEW);
+        workPicture.writeMode(true);
+        workPicture.addData("preview", filename);
+
+        // executorService.submit(workSched);
+        executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
+
+    }
 
     private void refreshProfile() {
 
@@ -260,6 +295,22 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         executorService.schedule(workProfile, 3, TimeUnit.SECONDS);
 
+    }
+    private void submitAllExamAnswers() {
+
+        for(ExamStudentAnswer jawabanUser: allExamStudentAnswer){
+        SWThreadWorker workProfile = new SWThreadWorker(this);
+        workProfile.setWork(SWTKey.WORK_EXAM_STUDENT_ANS_SAVE);
+        
+        workProfile.addData("username", personLogged.getUsername());
+        workProfile.addData("exam_qa_id", jawabanUser.getExam_qa_id()+"");
+        workProfile.addData("answer", jawabanUser.getAnswer());
+        workProfile.addData("score_earned", jawabanUser.getScore_earned()+"");
+        workProfile.addData("status", jawabanUser.getStatus());
+        
+        prepareToken(workProfile);
+        executorService.schedule(workProfile, 3, TimeUnit.SECONDS);
+        }
     }
 
     private void refreshSchedule() {
@@ -349,6 +400,24 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         pack();
 
+    }
+    
+    private boolean isTodayMonthYear(String dataIn){
+        // format DataIn is = dd/MM/yyyy
+        String tglSkarang = todaysDate();
+        
+        String tglData [] = dataIn.split("/");
+        String tglSkarangArray [] = tglSkarang.split("/");
+        
+        boolean yeah = false;
+        
+        // month year comparison
+        if(tglData[1].equalsIgnoreCase(tglSkarangArray[1]) && tglData[2].equalsIgnoreCase(tglSkarangArray[2])){
+            yeah = true;
+        }
+        
+        return yeah;
+        
     }
 
     /**
@@ -503,12 +572,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         buttonContinueExam = new javax.swing.JButton();
         panelExamInner = new javax.swing.JPanel();
         panelWelcomeExam = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
+        labelExamLogo = new javax.swing.JLabel();
         labelYouRegisteredTimeExam = new javax.swing.JLabel();
         labelCongratulationUserExam = new javax.swing.JLabel();
         labelYouRegisteredTitleExam = new javax.swing.JLabel();
         panelQuestionExam = new javax.swing.JPanel();
-        jLabel9 = new javax.swing.JLabel();
+        labelExamQuestion = new javax.swing.JLabel();
         panelInnerQuestionExam = new javax.swing.JPanel();
         panelInnerMultipleChoiceExam = new javax.swing.JPanel();
         radioButtonChoiceBMultipleChoice = new javax.swing.JRadioButton();
@@ -517,8 +586,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         radioButtonChoiceCMultipleChoice = new javax.swing.JRadioButton();
         panelInnerEssayExam = new javax.swing.JPanel();
         jScrollPane7 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jLabel7 = new javax.swing.JLabel();
+        textareaExamQuestionAnswerEssay = new javax.swing.JTextArea();
+        labelExamQuestionPreview = new javax.swing.JLabel();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
         labelNavHome = new javax.swing.JLabel();
@@ -651,6 +720,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelMenu.add(buttonAttendance);
 
         buttonExam.setText("Exam");
+        buttonExam.setEnabled(false);
         buttonExam.setPreferredSize(new java.awt.Dimension(120, 23));
         buttonExam.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1588,6 +1658,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelExam.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         buttonContinueExam.setText("Continue");
+        buttonContinueExam.setEnabled(false);
         buttonContinueExam.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonContinueExamActionPerformed(evt);
@@ -1599,9 +1670,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelWelcomeExam.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/exam72.png"))); // NOI18N
-        panelWelcomeExam.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, 100, 130));
+        labelExamLogo.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        labelExamLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/exam72.png"))); // NOI18N
+        panelWelcomeExam.add(labelExamLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, 100, 130));
 
         labelYouRegisteredTimeExam.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         labelYouRegisteredTimeExam.setText("Started at : xxx");
@@ -1619,8 +1690,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelQuestionExam.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel9.setText("No.1 : lorem pisum direpisumm orem pisum");
-        panelQuestionExam.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 600, 38));
+        labelExamQuestion.setText("No.1 : lorem pisum direpisumm orem pisum");
+        panelQuestionExam.add(labelExamQuestion, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 600, 38));
 
         panelInnerQuestionExam.setLayout(new java.awt.CardLayout());
 
@@ -1642,9 +1713,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelInnerEssayExam.setLayout(new java.awt.BorderLayout());
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane7.setViewportView(jTextArea1);
+        textareaExamQuestionAnswerEssay.setColumns(20);
+        textareaExamQuestionAnswerEssay.setRows(5);
+        textareaExamQuestionAnswerEssay.setOpaque(false);
+        jScrollPane7.setViewportView(textareaExamQuestionAnswerEssay);
 
         panelInnerEssayExam.add(jScrollPane7, java.awt.BorderLayout.CENTER);
 
@@ -1652,14 +1724,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelQuestionExam.add(panelInnerQuestionExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 360, 210));
 
-        jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel7.setText("preview");
-        jLabel7.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        panelQuestionExam.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 70, 260, 220));
+        labelExamQuestionPreview.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelExamQuestionPreview.setText("preview");
+        labelExamQuestionPreview.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        panelQuestionExam.add(labelExamQuestionPreview, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 70, 240, 220));
 
         panelExamInner.add(panelQuestionExam, "panelQuestionExam");
 
-        panelExam.add(panelExamInner, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 650, 300));
+        panelExam.add(panelExamInner, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 660, 300));
 
         panelContentCenter.add(panelExam, "panelExam");
 
@@ -1889,6 +1961,19 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         executorService.schedule(workCheck, 2, TimeUnit.SECONDS);
 
     }
+    private void getExamDataBySchedule(int number) {
+
+        SWThreadWorker workExQA = new SWThreadWorker(this);
+        workExQA.setWork(SWTKey.WORK_EXAM_QUESTION_BY_SCHEDULE);
+        workExQA.addData("schedule_id", number+"");
+
+        prepareToken(workExQA);
+        //executorService.submit(workPay);
+        executorService.schedule(workExQA, 2, TimeUnit.SECONDS);
+
+    }
+    
+    
 
     private void downloadTools() {
 
@@ -2513,10 +2598,161 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         
     }//GEN-LAST:event_buttonVisitGoogleMeetActionPerformed
 
+    private String todaysDate(){
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Date date = new Date();
+        String tgl = dateFormat.format(date);
+        
+        return tgl;
+        
+    }
+    
     private void buttonContinueExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonContinueExamActionPerformed
-        // TODO add your handling code here:
+        // start opening the exam questions
+        if(currentIndexExamQuestion==-1){
+        cardLayoutExam = (CardLayout) panelExamInner.getLayout();
+        cardLayoutExam.show(panelExamInner, "panelQuestionExam");
+        
+        cardLayoutExamType = (CardLayout) panelInnerQuestionExam.getLayout();
+        } else if(buttonContinueExam.getText().equalsIgnoreCase("save")){
+            
+            saveExamAnswer();
+            
+            buttonContinueExam.setEnabled(false);
+            buttonContinueExam.setText("-");
+            
+           cardLayoutExam.show(panelExamInner, "panelWelcomeExam");
+           
+           labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeWaitingExam"));
+           labelYouRegisteredTitleExam.setText(languageHelper.getData("labelYouRegisteredTitleExamDone").replace("xxx", dataSchedExam.getClass_registered()));
+           
+           buttonExam.setEnabled(false);
+           labelExamLogo.setIcon(loadingBookImage);
+           
+           // submitting all data to Web Server API
+           submitAllExamAnswers();
+           
+           
+           // saving the local track record
+           configuration.setValue(Keys.LAST_EXAM_COMPLETED_DATE, todaysDate());
+           String totalEx = configuration.getStringValue(Keys.TOTAL_EXAM_COMPLETED);
+           
+           int totExamCompleted = 0;
+           
+           if(totalEx!=null){
+               
+               if(!totalEx.equalsIgnoreCase("0") || totalEx.length()!=0){    
+                   totExamCompleted = Integer.parseInt(totalEx);
+               }
+               
+                 totExamCompleted++;
+                configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, totExamCompleted+"");
+                
+                
+           }
+           
+            System.out.println("-------- DATA ------- tersimpan " + totExamCompleted + " untuk " + todaysDate());
+           
+        }
+        
+         
+        
+        if(!buttonContinueExam.getText().equalsIgnoreCase("save") && currentIndexExamQuestion+1<manyExamQuestions){
+            
+            if(currentIndexExamQuestion>=0){
+                saveExamAnswer();
+            }
+            
+            currentIndexExamQuestion++;
+            
+            showExamQuestion(); 
+        }
+        
+        if(currentIndexExamQuestion+1==manyExamQuestions){
+            buttonContinueExam.setText("save");
+            
+        }
+        
     }//GEN-LAST:event_buttonContinueExamActionPerformed
 
+    private void saveExamAnswer(){
+                ExamStudentAnswer jawabanOrang = new ExamStudentAnswer();
+                jawabanOrang.setStatus("WAITING");
+                jawabanOrang.setScore_earned(0);
+                
+                if(userCurrentExamQ[currentIndexExamQuestion].getJenis()==2){
+                jawabanOrang.setAnswer(textareaExamQuestionAnswerEssay.getText());    
+                }else{
+                    // if it is not essay
+                    // thus it must be a multiple choices
+                    if(radioButtonChoiceAMultipleChoice.isSelected()){
+                        jawabanOrang.setAnswer("A");
+                    } else
+                    if(radioButtonChoiceBMultipleChoice.isSelected()){
+                        jawabanOrang.setAnswer("B");
+                    }else 
+                    if(radioButtonChoiceCMultipleChoice.isSelected()){
+                        jawabanOrang.setAnswer("C");
+                    }else 
+                    if(radioButtonChoiceDMultipleChoice.isSelected()){
+                        jawabanOrang.setAnswer("D");
+                    }
+                }
+                
+                jawabanOrang.setExam_qa_id(userCurrentExamQ[currentIndexExamQuestion].getId());
+                
+                System.out.println("--------Ada exam no.id na " + jawabanOrang.getExam_qa_id());
+                
+                // put it together
+                allExamStudentAnswer[currentIndexExamQuestion] = jawabanOrang;
+    }
+    
+    private void showExamQuestion(){
+        
+        labelExamQuestion.setText("No." + (currentIndexExamQuestion+1) + " : " + userCurrentExamQ[currentIndexExamQuestion].getQuestion());
+        
+        // if the preview 
+        if(userCurrentExamQ[currentIndexExamQuestion].getPreview().contains("default")){
+            labelExamQuestionPreview.setText("-");
+            labelExamQuestionPreview.setIcon(null);
+        }else{
+            // we download the image from server
+               labelExamQuestionPreview.setText("loading...");
+            refreshExamQuestionPicture(userCurrentExamQ[currentIndexExamQuestion].getPreview());            
+        }
+        
+        switch(userCurrentExamQ[currentIndexExamQuestion].getJenis()){
+            case 1:
+            radioButtonChoiceAMultipleChoice.setVisible(true);
+            radioButtonChoiceBMultipleChoice.setVisible(true);
+            radioButtonChoiceCMultipleChoice.setVisible(true);
+            radioButtonChoiceDMultipleChoice.setVisible(true);
+            
+            radioButtonChoiceAMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_a());
+            radioButtonChoiceBMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_b());
+            radioButtonChoiceCMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_c());
+            radioButtonChoiceDMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_d());
+            
+            cardLayoutExamType.show(panelInnerQuestionExam, "panelMultipleChoice");   
+            break;
+            case 3:
+            radioButtonChoiceAMultipleChoice.setVisible(true);
+            radioButtonChoiceBMultipleChoice.setVisible(true);
+            radioButtonChoiceCMultipleChoice.setVisible(false);
+            radioButtonChoiceDMultipleChoice.setVisible(false);
+            
+            radioButtonChoiceAMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_a());
+            radioButtonChoiceBMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_b());
+            
+            cardLayoutExamType.show(panelInnerQuestionExam, "panelMultipleChoice");   
+            break;
+            case 2:
+                textareaExamQuestionAnswerEssay.setText("tulis jawaban disini...");
+                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay");   
+                break;
+        }
+    }
+    
     private void buttonExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExamActionPerformed
         //labelPanelViewName.setText("<< Attendance");
         languageHelper.apply(labelPanelViewName, "labelPanelViewNameExam", Comp.LABEL);
@@ -2641,6 +2877,22 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         hideLoadingStatus();
     }
+    
+    private void loadExamQuestionPreviewLocally() {
+
+        String propic = configuration.getStringValue(Keys.EXAM_QUESTION_PREVIEW);
+
+        System.out.println("Client Frame is Trying to load " + propic);
+
+        if (!propic.contains("default") && propic.length() > 0) {
+            // set the propic
+            UIEffect.iconChanger(labelExamQuestionPreview, (propic));
+            // clearing any text remains...
+            labelExamQuestionPreview.setText("");
+        }
+
+        hideLoadingStatus();
+    }
 
     // for settings ui
     private void loadConfiguration() {
@@ -2727,10 +2979,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -2739,7 +2988,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JLabel labelAddPayment;
     private javax.swing.JLabel labelAddressProfile;
     private javax.swing.JLabel labelAmountPaymentForm;
@@ -2752,6 +3000,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelDescReportBugsForm;
     private javax.swing.JLabel labelDownloadDocument;
     private javax.swing.JLabel labelEmailProfile;
+    private javax.swing.JLabel labelExamLogo;
+    private javax.swing.JLabel labelExamQuestion;
+    private javax.swing.JLabel labelExamQuestionPreview;
     private javax.swing.JLabel labelHidePaymentForm;
     private javax.swing.JLabel labelHistoryLast1;
     private javax.swing.JLabel labelHistoryLast2;
@@ -2854,6 +3105,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JTable tablePaymentData;
     private javax.swing.JTextArea textareaAddressProfile;
     private javax.swing.JTextArea textareaDescriptionReportBugsForm;
+    private javax.swing.JTextArea textareaExamQuestionAnswerEssay;
     private javax.swing.JTextField textfieldAmountPayment;
     private javax.swing.JTextField textfieldCaseReportBugsForm;
     private javax.swing.JTextField textfieldEmailProfile;
@@ -2905,6 +3157,44 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelHistoryLast5.setVisible(false);
     }
 
+    private boolean isExamLimitReached(){
+        
+        // checking this month date
+        String tglTerakhir = configuration.getStringValue(Keys.LAST_EXAM_COMPLETED_DATE);
+        int jumlahUjianBulanIni = Integer.parseInt(configuration.getStringValue(Keys.TOTAL_EXAM_COMPLETED));
+        
+        System.out.println("Data --------" + tglTerakhir + " and " + jumlahUjianBulanIni);
+        
+        boolean limited = true;
+        
+        if(tglTerakhir!=null){
+            if(!tglTerakhir.equalsIgnoreCase("none") || tglTerakhir.length()!=0){
+            
+            if(isTodayMonthYear(tglTerakhir) && jumlahUjianBulanIni<2){
+            
+            // limit bulan ini harus only below 2
+            limited = false;
+            
+            }else if(!isTodayMonthYear(tglTerakhir)){
+                // maybe several months passed by
+                // thus we can reset the limit back to 0
+                limited = false;
+                configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, "0");
+            }
+            
+        }else{
+            // when it is none
+            limited = false;
+        }
+        }else{
+             limited = false;
+        }
+        
+        
+        
+        return limited;
+    }
+    
     private boolean checkDiffVersion(String ver1, String ver2) {
 
         System.out.println("First ver " + ver1 + " and Second ver " + ver2);
@@ -2959,8 +3249,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             
 
 } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
-                Document[] dataIn = objectG.fromJson(innerData, Document[].class
-);
+                Document[] dataIn = objectG.fromJson(innerData, Document[].class);
                 tabRender.render(tableDocumentData, dataIn);
 
                 labelRefreshDocument.setIcon(refreshImage);
@@ -2968,8 +3257,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             
 
 } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
-                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class
-);
+                Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
                 tabRender.render(tableAttendanceData, dataIn);
 
                 labelRefreshAttendance.setIcon(refreshImage);
@@ -2980,8 +3268,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
 } else if (callingFromURL.equalsIgnoreCase(WebReference.CHECK_TOOLS)) {
 
-                Tool dataIn = objectG.fromJson(innerData, Tool.class
-);
+                Tool dataIn = objectG.fromJson(innerData, Tool.class);
 
                 // checking versioning
                 // this is forcing the version to be saved on configuration
@@ -3000,30 +3287,29 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                     System.out.println("No new updates for the tools...");
                 }
 
-            } else if (callingFromURL.contains(WebReference.PICTURE_USER)) {
+            } else if (callingFromURL.contains(WebReference.PREVIEW_EXAM)) {
+
+                System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
+                loadExamQuestionPreviewLocally();
+
+            }  else if (callingFromURL.contains(WebReference.PICTURE_USER)) {
 
                 System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
                 loadUserPictureLocally();
 
-            
-
 } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
-                Payment[] dataIn = objectG.fromJson(innerData, Payment[].class
-);
+                Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
                 tabRender.render(tablePaymentData, dataIn);
 
                 labelLastPayment.setText(languageHelper.getData("labelLastPayment") + dataIn[dataIn.length - 1].getDate_created());
                 labelLastPayment.setIcon(coinIcon);
 
                 labelRefreshPayment.setIcon(refreshImage);
-            } else if (callingFromURL.equalsIgnoreCase(WebReference.PROFILE_USER)) {
+} else if (callingFromURL.equalsIgnoreCase(WebReference.PROFILE_USER)) {
 
                 System.out.println("Obtaining Profile User data...");
 
-                User 
-
-dataIn = objectG.fromJson(innerData, User.class
-);
+                User dataIn = objectG.fromJson(innerData, User.class);
                 textfieldUsernameProfile.setText(dataIn.getUsername());
                 textfieldPasswordProfile.setText(dataIn.getPass());
                 textfieldEmailProfile.setText(dataIn.getEmail());
@@ -3044,8 +3330,7 @@ dataIn = objectG.fromJson(innerData, User.class
             
 
 } else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
-                History[] dataIn = objectG.fromJson(innerData, History[].class
-);
+                History[] dataIn = objectG.fromJson(innerData, History[].class);
 
                 if (dataIn.length > 0) {
                     showHistoryPanel(true);
@@ -3075,18 +3360,20 @@ dataIn = objectG.fromJson(innerData, User.class
                         labelHistoryLast4.setVisible(false);
                         labelHistoryLast5.setVisible(false);
 
-                
+            } 
 
-}
 
-            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
+        }   else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
                 Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
 
-                if(isScheduledForExam(dataIn)){
+                if(isScheduledForExam(dataIn) ){
                     // activate the Button Menu & the text welcome (exam)
-                    Schedule dataSchedExam = getExamOnly(dataIn);
+                    dataSchedExam = getExamOnly(dataIn);
                     
-                    buttonExam.setEnabled(true);
+                    if(!isExamLimitReached()){
+                        
+                          buttonExam.setEnabled(true);
+                    
                     labelCongratulationUserExam.setText(languageHelper.getData("labelCongratulationUserExam").replace("xxx",personLogged.getUsername()));
                     labelYouRegisteredTitleExam.setText(languageHelper.getData("labelYouRegisteredTitleExam").replace("xxx", dataSchedExam.getClass_registered()));
                     
@@ -3098,7 +3385,13 @@ dataIn = objectG.fromJson(innerData, User.class
                         labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeExam").replace("xxx", dataSchedExam.getDay_schedule() + ", " + dataSchedExam.getTime_schedule()));
                     }
                     
+                    // call another WEB API Request for Exam QA
+                    System.out.println("Calling for exam " + dataSchedExam.getId());
+                    getExamDataBySchedule(dataSchedExam.getId());
+                        
+                    }
                     
+                  
                     
                 }else{
                     // lock that submission
@@ -3142,6 +3435,18 @@ dataIn = objectG.fromJson(innerData, User.class
                         labelScheduleDay3.setVisible(false);
                 }
 
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_EXAM_QUESTION_BY_SCHEDULE)) {
+            
+                    userCurrentExamQ = objectG.fromJson(innerData, ExamQuestion[].class);
+                    
+                    manyExamQuestions = userCurrentExamQ.length;
+                    
+                    // for submitting later
+                    allExamStudentAnswer = new ExamStudentAnswer[manyExamQuestions];
+                    
+                 // we make the appearance randomly
+                 Collections.shuffle(Arrays.asList(userCurrentExamQ));
+                 buttonContinueExam.setEnabled(true);
             }
 
         } else {

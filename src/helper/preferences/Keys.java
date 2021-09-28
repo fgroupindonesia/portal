@@ -29,6 +29,9 @@ public class Keys {
     public static final String SCREENSHOT_REPORT_BUGS = "reportbugs_screenshot";
     public static final String CERTIFICATE_PICTURE = "certificate_student";
     
+    public static final String LAST_EXAM_COMPLETED_DATE = "last_exam_completed_date";
+    public static final String TOTAL_EXAM_COMPLETED = "total_exam_completed";
+    
     public static final String SYSTEM_LANGUAGE = "system_language";
     public static final String DEFAULT_SYSTEM_LANGUAGE = "English (default)";
 

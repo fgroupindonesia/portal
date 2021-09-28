@@ -70,7 +70,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     // used for Certificate Student form only
     int certExamCatID;
-    
+
     // used for Schedule form only
     int schedExamCatID;
 
@@ -265,14 +265,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         textfieldNameClassRoom.setText(dataCome.getName());
         textareaDescriptionClassRoom.setText(dataCome.getDescription());
-       
+
         comboboxUsernameClassRoom.setSelectedItem(dataCome.getInstructor_name());
 
         lockClassRoomForm(false);
         hideLoadingStatus();
 
     }
-    
+
     private void renderScheduleForm(Schedule dataCome) {
 
         idForm = (short) dataCome.getId();
@@ -1262,17 +1262,17 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         if (radiobuttonMultipleChoiceExamQuestion.isSelected()) {
             // we take the options a-d
-            workExamQAEntity.addData("option_a", tabRender.getValueWithParameter(tableExamQuestionOptions, "A", 1, 3));
-            workExamQAEntity.addData("option_b", tabRender.getValueWithParameter(tableExamQuestionOptions, "B", 1, 3));
+            workExamQAEntity.addData("option_a", tabRender.getValueWithText(tableExamQuestionOptions, "A", 1, 3));
+            workExamQAEntity.addData("option_b", tabRender.getValueWithText(tableExamQuestionOptions, "B", 1, 3));
 
             if (tableExamQuestionOptions.getRowCount() > 2) {
                 // if there are many options c,d
                 // thus we took them all
-                workExamQAEntity.addData("option_c", tabRender.getValueWithParameter(tableExamQuestionOptions, "C", 1, 3));
-                workExamQAEntity.addData("option_d", tabRender.getValueWithParameter(tableExamQuestionOptions, "D", 1, 3));
+                workExamQAEntity.addData("option_c", tabRender.getValueWithText(tableExamQuestionOptions, "C", 1, 3));
+                workExamQAEntity.addData("option_d", tabRender.getValueWithText(tableExamQuestionOptions, "D", 1, 3));
             }
 
-            workExamQAEntity.addData("answer", tabRender.getValueWithParameter(tableExamQuestionOptions, "true", 2, 1));
+            workExamQAEntity.addData("answer", tabRender.getValueWithText(tableExamQuestionOptions, "true", 2, 1));
 
         } else {
             // if this is not multiple choice,
@@ -1330,6 +1330,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workScheduleEntity.addData("day_schedule", comboboxDaySched.getSelectedItem().toString());
         workScheduleEntity.addData("time_schedule", timeSched);
         workScheduleEntity.addData("class_registered", comboboxClassRegSched.getSelectedItem().toString());
+
+        if (panelExamCategorySched.isVisible()) {
+            workScheduleEntity.addData("exam_category_id", schedExamCatID + "");
+        }
 
         prepareToken(workScheduleEntity);
         executorService.schedule(workScheduleEntity, 2, TimeUnit.SECONDS);
@@ -2493,6 +2497,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         comboboxDaySched.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 comboboxDaySchedItemStateChanged(evt);
+            }
+        });
+        comboboxDaySched.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboboxDaySchedActionPerformed(evt);
             }
         });
         panelScheduleForm.add(comboboxDaySched, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 120, 160, -1));
@@ -4086,15 +4095,22 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
             },
             new String [] {
-                "[ x ]", "Id", "Class Name", "Description", "Instructor ID", "Instructor Name", "Date Created"
+                "[ x ]", "Id", "Class Name", "Description", "Instructor ID", "Instructor Name", "Date Created", "Exam"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Boolean.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class
+            };
+            boolean[] canEdit = new boolean [] {
+                true, true, true, true, true, true, true, false
             };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
             }
         });
         tableClassRoomData.getTableHeader().setReorderingAllowed(false);
@@ -4109,6 +4125,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             tableClassRoomData.getColumnModel().getColumn(4).setMinWidth(0);
             tableClassRoomData.getColumnModel().getColumn(4).setPreferredWidth(0);
             tableClassRoomData.getColumnModel().getColumn(4).setMaxWidth(0);
+            tableClassRoomData.getColumnModel().getColumn(7).setMinWidth(0);
+            tableClassRoomData.getColumnModel().getColumn(7).setPreferredWidth(0);
+            tableClassRoomData.getColumnModel().getColumn(7).setMaxWidth(0);
         }
 
         panelClassRoomTable.add(jScrollPane20, java.awt.BorderLayout.CENTER);
@@ -4523,18 +4542,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
 
     private void comboboxDaySchedItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboboxDaySchedItemStateChanged
-        showLoadingStatus();
-
-        // when the item selected changed
-        // we check the registered class of that day
-        if (comboboxDaySched.getSelectedItem() != null) {
-            String classSelected = comboboxDaySched.getSelectedItem().toString();
-            refreshScheduleByDay(classSelected);
-        } else {
-            // clearup the list
-            listAnotherClassSched.setModel(new DefaultListModel());
-            showLoadingStatus();
-        }
+      
     }//GEN-LAST:event_comboboxDaySchedItemStateChanged
 
     private void buttonAddAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddAttendanceActionPerformed
@@ -5765,11 +5773,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // get the category name
         if (comboboxCategoryExamQuestion.getItemCount() > 0) {
-            String catName = comboboxCategoryExamQuestion.getSelectedItem().toString();
-
-            // and then convert it to an ID
+            Object catName = comboboxCategoryExamQuestion.getSelectedItem();
+            
+            if(catName!=null){
+                 // and then convert it to an ID
             // based on data stored locally in the jtable
-            String anIDChosen = tabRender.getValueWithParameter(tableExamCategoryData, catName, 2, 1);
+            String anIDChosen = tabRender.getValueWithText(tableExamCategoryData, ""+catName, 2, 1);
 
             // used for later submission
             examQCatID = Integer.parseInt(anIDChosen);
@@ -5780,6 +5789,9 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             // clearup the sub combobox because later will be updated by the async call from server callback
             comboboxSubCategoryExamQuestion.removeAllItems();
             comboboxSubCategoryExamQuestion.setEnabled(false);
+            }
+
+           
 
         }
     }//GEN-LAST:event_comboboxCategoryExamQuestionActionPerformed
@@ -5902,7 +5914,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
             // and then convert it to an ID
             // based on data stored locally in the jtable
-            String anIDChosen = tabRender.getValueWithParameter(tableExamCategoryData, catName, 2, 1);
+            String anIDChosen = tabRender.getValueWithText(tableExamCategoryData, catName, 2, 1);
 
             // used for later submission
             certExamCatID = Integer.parseInt(anIDChosen);
@@ -6034,32 +6046,60 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_comboboxUsernameClassRoomActionPerformed
 
     private void comboboxClassRegSchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboboxClassRegSchedActionPerformed
-        
+
         // if the class is actually for exam
         // we enabled the radio button exam category
-        if(true){
-            panelExamCategorySched.setVisible(true);
-        }else{
-            panelExamCategorySched.setVisible(false);
+        if (comboboxClassRegSched.getSelectedItem() != null) {
+            String className = comboboxClassRegSched.getSelectedItem().toString();
+
+            // and then convert it to an ID
+            // based on data stored locally in the jtable
+            // get the last column index (exam status : true/false)
+            String isExam = tabRender.getValueWithText(tableClassRoomData, className, 2, tableClassRoomData.getColumnCount() - 1);
+
+            // System.out.println("isexam " + isExam);
+            if (isExam != null) {
+                boolean vis = Boolean.valueOf(isExam);
+                panelExamCategorySched.setVisible(vis);
+            }
+
         }
-        
+
+
     }//GEN-LAST:event_comboboxClassRegSchedActionPerformed
 
     private void comboboxExamCategorySchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboboxExamCategorySchedActionPerformed
-        
+
         if (comboboxExamCategorySched.getSelectedItem() != null) {
             String catName = comboboxExamCategorySched.getSelectedItem().toString();
 
             // and then convert it to an ID
             // based on data stored locally in the jtable
-            String anIDChosen = tabRender.getValueWithParameter(tableExamCategoryData, catName, 2, 1);
+            String anIDChosen = tabRender.getValueWithText(tableExamCategoryData, catName, 2, 1);
 
             // used for later submission
             schedExamCatID = Integer.parseInt(anIDChosen);
 
         }
-        
+
     }//GEN-LAST:event_comboboxExamCategorySchedActionPerformed
+
+    private void comboboxDaySchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboboxDaySchedActionPerformed
+
+          showLoadingStatus();
+
+        // when the item selected changed
+        // we check the registered class of that day
+        if (comboboxDaySched.getSelectedItem() != null) {
+            String classSelected = comboboxDaySched.getSelectedItem().toString();
+            refreshScheduleByDay(classSelected);
+        } else {
+            // clearup the list
+            listAnotherClassSched.setModel(new DefaultListModel());
+            showLoadingStatus();
+        }
+        
+    }//GEN-LAST:event_comboboxDaySchedActionPerformed
 
     private void getExamQuestionDetail() {
 
@@ -6935,19 +6975,24 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void fillComboboxExamCategoryName(ExamCategory[] entries) {
 
         // into dropdown combobox under every form related
-        comboboxCategoryExamQuestion.removeAllItems();
-        comboboxCertificateStudentCategory.removeAllItems();
-        comboboxExamCategorySched.removeAllItems();
+       fillComboboxExamCategoryNameData(comboboxCategoryExamQuestion, entries);
+       fillComboboxExamCategoryNameData(comboboxCertificateStudentCategory, entries);
+       fillComboboxExamCategoryNameData(comboboxExamCategorySched, entries);
+        
+    }
+    
+    private void fillComboboxExamCategoryNameData(JComboBox cmb, ExamCategory [] entries){
+        
+         cmb.removeAllItems();
 
         for (ExamCategory es : entries) {
-            comboboxCategoryExamQuestion.addItem(es.getTitle());
-            comboboxCertificateStudentCategory.addItem(es.getTitle());
-            comboboxExamCategorySched.addItem(es.getTitle());
+            cmb.addItem(es.getTitle());
+          
         }
 
-        comboboxCertificateStudentCategory.setEnabled(true);
-        comboboxCategoryExamQuestion.setEnabled(true);
-        comboboxExamCategorySched.setEnabled(true);
+        cmb.setEnabled(true);
+        cmb.setSelectedIndex(-1);
+        
     }
 
     private void fillComboboxExamSubCategoryName(ExamSubCategory[] entries) {
@@ -7009,12 +7054,15 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         comboboxDaySched.setSelectedIndex(-1);
         comboboxUsernameSched.setSelectedIndex(-1);
 
+        // hide the examcategory panel dropdown
+        panelExamCategorySched.setVisible(false);
+
         if (editMode) {
             // we lock first
             // so later it will be unlocked by async success call
 
             lockScheduleForm(editMode);
-            showLoadingStatus();
+            //showLoadingStatus();
         }
 
     }
@@ -7099,18 +7147,17 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         }
 
     }
-    
+
     private void renderUsernameForComboboxClassRoom(User[] dataIn, JComboBox jc) {
         jc.removeAllItems();
 
         // this is from SERVER API
         // access_level = 1 = ADMIN
-	// access_level = 2 = STUDENT
-	// access_level = 3 = INSTRUCTOR
-        
+        // access_level = 2 = STUDENT
+        // access_level = 3 = INSTRUCTOR
         for (User single : dataIn) {
-            if(single.getAccess_level()==3){
-            jc.addItem(single.getUsername());
+            if (single.getAccess_level() == 3) {
+                jc.addItem(single.getUsername());
             }
         }
 
@@ -7123,7 +7170,6 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             jc.addItem(d.getName());
         }
     }
-    
 
     private void renderScheduleForList(Schedule[] sched, JList elContainer) {
 
@@ -7169,10 +7215,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                     } else if (urlTarget.equalsIgnoreCase(WebReference.ALL_CLASSROOM)) {
                         ClassRoom[] dataIn = objectG.fromJson(innerData, ClassRoom[].class);
 
+                        tabRender.render(tableClassRoomData, dataIn);
+
                         renderClassRoomForCombobox(dataIn, comboboxClassRegSched);
                         renderClassRoomForCombobox(dataIn, comboboxClassRegAttendance);
-
-                        tabRender.render(tableClassRoomData, dataIn);
 
                         hideLoadingStatus();
 
@@ -7376,7 +7422,6 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         ClassRoom dataIn = objectG.fromJson(innerData, ClassRoom.class);
                         renderClassRoomForm(dataIn);
 
-
                     } else if (urlTarget.equalsIgnoreCase(WebReference.DETAIL_CERTIFICATE_STUDENT)) {
 
                         // we got the single data here
@@ -7457,6 +7502,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE_BY_DAY)) {
                 // we clear up the list
                 listAnotherClassSched.setModel(new DefaultListModel());
+                  hideLoadingStatus();
             } else if (urlTarget.equalsIgnoreCase(WebReference.UPDATE_ATTENDANCE)
                     || urlTarget.equalsIgnoreCase(WebReference.UPDATE_DOCUMENT)
                     || urlTarget.equalsIgnoreCase(WebReference.UPDATE_SCHEDULE)

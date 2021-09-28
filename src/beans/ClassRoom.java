@@ -15,6 +15,7 @@ public class ClassRoom {
     private String name;
     private String description;
     private String date_created;
+    private int for_exam;
 
     /**
      * @return the id
@@ -98,5 +99,19 @@ public class ClassRoom {
      */
     public void setInstructor_name(String instructor_name) {
         this.instructor_name = instructor_name;
+    }
+
+    /**
+     * @return the for_exam
+     */
+    public int getFor_exam() {
+        return for_exam;
+    }
+
+    /**
+     * @param for_exam the for_exam to set
+     */
+    public void setFor_exam(int for_exam) {
+        this.for_exam = for_exam;
     }
 }
