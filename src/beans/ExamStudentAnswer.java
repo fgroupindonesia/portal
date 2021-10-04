@@ -17,6 +17,7 @@ public class ExamStudentAnswer {
     private String answer;
     private String status;
     private String date_created;
+    private String fileupload;
 
     /**
      * @return the id
@@ -114,6 +115,20 @@ public class ExamStudentAnswer {
      */
     public void setDate_created(String date_created) {
         this.date_created = date_created;
+    }
+
+    /**
+     * @return the fileupload
+     */
+    public String getFileupload() {
+        return fileupload;
+    }
+
+    /**
+     * @param fileupload the fileupload to set
+     */
+    public void setFileupload(String fileupload) {
+        this.fileupload = fileupload;
     }
     
 }

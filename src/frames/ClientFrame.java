@@ -37,9 +37,9 @@ import helper.WebReference;
 import helper.language.Comp;
 import helper.language.LanguageSwitcher;
 import helper.preferences.Keys;
-import java.awt.AWTException;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
@@ -50,11 +50,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -75,6 +75,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     /**
      * Creates new form MainFrame
      */
+    FileCopier fcp = new FileCopier();
     
     LoginFrame loginFrame;
     CardLayout cardLayouterMain, cardLayouterAttendance, cardLayoutHistory,
@@ -85,28 +86,37 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     RupiahGenerator rpGen = new RupiahGenerator();
     //   ExecutorService executorService = Executors.newFixedThreadPool(28);
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(28);
-
+    ExecutorService executorServiceSingle;
     LanguageSwitcher languageHelper = new LanguageSwitcher(configuration);
 
     // for Exam Layout Usage
     Schedule dataSchedExam;
-    int manyExamQuestions, currentIndexExamQuestion = -1;
+    int manyExamQuestions, currentIndexExamQuestion = -1,
+            currentIndexFilePraktekExamQ = 0;
     ExamQuestion[] userCurrentExamQ;
     ExamStudentAnswer [] allExamStudentAnswer;
     
     File propicFile;
     File screenshotFile;
+    File screenshotBrowserFile;
+    File praktekFiles[];
+    
     String oldDay;
     String textChangeHover = "change -";
 
     TrayMaker tm = new TrayMaker();
 
+    ImageIcon typingImage = new ImageIcon(getClass().getResource("/images/keyboard24.png"));
     ImageIcon loadingImage = new ImageIcon(getClass().getResource("/images/loadingprel.gif"));
     ImageIcon okImage = new ImageIcon(getClass().getResource("/images/ok16.png"));
     ImageIcon refreshImage = new ImageIcon(getClass().getResource("/images/refresh24.png"));
     ImageIcon browseImage = new ImageIcon(getClass().getResource("/images/file.png"));
     ImageIcon loadingBookImage = new ImageIcon(getClass().getResource("/images/loadingprelcircular.gif"));
     ImageIcon screenshotImage = new ImageIcon(getClass().getResource("/images/camera24.png"));
+    ImageIcon wordImage = new ImageIcon(getClass().getResource("/images/word72.png"));
+    ImageIcon excelImage = new ImageIcon(getClass().getResource("/images/excel72.png"));
+    ImageIcon ppointImage = new ImageIcon(getClass().getResource("/images/ppoint72.png"));
+    ImageIcon pdfImage = new ImageIcon(getClass().getResource("/images/pdf72.png"));
 
     User personLogged;
 
@@ -138,7 +148,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // from Exam UI
         labelScreenshot.setVisible(false);
         labelTyping.setVisible(false);
-        buttonBrowseFileExam.setVisible(false);
+        panelBrowseUpload.setVisible(false);
         
         // showing the username
         labelUsernameText.setText(personLogged.getUsername());
@@ -162,8 +172,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         tm.setFrameRef(this);
 
         //hide the ui effect
-        progressBarDownload.setVisible(false);
-        labelPercentage.setVisible(false);
+        showLoadingDownload(false);
 
         // activate the effect stuff
         UIDragger.setFrame(this);
@@ -223,9 +232,18 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         obSW.addData("token", this.getTokenLocally());
     }
 
+    private void prepareFileCopier(){
+        fcp.resetProgressBar();
+        fcp.setProgressBar(progressBarDownload);
+        fcp.setProgressLabel(labelPercentage, labelLoadingStatus);
+    }
+    
     private void downloadFile(String target, String fname) {
 
+       prepareFileCopier();
+        
         SWThreadWorker workDownload = new SWThreadWorker(this);
+        workDownload.setFileCopierHelper(fcp);
         workDownload.setWork(SWTKey.WORK_DOCUMENT_DOWNLOAD);
         workDownload.writeMode(true);
         workDownload.addData("url", target);
@@ -233,9 +251,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         workDownload.addData("username", personLogged.getUsername());
         prepareToken(workDownload);
 
-        // optional for showing the effect
-        FileCopier.setProgressBar(progressBarDownload);
-        FileCopier.setProgressLabel(labelPercentage, labelLoadingStatus);
+        
+       
 
         showLoadingStatus("Download");
 
@@ -243,6 +260,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         executorService.schedule(workDownload, 2, TimeUnit.SECONDS);
 
     }
+    
+    
 
     private void refreshHistory() {
 
@@ -287,6 +306,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     
     private void refreshExamQuestionPicture(String filename) {
 
+        // showing the download progress
+       showLoadingDownload(true);
+        
         // set the path temporarily 
         // for later usage in locally
         PathReference.setExamQuestionPreviewFileName(filename);
@@ -300,6 +322,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         workPicture.writeMode(true);
         workPicture.addData("preview", filename);
 
+        // optional for showing the effect
+       prepareFileCopier();
+       workPicture.setFileCopierHelper(fcp);
+        
         // executorService.submit(workSched);
         executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
 
@@ -316,20 +342,46 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         executorService.schedule(workProfile, 3, TimeUnit.SECONDS);
 
     }
+    
     private void submitAllExamAnswers() {
 
+        showLoadingUpload(true);
+        
+        executorServiceSingle = Executors.newSingleThreadExecutor();
+
+        int mIndex=0;
         for(ExamStudentAnswer jawabanUser: allExamStudentAnswer){
-        SWThreadWorker workProfile = new SWThreadWorker(this);
-        workProfile.setWork(SWTKey.WORK_EXAM_STUDENT_ANS_SAVE);
+        //ExamStudentAnswer jawabanUser = allExamStudentAnswer[0];
+        SWThreadWorker workQA = new SWThreadWorker(this);
         
-        workProfile.addData("username", personLogged.getUsername());
-        workProfile.addData("exam_qa_id", jawabanUser.getExam_qa_id()+"");
-        workProfile.addData("answer", jawabanUser.getAnswer());
-        workProfile.addData("score_earned", jawabanUser.getScore_earned()+"");
-        workProfile.addData("status", jawabanUser.getStatus());
+        workQA.setWork(SWTKey.WORK_EXAM_STUDENT_ANS_SAVE);
         
-        prepareToken(workProfile);
-        executorService.schedule(workProfile, 3, TimeUnit.SECONDS);
+        workQA.addData("username", personLogged.getUsername());
+        workQA.addData("exam_qa_id", jawabanUser.getExam_qa_id()+"");
+        workQA.addData("answer", jawabanUser.getAnswer());
+        workQA.addData("score_earned", jawabanUser.getScore_earned()+"");
+        workQA.addData("status", jawabanUser.getStatus());
+        
+        prepareFileCopier();
+        workQA.setFileCopierHelper(fcp);
+        
+        if(jawabanUser.getFileupload()!=null){
+            System.out.println("--------- menambahkan " + praktekFiles[mIndex].getName() + " success!");
+            
+            workQA.addFile("fileupload", praktekFiles[mIndex]);
+            mIndex++;
+            
+        }
+        
+        prepareToken(workQA);
+        
+       try{
+        executorServiceSingle.submit(workQA).get();
+           
+       } catch (Exception ex){
+           UIEffect.popup("error while submitting answers....", this);
+       }
+        
         }
     }
 
@@ -608,8 +660,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         panelInnerEssayExam = new javax.swing.JPanel();
         jScrollPane7 = new javax.swing.JScrollPane();
         textareaExamQuestionAnswerEssay = new javax.swing.JTextArea();
-        labelExamQuestionPreview = new javax.swing.JLabel();
         labelTyping = new javax.swing.JLabel();
+        panelExamQuestionPreview = new javax.swing.JPanel();
+        labelExamQuestionPreview = new javax.swing.JLabel();
+        panelBrowseUpload = new javax.swing.JPanel();
         buttonBrowseFileExam = new javax.swing.JButton();
         panelHeaderCenter = new javax.swing.JPanel();
         labelPanelViewName = new javax.swing.JLabel();
@@ -1761,12 +1815,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelInnerQuestionExam.add(panelInnerEssayExam, "panelEssay");
 
-        panelQuestionExam.add(panelInnerQuestionExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 360, 210));
-
-        labelExamQuestionPreview.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        labelExamQuestionPreview.setText("preview");
-        labelExamQuestionPreview.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        panelQuestionExam.add(labelExamQuestionPreview, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 110, 240, 170));
+        panelQuestionExam.add(panelInnerQuestionExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 350, 210));
 
         labelTyping.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         labelTyping.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/keyboard24.png"))); // NOI18N
@@ -1777,10 +1826,36 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelTypingMouseClicked(evt);
             }
         });
-        panelQuestionExam.add(labelTyping, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 62, 130, 29));
+        panelQuestionExam.add(labelTyping, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 60, 130, 29));
+
+        panelExamQuestionPreview.setBorder(javax.swing.BorderFactory.createTitledBorder("Preview"));
+        panelExamQuestionPreview.setLayout(new java.awt.BorderLayout());
+
+        labelExamQuestionPreview.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelExamQuestionPreview.setText("preview");
+        labelExamQuestionPreview.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelExamQuestionPreview.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        labelExamQuestionPreview.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelExamQuestionPreviewMouseClicked(evt);
+            }
+        });
+        panelExamQuestionPreview.add(labelExamQuestionPreview, java.awt.BorderLayout.CENTER);
+
+        panelQuestionExam.add(panelExamQuestionPreview, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 100, 270, 180));
+
+        panelBrowseUpload.setBorder(javax.swing.BorderFactory.createTitledBorder("Upload"));
+        panelBrowseUpload.setLayout(new java.awt.BorderLayout());
 
         buttonBrowseFileExam.setText("Browse...");
-        panelQuestionExam.add(buttonBrowseFileExam, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 62, 100, 30));
+        buttonBrowseFileExam.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buttonBrowseFileExamActionPerformed(evt);
+            }
+        });
+        panelBrowseUpload.add(buttonBrowseFileExam, java.awt.BorderLayout.CENTER);
+
+        panelQuestionExam.add(panelBrowseUpload, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 50, 120, 50));
 
         panelExamInner.add(panelQuestionExam, "panelQuestionExam");
 
@@ -1925,7 +2000,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             File dest = new File(PathReference.UserPropicPath);
 
             try {
-                FileCopier.copyTo(propicFile, dest);
+                prepareFileCopier();
+                //workPicture.setFileCopierHelper(fcp);
+                fcp.copyTo(propicFile, dest);
                 UIEffect.iconChanger(labelPropicUser, dest.getAbsolutePath());
 
                 // store the settings for next time usage
@@ -2032,8 +2109,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         prepareToken(workCheck);
 
         // optional for showing the effect
-        FileCopier.setProgressBar(progressBarDownload);
-        FileCopier.setProgressLabel(labelPercentage, labelLoadingStatus);
+            prepareFileCopier();
+            workCheck.setFileCopierHelper(fcp);
+        
 
         showLoadingStatus("Download");
 
@@ -2186,9 +2264,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
             // passing url only
             if (!progressBarDownload.isVisible()) {
-                showLoadingStatus();
-                progressBarDownload.setVisible(true);
-                labelPercentage.setVisible(true);
+                
+                
+                showLoadingDownload(true);
+                
                 // download only the 1 one
                 downloadFile(dataDoc.get(0).toString(), dataDoc2.get(0).toString());
             } else {
@@ -2200,6 +2279,28 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     }//GEN-LAST:event_labelDownloadDocumentMouseClicked
 
+    private void showLoadingDownload(boolean b){
+                progressBarDownload.setVisible(b);
+                labelPercentage.setVisible(b);
+                if(b){
+                    showLoadingStatus("Downloading");
+                }else{
+                    hideLoadingStatus();
+                }
+    }
+    
+    private void showLoadingUpload(boolean b){
+                
+                
+                progressBarDownload.setVisible(b);
+                labelPercentage.setVisible(b);
+                if(b){
+                    showLoadingStatus("Uploading");
+                }else{
+                    hideLoadingStatus();
+                }
+    }
+    
     private void savePayment() {
         showLoadingStatus();
         SWThreadWorker workPayment = new SWThreadWorker(this);
@@ -2300,10 +2401,32 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void visitURL(String targetCompleteURL, String historyMessage){
         browser.loadURL(targetCompleteURL);
 
-        cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
-        labelScreenshot.setVisible(true);
+        // animate the showing panel after 4-6 seconds
+        showBrowserPanel();
+       
         
         saveHistory(historyMessage);
+    }
+    
+     private void displayPDF(String targetCompleteURI){
+        browser.loadURL(targetCompleteURI);
+
+        // animate the showing panel after 4-6 seconds
+        showBrowserPanel();
+       
+    }
+    
+    private void showBrowserPanel(){
+        new java.util.Timer().schedule( 
+        new java.util.TimerTask() {
+            @Override
+            public void run() {
+              labelScreenshot.setVisible(true);
+              cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+            }
+        }, 
+        3000 
+);
     }
     
     private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
@@ -2474,7 +2597,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             File dest = new File(PathReference.getScreenshotPath(screenshotFile.getName()));
 
             try {
-                FileCopier.copyTo(screenshotFile, dest);
+                prepareFileCopier();// FileCopier.resetProgressBar();
+                fcp.copyTo(screenshotFile, dest);
                 UIEffect.iconChanger(labelScreenshotPayment, dest.getAbsolutePath());
 
                 System.out.println("screenshot now is " + dest.getAbsolutePath());
@@ -2556,7 +2680,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             File dest = new File(PathReference.getScreenshotPath(screenshotFile.getName()));
 
             try {
-                FileCopier.copyTo(screenshotFile, dest);
+                prepareFileCopier();// FileCopier.resetProgressBar();
+                fcp.copyTo(screenshotFile, dest);
                 UIEffect.iconChanger(labelScreenshotPictureReportBugsForm, dest.getAbsolutePath());
 
                 System.out.println("screenshot now is " + dest.getAbsolutePath());
@@ -2683,7 +2808,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
            // submitting all data to Web Server API
            submitAllExamAnswers();
            
-           
            // saving the local track record
            configuration.setValue(Keys.LAST_EXAM_COMPLETED_DATE, todaysDate());
            String totalEx = configuration.getStringValue(Keys.TOTAL_EXAM_COMPLETED);
@@ -2696,7 +2820,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                    totExamCompleted = Integer.parseInt(totalEx);
                }
                
-                 totExamCompleted++;
+                totExamCompleted++;
                 configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, totExamCompleted+"");
                 
                 
@@ -2731,7 +2855,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 jawabanOrang.setStatus("WAITING");
                 jawabanOrang.setScore_earned(0);
                 
-                if(userCurrentExamQ[currentIndexExamQuestion].getJenis()==2){
+                // we save the name first here for later usage of uploading
+                
+                if(praktekFiles[currentIndexFilePraktekExamQ]!=null){
+                jawabanOrang.setFileupload(praktekFiles[currentIndexFilePraktekExamQ].getName());
+                 currentIndexFilePraktekExamQ++;
+                }
+                int jenisSoal = userCurrentExamQ[currentIndexExamQuestion].getJenis();
+                if(jenisSoal==2){
                 jawabanOrang.setAnswer(textareaExamQuestionAnswerEssay.getText());    
                 }else{
                     // if it is not essay
@@ -2756,6 +2887,15 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 
                 // put it together
                 allExamStudentAnswer[currentIndexExamQuestion] = jawabanOrang;
+               
+    }
+    
+    private void showExamQuestionPreviewWhenAvailable(){
+        if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("default")){
+                panelExamQuestionPreview.setVisible(false);
+        }else{
+                panelExamQuestionPreview.setVisible(true);
+        }
     }
     
     private void showExamQuestion(){
@@ -2765,6 +2905,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // jenis 3 : ab only
         // jenis 4 : typing
         // jenis 5 : praktek (submit file)
+        labelExamQuestion.setIcon(null);
+        buttonBrowseFileExam.setIcon(null);
         
         labelExamQuestion.setText("No." + (currentIndexExamQuestion+1) + " : " + userCurrentExamQ[currentIndexExamQuestion].getQuestion());
         
@@ -2774,12 +2916,31 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             labelExamQuestionPreview.setIcon(null);
         }else{
             // we download the image from server
-               labelExamQuestionPreview.setText("loading...");
-            refreshExamQuestionPicture(userCurrentExamQ[currentIndexExamQuestion].getPreview());            
+            labelExamQuestionPreview.setText("loading...");
+            
+            refreshExamQuestionPicture(userCurrentExamQ[currentIndexExamQuestion].getPreview());
+            
+                if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("pdf")){
+                labelExamQuestionPreview.setIcon(pdfImage);    
+                } else
+                if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("doc")){
+                labelExamQuestionPreview.setIcon(wordImage);    
+                } else 
+                if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("xls")){
+                labelExamQuestionPreview.setIcon(excelImage);    
+                } else 
+                if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("ppt")){
+                labelExamQuestionPreview.setIcon(ppointImage);    
+                }
+            
         }
         
         switch(userCurrentExamQ[currentIndexExamQuestion].getJenis()){
             case 1:
+            labelTyping.setVisible(false);
+            panelBrowseUpload.setVisible(false);
+            showExamQuestionPreviewWhenAvailable();
+                
             radioButtonChoiceAMultipleChoice.setVisible(true);
             radioButtonChoiceBMultipleChoice.setVisible(true);
             radioButtonChoiceCMultipleChoice.setVisible(true);
@@ -2793,6 +2954,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             cardLayoutExamType.show(panelInnerQuestionExam, "panelMultipleChoice");   
             break;
             case 3:
+            labelTyping.setVisible(false);
+            panelBrowseUpload.setVisible(false);
+            showExamQuestionPreviewWhenAvailable();
+            
             radioButtonChoiceAMultipleChoice.setVisible(true);
             radioButtonChoiceBMultipleChoice.setVisible(true);
             radioButtonChoiceCMultipleChoice.setVisible(false);
@@ -2804,11 +2969,19 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             cardLayoutExamType.show(panelInnerQuestionExam, "panelMultipleChoice");   
             break;
             case 2:
+                labelTyping.setVisible(false);
+                panelBrowseUpload.setVisible(false);
+                showExamQuestionPreviewWhenAvailable();
+                
                 textareaExamQuestionAnswerEssay.setText("tulis jawaban disini...");
+                textareaExamQuestionAnswerEssay.setOpaque(true);
                 cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay");   
                 break;
             case 4:
                 labelTyping.setVisible(true);
+                panelBrowseUpload.setVisible(false);
+                showExamQuestionPreviewWhenAvailable();
+                
                 cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay"); 
                 textareaExamQuestionAnswerEssay.setText("tunggu hingga aplikasi typing terbuka\n"+
                       "kini mulailah mengetik kata-kata yang bermunculan.\n"+
@@ -2816,7 +2989,27 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                       "jika sudah mengetik, kemudian tekan Screenshot.\n"+
                       "pastikan score terlihat baik di layar.\n"+
                       "dan lanjutkan ke soalan berikutnya.");
+                textareaExamQuestionAnswerEssay.setOpaque(false);
             
+                break;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+                labelTyping.setVisible(false);
+                panelBrowseUpload.setVisible(true);
+                showExamQuestionPreviewWhenAvailable();
+                
+                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay"); 
+                textareaExamQuestionAnswerEssay.setText(
+                      "Klik pada gambar disamping untuk\n"+
+                      "melihat dokumen yg harus di\n"+
+                      "ketik (dibuat) kembali.\n"+
+                      "pastikan konten & pengaturan lainnya\n"+
+                      "telah sesuai lalu, save dan upload...");
+                textareaExamQuestionAnswerEssay.setOpaque(false);
+                
                 break;
         }
     }
@@ -2828,7 +3021,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }//GEN-LAST:event_buttonExamActionPerformed
 
     private void labelTypingMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelTypingMouseClicked
-
+        labelTyping.setIcon(loadingImage);
         visitURL("https://fastfingers.net/typingtest/indonesian", "opening embedded typing");
     }//GEN-LAST:event_labelTypingMouseClicked
 
@@ -2840,11 +3033,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void labelScreenshotMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScreenshotMouseClicked
 
         labelScreenshot.setIcon(loadingImage);
+        //return back the image display
+        labelTyping.setIcon(typingImage);
         
         try {
-            File file = new File(PathReference.getScreenshotPath(createImageFileName()));
+            screenshotBrowserFile = new File(PathReference.getScreenshotPath(createImageFileName()));
             BufferedImage image = new Robot().createScreenCapture(new Rectangle(panelBase.getLocationOnScreen().x, panelBase.getLocationOnScreen().y, panelBase.getWidth(), panelBase.getHeight()));
-            ImageIO.write(image, "png", file);
+            ImageIO.write(image, "png", screenshotBrowserFile);
         } catch (Exception ex) {
             System.err.println("error while screenshot panel");
         }
@@ -2863,6 +3058,97 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // TODO add your handling code here:
     }//GEN-LAST:event_labelUsernameTextMouseEntered
 
+  
+    
+    private void buttonBrowseFileExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonBrowseFileExamActionPerformed
+        
+        fileChooser = new JFileChooser();
+        //fileChooser.setAcceptAllFileFilterUsed(false);
+
+                // jenis is 
+		// 1 for abcd
+		// 2 for essay
+		// 3 for ab only (true false)
+		// 4 for typing
+		// 5 for praktek (submit upload) - word
+		// 6 for praktek (submit upload) - excel
+		// 7 for praktek (submit upload) - ppoint
+		// 8 for praktek (submit upload) - pdf
+		// 9 for praktek (submit upload) - all-files
+                
+        System.out.println("------------ saat ini soalan di index ke " + currentIndexExamQuestion + " id ke " + userCurrentExamQ[currentIndexExamQuestion].getId());
+        System.out.println("------------ saat ini soalan berjenis " + userCurrentExamQ[currentIndexExamQuestion].getJenis());
+        
+        switch (userCurrentExamQ[currentIndexExamQuestion].getJenis()) {
+            case 5:
+                //fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Ms.Word file", "doc", "docx"));
+                  fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.Word file", "doc", "docx"));
+                break;
+            case 6:
+                //fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Ms.Excel file", "xls", "xlsx"));
+                  fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.Excel file", "xls", "xlsx"));
+                break;
+            case 7:
+                //fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Ms.P.Point file",  "ppt", "pptx"));
+                  fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.P.Point file",  "ppt", "pptx"));
+                break;
+            case 8:
+                //fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF file",  "pdf"));
+                  fileChooser.setFileFilter(new FileNameExtensionFilter("PDF file",  "pdf"));
+                break;
+            case 9:
+                //fileChooser.setAcceptAllFileFilterUsed(true);
+                // we set it to all files
+                // fileChooser.setFileFilter(new FileNameExtensionFilter("All file", "*.*"));
+                break;
+            default:
+                break;
+        }
+        
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            // change accordingly
+            // copy the image to Local AppData path
+            // use it to Jlabel Propic
+            praktekFiles[currentIndexFilePraktekExamQ] = fileChooser.getSelectedFile();
+
+            buttonBrowseFileExam.setIcon(okImage);    
+
+            
+        } else {
+                buttonBrowseFileExam.setIcon(null);
+                praktekFiles[currentIndexFilePraktekExamQ] = null;
+        }
+        
+    }//GEN-LAST:event_buttonBrowseFileExamActionPerformed
+
+    private void labelExamQuestionPreviewMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelExamQuestionPreviewMouseClicked
+        
+        // opening file locally
+        // but not for typing mode
+        if(userCurrentExamQ[currentIndexExamQuestion].getJenis()==4){
+            UIEffect.popup("Please continue the exam", this);
+        }else{
+        
+        try { 
+            // file path to  open
+            String fileExamPreview = configuration.getStringValue(Keys.EXAM_QUESTION_PREVIEW);
+
+            File u = new File(fileExamPreview);
+            if(u.exists()){
+                Desktop d = Desktop.getDesktop(); 
+                d.open(u); 
+            }else{
+                 UIEffect.popup("File preview is not downloaded yet! Please wait...", this);
+            }
+            
+        } catch (Exception eevt) { 
+            UIEffect.popup("File not found! Please report a bug to administrator.", this);
+        } 
+        
+        }
+    }//GEN-LAST:event_labelExamQuestionPreviewMouseClicked
+
     private void setBackScreenshotIcon(){
         
         new java.util.Timer().schedule( 
@@ -2870,13 +3156,21 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             @Override
             public void run() {
                labelScreenshot.setIcon(screenshotImage);
+               
                 if(userCurrentExamQ != null){
                     if(userCurrentExamQ[currentIndexExamQuestion].getJenis()==4){
                         // return back to exam page UI
                         cardLayouterMain.show(panelContentCenter, "panelExam");
                         labelTyping.setVisible(false);
                         labelScreenshot.setVisible(false);
+                        panelExamQuestionPreview.setVisible(true);
+                        
+                        // render the screenshot taken
+                        UIEffect.iconChanger(labelExamQuestionPreview, screenshotBrowserFile.getAbsolutePath());
+                        
+                        labelExamQuestion.setIcon(okImage);
                         labelExamQuestion.setText("Mengetik (Typing) telah usai. Silahkan melanjutkan soalan berikutnya...");
+                        textareaExamQuestionAnswerEssay.setText("-");
                     }
                 }
             }
@@ -3005,6 +3299,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         hideLoadingStatus();
     }
     
+    private boolean isExamQuestionPreview(String ... ext){
+        
+        boolean statMatched = false;
+        
+        for(String n:ext){
+            
+                statMatched = userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains(n);
+                if(statMatched){
+                    break;
+                }
+            
+        }
+        
+        return statMatched;
+        
+    }
+    
     private void loadExamQuestionPreviewLocally() {
 
         String propic = configuration.getStringValue(Keys.EXAM_QUESTION_PREVIEW);
@@ -3012,8 +3323,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         System.out.println("Client Frame is Trying to load " + propic);
 
         if (!propic.contains("default") && propic.length() > 0) {
-            // set the propic
-            UIEffect.iconChanger(labelExamQuestionPreview, (propic));
+            // set the propic only if the question preview is image
+            if(isExamQuestionPreview("png", "jpg", "jpeg")){
+            UIEffect.iconChanger(labelExamQuestionPreview, (propic));    
+            }else{
+                // let the icon changed by the showExamQuestion() method
+            }
+            
             // clearing any text remains...
             labelExamQuestionPreview.setText("");
         }
@@ -3185,6 +3501,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JPanel panelAttendance;
     private javax.swing.JPanel panelAttendanceData;
     private javax.swing.JPanel panelBase;
+    private javax.swing.JPanel panelBrowseUpload;
     private javax.swing.JPanel panelCenter;
     private javax.swing.JPanel panelContent;
     private javax.swing.JPanel panelContentCenter;
@@ -3196,6 +3513,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JPanel panelDocumentData;
     private javax.swing.JPanel panelExam;
     private javax.swing.JPanel panelExamInner;
+    private javax.swing.JPanel panelExamQuestionPreview;
     private javax.swing.JPanel panelHeader;
     private javax.swing.JPanel panelHeaderCenter;
     private javax.swing.JPanel panelHistory;
@@ -3575,6 +3893,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                     // for submitting later
                     allExamStudentAnswer = new ExamStudentAnswer[manyExamQuestions];
                     
+                    // for creating a prepared file object for practically purposes
+                    praktekFiles = preparedFileObjectFromExamQ(userCurrentExamQ);
+                    
                  // we make the appearance randomly
                  Collections.shuffle(Arrays.asList(userCurrentExamQ));
                  buttonContinueExam.setEnabled(true);
@@ -3599,6 +3920,35 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void hideHistoryData() {
         labelHistoryLast1.setVisible(false);
         showHistoryPanel(false);
+    }
+    
+    private File[] preparedFileObjectFromExamQ(ExamQuestion [] arr){
+        File manyFiles [] = null;
+        int ditemukan=0;
+        
+                // jenis is 
+		// 1 for abcd
+		// 2 for essay
+		// 3 for ab only (true false)
+		// 4 for typing (submit upload) - png
+		// 5 for praktek (submit upload) - word
+		// 6 for praktek (submit upload) - excel
+		// 7 for praktek (submit upload) - ppoint
+		// 8 for praktek (submit upload) - pdf
+		// 9 for praktek (submit upload) - all-files
+		
+        
+        for(ExamQuestion single: arr){
+            if(single.getJenis()>=4 || single.getJenis()<=9){
+                ditemukan++;
+            }
+        }
+        
+        if(ditemukan!=0){
+            manyFiles = new File[ditemukan];
+        }
+        
+        return manyFiles;
     }
 
     public void showHistoryPanel(boolean b) {

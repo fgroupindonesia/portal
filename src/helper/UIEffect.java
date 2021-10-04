@@ -15,10 +15,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -77,6 +81,17 @@ public class UIEffect {
         }
 
         return en;
+    }
+    
+    public static String encode(String val){
+        String n = null;
+        try {
+            n = URLEncoder.encode(val, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            
+        }
+        
+        return n;
     }
 
     private static void addingTimerSchedule() {

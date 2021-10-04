@@ -101,24 +101,25 @@ public class SWTKey {
     public static final int WORK_EXAM_QUESTION_SAVE = 65;
     public static final int WORK_EXAM_QUESTION_UPDATE = 66;
     public static final int WORK_EXAM_QUESTION_BY_SCHEDULE = 67;
-
-    public static final int WORK_DELETE_EXAM_QUESTION_PREVIEW = 68;
-
-    public static final int WORK_EXAM_STUDENT_ANS_EDIT = 69;
-    public static final int WORK_EXAM_STUDENT_ANS_DELETE = 70;
-    public static final int WORK_EXAM_STUDENT_ANS_SAVE = 71;
-    public static final int WORK_EXAM_STUDENT_ANS_UPDATE = 72;
     
-    public static final int WORK_CERTIFICATE_STUDENT_EDIT = 73;
-    public static final int WORK_CERTIFICATE_STUDENT_DELETE = 74;
-    public static final int WORK_CERTIFICATE_STUDENT_SAVE = 75;
-    public static final int WORK_CERTIFICATE_STUDENT_UPDATE = 76;
-    public static final int WORK_DELETE_CERTIFICATE_PICTURE = 77;
 
-    public static final int WORK_CLASSROOM_EDIT = 78;
-    public static final int WORK_CLASSROOM_DELETE = 79;
-    public static final int WORK_CLASSROOM_SAVE = 80;
-    public static final int WORK_CLASSROOM_UPDATE = 81;
+    public static final int WORK_DELETE_EXAM_QUESTION_PREVIEW = 69;
+
+    public static final int WORK_EXAM_STUDENT_ANS_EDIT = 70;
+    public static final int WORK_EXAM_STUDENT_ANS_DELETE = 71;
+    public static final int WORK_EXAM_STUDENT_ANS_SAVE = 72;
+    public static final int WORK_EXAM_STUDENT_ANS_UPDATE = 73;
+    
+    public static final int WORK_CERTIFICATE_STUDENT_EDIT = 74;
+    public static final int WORK_CERTIFICATE_STUDENT_DELETE = 75;
+    public static final int WORK_CERTIFICATE_STUDENT_SAVE = 76;
+    public static final int WORK_CERTIFICATE_STUDENT_UPDATE = 77;
+    public static final int WORK_DELETE_CERTIFICATE_PICTURE = 78;
+
+    public static final int WORK_CLASSROOM_EDIT = 79;
+    public static final int WORK_CLASSROOM_DELETE = 80;
+    public static final int WORK_CLASSROOM_SAVE = 81;
+    public static final int WORK_CLASSROOM_UPDATE = 82;
     
     
 }

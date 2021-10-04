@@ -5,6 +5,7 @@
 package helper;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -18,12 +19,20 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 /**
  *
  * @author ASUS
  */
 public class HttpCall {
+
+    FileCopier fcopier;
+
+    public void setFileCopier(FileCopier fcp) {
+        fcopier = fcp;
+    }
 
     public HttpCall(HttpProcess hpro) {
         listener = hpro;
@@ -68,7 +77,7 @@ public class HttpCall {
     public static final int METHOD_POST = 1;
     public static final int METHOD_GET = 2;
     public static final int METHOD_POST_FILE = 3;
-    private static final String BOUNDARY = "*****";
+    private static final String BOUNDARY = "******";
     private static final String CRLF = "\r\n";
     private static final String TWO_HYPENS = "--";
 
@@ -147,6 +156,47 @@ public class HttpCall {
         return stat;
     }
 
+    public String getMimeType(String filename) {
+
+        String result = null;
+        filename = filename.toLowerCase();
+
+        if (filename.contains("docx")) {
+            result = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+        } else if (filename.contains("doc")) {
+            result = "application/msword";
+
+        } else if (filename.contains("xlsx")) {
+            result = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+        } else if (filename.contains("xls")) {
+            result = "application/vnd.ms-excel";
+
+        } else if (filename.contains("pptx")) {
+            result = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+
+        } else if (filename.contains("ppt")) {
+            result = "application/vnd.ms-powerpoint";
+
+        } else if (filename.contains("jpg") || filename.contains("jpeg")) {
+            result = "image/jpeg";
+
+        } else if (filename.contains("png")) {
+            result = "image/png";
+
+        } else if (filename.contains("txt")) {
+            result = "text/plain";
+
+        } else if (filename.contains("pdf")) {
+            result = "application/pdf";
+
+        }
+
+        return result;
+
+    }
+
     public void start(String urlTarget, int modeCall) {
 
         try {
@@ -161,12 +211,14 @@ public class HttpCall {
             if (!isWriteToDisk()) {
 
                 conn = (HttpURLConnection) url.openConnection();
+                conn.setReadTimeout(5000);
+                conn.setConnectTimeout(5000);
 
                 if (modeCall == METHOD_POST) {
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-                    conn.setRequestProperty("Acceptcharset", "en-us");
+                    conn.setRequestProperty("Accept-Charset", "en-us");
                     conn.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
                     conn.setRequestProperty("charset", "EN-US");
                     conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -181,30 +233,40 @@ public class HttpCall {
                     wr.close();
 
                     int responseCode = conn.getResponseCode();
+                    System.out.println("---------------- HTTP Call response code is " + responseCode);
                     //conn.getOutputStream().write(postDataBytes);
 
                 } else if (modeCall == METHOD_POST_FILE) {
 
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Connection", "Keep-Alive");
-                    conn.setRequestProperty("Cache-Control", "no-cache");
-                    conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-                    conn.addRequestProperty("Accept", "*/*");
-                    conn.setDoOutput(true);
+                    int bytesRead, bytesAvailable, bufferSize;
+                    byte[] buffer;
+                    int maxBufferSize = 1 * 1024 * 1024;
 
-                    DataOutputStream request = new DataOutputStream(conn.getOutputStream());
+                    conn.setRequestProperty("Connection", "Keep-Alive");
+                    conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
+                    conn.setDoOutput(true);
+                    conn.setDoInput(true);
+                    conn.setUseCaches(false);
+                    conn.setChunkedStreamingMode(1024);
+
+                    OutputStream outputStream = conn.getOutputStream();
+                    BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(outputStream, "UTF-8"));
 
                     // does this has a form field ?
                     if (mainData.size() > 0) {
 
                         for (FormData fd : mainData) {
 
-                            request.writeBytes(TWO_HYPENS + BOUNDARY + CRLF);
-                            request.writeBytes("Content-Disposition: form-data; name=\"" + fd.getKey() + "\"" + CRLF);
-                            request.writeBytes("Content-Type: text/plain; charset=UTF-8" + CRLF);
-                            request.writeBytes(CRLF);
-                            request.writeBytes(URLDecoder.decode(fd.getValue(), "UTF-8") + CRLF);
-                            request.flush();
+                            // write each key-values
+                            writer.append("--" + BOUNDARY).append(CRLF);
+                            writer.append("Content-Disposition: form-data; name=\"" + fd.getKey() + "\"")
+                                    .append(CRLF);
+                            writer.append("Content-Type: text/plain; charset=en-us").append(
+                                    CRLF);
+                            writer.append(CRLF);
+                            writer.append(UIEffect.encode(fd.getValue())).append(CRLF);
+                            writer.flush();
 
                         }
 
@@ -214,33 +276,56 @@ public class HttpCall {
                     if (fileData.size() > 0) {
 
                         for (FormFile ff : fileData) {
+
                             String fileName = ff.getFileObject().getName();
-                            request.writeBytes(TWO_HYPENS + BOUNDARY + CRLF);
-                            request.writeBytes("Content-Disposition: form-data; name=\"" + ff.getKey() + "\"; filename=\"" + fileName + "\"" + CRLF);
-                            request.writeBytes("Content-Type: " + conn.guessContentTypeFromName(fileName) + CRLF);
-                            request.writeBytes("Content-Transfer-Encoding: binary" + CRLF);
-                            request.writeBytes(CRLF);
-                            request.flush();
+                            writer.append("--" + BOUNDARY).append(CRLF);
+                            writer.append(
+                                    "Content-Disposition: post-data; name=\"" + ff.getKey()
+                                    + "\"; filename=\"" + fileName + "\"")
+                                    .append(CRLF);
+                            writer.append(
+                                    "Content-Type: "
+                                    + this.getMimeType(fileName))
+                                    .append(CRLF);
+                            writer.append("Content-Transfer-Encoding: binary").append(CRLF);
+                            writer.append(CRLF).flush();
 
                             FileInputStream inputStream = new FileInputStream(ff.getFileObject());
-                            byte[] buffer = new byte[4096];
-                            int bytesRead = -1;
-                            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                                request.write(buffer, 0, bytesRead);
+
+                            bytesAvailable = inputStream.available();
+                            maxBufferSize = 1000;
+                            // int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                            buffer = new byte[bytesAvailable];
+
+                            /*while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                outputStream.write(buffer, 0, bytesRead);
+                            }*/
+                            bytesRead = inputStream.read(buffer, 0, bytesAvailable);
+                            while (bytesRead > 0) {
+                                outputStream.write(buffer, 0, bytesAvailable);
+                                bytesAvailable = inputStream.available();
+                                bytesAvailable = Math.min(bytesAvailable, maxBufferSize);
+                                bytesRead = inputStream.read(buffer, 0, bytesAvailable);
                             }
 
-                            request.flush();
+                            outputStream.flush();
+                            inputStream.close();
 
+                            // this CRLF dont be added coz it will make corruption writer.append(CRLF).flush();
+                            writer.flush();
                         }
 
                     }
 
                     // closing this POST + FORM + FILE request
-                    request.writeBytes(CRLF);
-                    request.writeBytes(TWO_HYPENS + BOUNDARY + TWO_HYPENS);
+                    writer.append(CRLF).flush();
+                    writer.append("--" + BOUNDARY + "--").append(CRLF);
+                    writer.flush();
+                    writer.close();
+                    outputStream.close();
 
-                    request.flush();
-                    //request.close();
+                    int responseCode = conn.getResponseCode();
+                    System.out.println("---------------- HTTP Call response code is " + responseCode);
 
                 } else if (modeCall == METHOD_GET) {
                     conn.setRequestMethod("GET");
@@ -281,7 +366,7 @@ public class HttpCall {
                 }
 
                 // download here
-                FileCopier.downloadFromURL(url, fileName);
+                fcopier.downloadFromURL(url, fileName);
 
                 // manually defining success json
                 endResult = "{\"status\":\"valid\"}";
@@ -301,6 +386,7 @@ public class HttpCall {
             }
 
             if (conn != null) {
+
                 conn.disconnect();
             }
 

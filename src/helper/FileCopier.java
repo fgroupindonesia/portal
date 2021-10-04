@@ -2,7 +2,6 @@
  *  This is a Portal Access for Client & Admin Usage
  *  (c) FGroupIndonesia, 2020.
  */
-
 package helper;
 
 import java.awt.image.BufferedImage;
@@ -15,6 +14,7 @@ import java.net.*;
 import java.io.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
@@ -25,30 +25,93 @@ import javax.swing.JProgressBar;
  */
 public class FileCopier {
 
-    private static JProgressBar innerProgressBar;
+    private  JProgressBar innerProgressBar;
     // innerLabelBar is for percentage
-    private static JLabel innerLabelBar;
+    private  JLabel innerLabelBar;
     // labelLoading is for loadingicon
-    private static JLabel labelLoading;
+    private  JLabel labelLoading;
 
-    public static void setProgressBar(JProgressBar jp) {
+    public  void resetProgressBar() {
+        if (innerProgressBar != null) {
+            innerProgressBar.setValue(0);
+        }
+
+        if (innerLabelBar != null) {
+            innerLabelBar.setText("");
+        }
+    }
+
+    public  void setProgressBar(JProgressBar jp) {
         innerProgressBar = jp;
 
     }
 
-    public static void setProgressLabel(JLabel jb, JLabel jb2) {
+    public  void setProgressLabel(JLabel jb, JLabel jb2) {
         innerLabelBar = jb;
         labelLoading = jb2;
 
     }
 
-    public static void downloadFromURL(URL urlCome, String savedPath) throws Exception {
+    public  void uploadFromLocal(FormFile ff, HttpURLConnection conn) {
+        try {
+
+            //FileInputStream inputStream = new FileInputStream(ff.getFileObject());
+            byte[] fileContent = Files.readAllBytes(ff.getFileObject().toPath());
+           
+            OutputStream os = conn.getOutputStream();
+          
+            int totalSize = fileContent.length;
+            int bytesTransferred = 0;
+            int chunkSize = 2000;
+            int b = 0;
+
+            if (innerProgressBar != null) {
+                innerProgressBar.setMaximum(totalSize);
+            }
+
+            while (bytesTransferred < totalSize) {
+                int nextChunkSize = totalSize - bytesTransferred;
+                if (nextChunkSize > chunkSize) {
+                    nextChunkSize = chunkSize;
+                }
+                os.write(fileContent, bytesTransferred, nextChunkSize);
+                bytesTransferred += nextChunkSize;
+
+                // Here you can call the method which updates progress
+                // be sure to wrap it so UI-updates are done on the main thread!
+                b = (100 * bytesTransferred / totalSize);
+                if (innerProgressBar != null) {
+                    innerProgressBar.setValue(bytesTransferred);
+                }
+
+                System.out.println("b ialah " + b + " dengan total " + totalSize);
+                System.out.println("sementara transfer " + bytesTransferred);
+                
+                if (bytesTransferred == totalSize) {
+                    if (innerLabelBar != null) {
+                        innerLabelBar.setVisible(false);
+                        innerProgressBar.setVisible(false);
+                        labelLoading.setVisible(false);
+                    }
+                }
+
+            }
+            os.flush();
+
+        } catch (Exception ex) {
+
+        }
+    }
+
+    public  void downloadFromURL(URL urlCome, String savedPath) throws Exception {
 
         if (innerLabelBar != null) {
             innerLabelBar.setVisible(true);
             innerProgressBar.setVisible(true);
-            labelLoading.setVisible(true);
+
         }
+
+        labelLoading.setVisible(true);
 
         System.out.println("Downloading " + urlCome);
         System.out.println("Saving " + savedPath);

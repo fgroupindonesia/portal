@@ -30,6 +30,10 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
     private int work;
 
+    public void setFileCopierHelper(FileCopier fcphelper){
+        urlExecutor.setFileCopier(fcphelper);
+    }
+    
     public void setWork(int mode) {
         work = mode;
     }
@@ -289,7 +293,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_CLASSROOM_EDIT:
                 name = "classroom_edit";
                 break;
-           case SWTKey.WORK_EXAM_QUESTION_BY_SCHEDULE:
+            case SWTKey.WORK_EXAM_QUESTION_BY_SCHEDULE:
                 name = "exam_question_by_schedule";
                 break;
             case SWTKey.WORK_LOGIN:
@@ -655,7 +659,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void userLogin() {
         urlExecutor.start(WebReference.LOGIN_USER, HttpCall.METHOD_POST);
     }
-    
+
     private void examQuestionBySchedule() {
         urlExecutor.start(WebReference.ALL_EXAM_QUESTION_BY_SCHEDULE, HttpCall.METHOD_POST);
     }
@@ -857,7 +861,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void classRoomDelete() {
         urlExecutor.start(WebReference.DELETE_CLASSROOM, HttpCall.METHOD_POST);
     }
-    
+
     private void examCategoryDelete() {
         urlExecutor.start(WebReference.DELETE_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
@@ -881,7 +885,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void examCategorySave() {
         urlExecutor.start(WebReference.ADD_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
-    
+
     private void classRoomSave() {
         urlExecutor.start(WebReference.ADD_CLASSROOM, HttpCall.METHOD_POST);
     }
@@ -897,7 +901,11 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void examStudentAnswerSave() {
-        urlExecutor.start(WebReference.ADD_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+        if (hasFile()) {
+            urlExecutor.start(WebReference.ADD_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.ADD_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+        }
     }
 
     private void examQuestionSave() {
@@ -916,6 +924,7 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private void classRoomEdit() {
         urlExecutor.start(WebReference.DETAIL_CLASSROOM, HttpCall.METHOD_POST);
     }
+
     private void examCategoryEdit() {
         urlExecutor.start(WebReference.DETAIL_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
@@ -929,19 +938,25 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void examStudentAnswerUpdate() {
-        urlExecutor.start(WebReference.UPDATE_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+        if (hasFile()) {
+            urlExecutor.start(WebReference.UPDATE_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST_FILE);
+        } else {
+            urlExecutor.start(WebReference.UPDATE_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+        }
+         
     }
 
     private void examCategoryUpdate() {
         urlExecutor.start(WebReference.UPDATE_EXAM_CATEGORY, HttpCall.METHOD_POST);
     }
+
     private void classRoomUpdate() {
         urlExecutor.start(WebReference.UPDATE_CLASSROOM, HttpCall.METHOD_POST);
     }
 
     private void certificateStudentUpdate() {
-      
-         if (hasFile()) {
+
+        if (hasFile()) {
             urlExecutor.start(WebReference.UPDATE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST_FILE);
         } else {
             urlExecutor.start(WebReference.UPDATE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
