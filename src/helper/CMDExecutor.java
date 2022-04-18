@@ -39,6 +39,9 @@ public class CMDExecutor {
             }
             val = output.toString().substring(output.indexOf("\n"), output.length()).trim();;
 
+            sNumReader.close();
+            SerNumProcess.destroy();
+            
         } catch (Exception ex) {
             UIEffect.popup("Error while obtaining Machine Unique ID " + ex.getMessage(), null);
         }

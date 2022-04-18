@@ -124,8 +124,6 @@ public class TableRenderer {
 
     }
 
-  
-
     public String getSelectedRowValue(JTable el, int colFind) {
 
         String val = null;
@@ -234,9 +232,9 @@ public class TableRenderer {
                 false,
                 d.getId(),
                 d.getUsername(),
-                UIEffect.decodeSafe(d.getPass()),
-                UIEffect.decodeSafe(d.getEmail()),
-                UIEffect.decodeSafe(d.getAddress()),
+                d.getPass(),
+                d.getEmail(),
+                d.getAddress(),
                 d.getPropic(),
                 d.getMobile()
             };
@@ -286,7 +284,7 @@ public class TableRenderer {
                 false,
                 d.getId(),
                 d.getStudent_username(),
-                UIEffect.decodeSafe(d.getAnswer()),
+                d.getAnswer(),
                 d.getScore_earned(),
                 d.getStatus(),
                 d.getDate_created()
@@ -341,9 +339,9 @@ public class TableRenderer {
             Object[] dataBaru = new Object[]{
                 false,
                 d.getId(),
-                UIEffect.decodeSafe(d.getQuestion()),
+                d.getQuestion(),
                 jenisQ,
-                UIEffect.decodeSafe(d.getAnswer()),
+                d.getAnswer(),
                 d.getScore_point(),
                 d.getPreview()
             };
@@ -420,7 +418,7 @@ public class TableRenderer {
             // 1 for yes
             // 0 for no
             boolean ex = (d.getFor_exam() == 1) ? true : false;
-            
+
             Object[] dataBaru = new Object[]{
                 false,
                 d.getId(),
@@ -445,8 +443,8 @@ public class TableRenderer {
         for (Document d : dataCome) {
             Object[] dataBaru = new Object[]{false,
                 d.getId(),
-                UIEffect.decodeSafe(d.getTitle()),
-                UIEffect.decodeSafe(d.getDescription()),
+                d.getTitle(),
+                d.getDescription(),
                 d.getFilename(),
                 d.getUsername(),
                 d.getUrl(),
@@ -467,7 +465,7 @@ public class TableRenderer {
                 d.getId(),
                 d.getUsername(),
                 rp.getText(d.getAmount()),
-                UIEffect.decodeSafe(d.getMethod()),
+                d.getMethod(),
                 d.getScreenshot(),
                 d.getDate_created(),};
             tableModel.addRow(dataBaru);
@@ -486,7 +484,7 @@ public class TableRenderer {
                 d.getUsername(),
                 d.getDay_schedule(),
                 d.getTime_schedule(),
-                UIEffect.decodeSafe(d.getClass_registered())
+                d.getClass_registered()
             };
 
             tableModel.addRow(dataBaru);

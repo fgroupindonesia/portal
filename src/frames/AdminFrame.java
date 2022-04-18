@@ -20,6 +20,7 @@ import beans.User;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.google.gson.Gson;
 import helper.CMDExecutor;
+import helper.FileCopier;
 import helper.HttpCall;
 import helper.JSONChecker;
 import helper.PathReference;
@@ -59,6 +60,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             certificateStudentFile;
     short idForm;
 
+    // used for downloading
+     FileCopier fcp = new FileCopier();
+
+    
     // used for exam question form only
     int examQCatID, examQSubCatID;
 
@@ -173,7 +178,18 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         textfieldMobile.setText(dataCome.getMobile());
         textfieldPass.setText(UIEffect.decodeSafe(dataCome.getPass()));
         textfieldUsername.setText(dataCome.getUsername());
+        int status_warning = dataCome.getWarning_status();
 
+        if(status_warning==1){
+            radioUserAttendanceProblem.setSelected(true);
+        }else if(status_warning == 2){
+            radioUserPaymentProblem.setSelected(true);
+        }else if(status_warning == 3){
+            radioUserExerciseProblem.setSelected(true);
+        } else {
+            radioUserNoProblem.setSelected(true);
+        }
+        
         if (!dataCome.getPropic().equalsIgnoreCase("default.png")) {
             // we are required to download the image from server
             refreshUserPicture(dataCome.getPropic());
@@ -359,7 +375,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.CERTIFICATE_PICTURE, dest.getAbsolutePath());
 
-        SWThreadWorker workCertImage = new SWThreadWorker(this);
+        SWThreadWorker workCertImage = new SWThreadWorker(this, HttpCall.METHOD_GET);
 
         // execute the download picture process
         workCertImage.setWork(SWTKey.WORK_REFRESH_CERTIFICATE_PICTURE);
@@ -457,7 +473,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.EXAM_QUESTION_PREVIEW, dest.getAbsolutePath());
 
-        SWThreadWorker workPicture = new SWThreadWorker(this);
+        SWThreadWorker workPicture = new SWThreadWorker(this, HttpCall.METHOD_GET);
 
         // execute the download picture process
         workPicture.setWork(SWTKey.WORK_REFRESH_EXAM_QUESTION_PREVIEW);
@@ -469,6 +485,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     }
 
+     private void prepareFileCopier() {
+        fcp.resetProgressBar();
+      
+    }
+    
     private void refreshUserPicture(String filename) {
 
         // set the path temporarily 
@@ -478,12 +499,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.USER_PROPIC, dest.getAbsolutePath());
 
-        SWThreadWorker workPicture = new SWThreadWorker(this);
+        SWThreadWorker workPicture = new SWThreadWorker(this, HttpCall.METHOD_GET);
 
         // execute the download picture process
         workPicture.setWork(SWTKey.WORK_REFRESH_PICTURE);
         workPicture.writeMode(true);
         workPicture.addData("propic", filename);
+        workPicture.setFileCopierHelper(fcp);
 
         // executorService.submit(workSched);
         executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
@@ -499,7 +521,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.SIGNATURE_ATTENDANCE, dest.getAbsolutePath());
 
-        SWThreadWorker workSignature = new SWThreadWorker(this);
+        SWThreadWorker workSignature = new SWThreadWorker(this, HttpCall.METHOD_GET);
 
         // execute the download picture process
         workSignature.setWork(SWTKey.WORK_REFRESH_SIGNATURE);
@@ -519,7 +541,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.SCREENSHOT_REPORT_BUGS, dest.getAbsolutePath());
 
-        SWThreadWorker workScreenshot = new SWThreadWorker(this);
+        SWThreadWorker workScreenshot = new SWThreadWorker(this, HttpCall.METHOD_GET);
 
         // execute the download picture process
         workScreenshot.setWork(SWTKey.WORK_REFRESH_SCREENSHOT_REPORT_BUGS);
@@ -540,7 +562,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.SCREENSHOT_LAST_PAYMENT, dest.getAbsolutePath());
 
-        SWThreadWorker workScreenshot = new SWThreadWorker(this);
+        SWThreadWorker workScreenshot = new SWThreadWorker(this, HttpCall.METHOD_GET);
 
         // execute the download picture process
         workScreenshot.setWork(SWTKey.WORK_REFRESH_SCREENSHOT_PAYMENT);
@@ -559,7 +581,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.SIGNATURE_ATTENDANCE, "");
 
-        SWThreadWorker workSignature = new SWThreadWorker(this);
+        SWThreadWorker workSignature = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // execute the download picture process
         workSignature.setWork(SWTKey.WORK_DELETE_SIGNATURE);
@@ -578,7 +600,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.EXAM_QUESTION_PREVIEW, "");
 
-        SWThreadWorker workPropic = new SWThreadWorker(this);
+        SWThreadWorker workPropic = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // execute the deleting picture process
         workPropic.setWork(SWTKey.WORK_DELETE_EXAM_QUESTION_PREVIEW);
@@ -597,7 +619,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.CERTIFICATE_PICTURE, "");
 
-        SWThreadWorker workCert = new SWThreadWorker(this);
+        SWThreadWorker workCert = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // execute the download picture process
         workCert.setWork(SWTKey.WORK_DELETE_CERTIFICATE_PICTURE);
@@ -616,7 +638,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.USER_PROPIC, "");
 
-        SWThreadWorker workPropic = new SWThreadWorker(this);
+        SWThreadWorker workPropic = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // execute the download picture process
         workPropic.setWork(SWTKey.WORK_DELETE_USER_PICTURE);
@@ -635,7 +657,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         configuration.setValue(Keys.SCREENSHOT_LAST_PAYMENT, "");
 
-        SWThreadWorker workScreenshot = new SWThreadWorker(this);
+        SWThreadWorker workScreenshot = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // execute the download picture process
         workScreenshot.setWork(SWTKey.WORK_DELETE_SCREENSHOT_PAYMENT);
@@ -649,7 +671,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshUser() {
 
-        SWThreadWorker workUser = new SWThreadWorker(this);
+        SWThreadWorker workUser = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workUser.setWork(SWTKey.WORK_REFRESH_USER);
         prepareToken(workUser);
         executorService.schedule(workUser, 2, TimeUnit.SECONDS);
@@ -662,7 +684,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshAttendance() {
 
-        SWThreadWorker workAttendance = new SWThreadWorker(this);
+        SWThreadWorker workAttendance = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workAttendance.setWork(SWTKey.WORK_REFRESH_ATTENDANCE);
         workAttendance.addData("username", "admin");
 
@@ -677,7 +699,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshExamQuestions() {
 
-        SWThreadWorker workExamQ = new SWThreadWorker(this);
+        SWThreadWorker workExamQ = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExamQ.setWork(SWTKey.WORK_REFRESH_EXAM_QUESTIONS);
         //workExamCat.addData("username", "admin");
 
@@ -692,7 +714,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshExamCategory() {
 
-        SWThreadWorker workExamCat = new SWThreadWorker(this);
+        SWThreadWorker workExamCat = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExamCat.setWork(SWTKey.WORK_REFRESH_EXAM_CATEGORY);
         //workExamCat.addData("username", "admin");
 
@@ -707,7 +729,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshCertificateStudent() {
 
-        SWThreadWorker workCertStudent = new SWThreadWorker(this);
+        SWThreadWorker workCertStudent = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workCertStudent.setWork(SWTKey.WORK_REFRESH_CERTIFICATE_STUDENT);
         //workExamCat.addData("username", "admin");
 
@@ -720,7 +742,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshExamStudentAnswer() {
 
-        SWThreadWorker workExamStudentAns = new SWThreadWorker(this);
+        SWThreadWorker workExamStudentAns = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExamStudentAns.setWork(SWTKey.WORK_REFRESH_EXAM_STUDENT_ANS);
         //workExamCat.addData("username", "admin");
 
@@ -735,7 +757,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshScheduleByDay(String dayName) {
 
-        SWThreadWorker workSchedule = new SWThreadWorker(this);
+        SWThreadWorker workSchedule = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workSchedule.setWork(SWTKey.WORK_REFRESH_SCHEDULE_BY_DAY);
         workSchedule.addData("day_schedule", dayName);
         prepareToken(workSchedule);
@@ -749,7 +771,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshDocument() {
 
-        SWThreadWorker workDoc = new SWThreadWorker(this);
+        SWThreadWorker workDoc = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workDoc.setWork(SWTKey.WORK_REFRESH_DOCUMENT);
         workDoc.addData("username", "admin");
         prepareToken(workDoc);
@@ -763,7 +785,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshPayment() {
 
-        SWThreadWorker workPay = new SWThreadWorker(this);
+        SWThreadWorker workPay = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workPay.setWork(SWTKey.WORK_REFRESH_PAYMENT);
         workPay.addData("username", "admin");
         prepareToken(workPay);
@@ -777,7 +799,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshBugsReported() {
 
-        SWThreadWorker workBugs = new SWThreadWorker(this);
+        SWThreadWorker workBugs = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workBugs.setWork(SWTKey.WORK_REFRESH_REPORT_BUGS);
         workBugs.addData("username", "admin");
         prepareToken(workBugs);
@@ -791,7 +813,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshSchedule() {
 
-        SWThreadWorker workSched = new SWThreadWorker(this);
+        SWThreadWorker workSched = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workSched.setWork(SWTKey.WORK_REFRESH_SCHEDULE);
         workSched.addData("username", "admin");
         prepareToken(workSched);
@@ -805,7 +827,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void refreshClassRoom() {
 
-        SWThreadWorker workClassRoom = new SWThreadWorker(this);
+        SWThreadWorker workClassRoom = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workClassRoom.setWork(SWTKey.WORK_REFRESH_CLASSROOM);
         prepareToken(workClassRoom);
         executorService.schedule(workClassRoom, 2, TimeUnit.SECONDS);
@@ -815,7 +837,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getUserProfile(String usernameIn) {
 
-        SWThreadWorker workUser = new SWThreadWorker(this);
+        SWThreadWorker workUser = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workUser.setWork(SWTKey.WORK_REFRESH_PROFILE);
         workUser.addData("username", usernameIn);
         prepareToken(workUser);
@@ -825,7 +847,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getAttendance(int idIn) {
 
-        SWThreadWorker workAttendance = new SWThreadWorker(this);
+        SWThreadWorker workAttendance = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workAttendance.setWork(SWTKey.WORK_ATTENDANCE_EDIT);
         workAttendance.addData("id", idIn + "");
         prepareToken(workAttendance);
@@ -835,7 +857,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getExamQuestion(String idIn) {
 
-        SWThreadWorker workExamQ = new SWThreadWorker(this);
+        SWThreadWorker workExamQ = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExamQ.setWork(SWTKey.WORK_EXAM_QUESTION_EDIT);
         workExamQ.addData("id", idIn);
         prepareToken(workExamQ);
@@ -845,7 +867,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getExamCategory(String idIn) {
 
-        SWThreadWorker workExamCat = new SWThreadWorker(this);
+        SWThreadWorker workExamCat = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExamCat.setWork(SWTKey.WORK_EXAM_CATEGORY_EDIT);
         workExamCat.addData("id", idIn);
         prepareToken(workExamCat);
@@ -855,7 +877,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getClassRoom(String idIn) {
 
-        SWThreadWorker workClassR = new SWThreadWorker(this);
+        SWThreadWorker workClassR = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workClassR.setWork(SWTKey.WORK_CLASSROOM_EDIT);
         workClassR.addData("id", idIn);
         prepareToken(workClassR);
@@ -865,7 +887,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getCertificateStudent(String idIn) {
 
-        SWThreadWorker workCertStudent = new SWThreadWorker(this);
+        SWThreadWorker workCertStudent = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workCertStudent.setWork(SWTKey.WORK_CERTIFICATE_STUDENT_EDIT);
         workCertStudent.addData("id", idIn);
         prepareToken(workCertStudent);
@@ -875,7 +897,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getExamStudentAnswer(String idIn) {
 
-        SWThreadWorker workExamStudentAns = new SWThreadWorker(this);
+        SWThreadWorker workExamStudentAns = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExamStudentAns.setWork(SWTKey.WORK_EXAM_STUDENT_ANS_EDIT);
         workExamStudentAns.addData("id", idIn);
         prepareToken(workExamStudentAns);
@@ -888,7 +910,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // the id come here is the main parent
         // exam category id as reference
-        SWThreadWorker workExamSubCat = new SWThreadWorker(this);
+        SWThreadWorker workExamSubCat = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExamSubCat.setWork(SWTKey.WORK_REFRESH_EXAM_SUBCATEGORY);
         workExamSubCat.addData("exam_category_id", idIn);
         prepareToken(workExamSubCat);
@@ -898,7 +920,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getDocument(int anID) {
 
-        SWThreadWorker workDoc = new SWThreadWorker(this);
+        SWThreadWorker workDoc = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workDoc.setWork(SWTKey.WORK_DOCUMENT_EDIT);
         workDoc.addData("id", anID + "");
         prepareToken(workDoc);
@@ -908,7 +930,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getBugsReported(int anID) {
 
-        SWThreadWorker workBugs = new SWThreadWorker(this);
+        SWThreadWorker workBugs = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workBugs.setWork(SWTKey.WORK_REPORT_BUGS_EDIT);
         workBugs.addData("id", anID + "");
         prepareToken(workBugs);
@@ -918,7 +940,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getPayment(int anID) {
 
-        SWThreadWorker workPay = new SWThreadWorker(this);
+        SWThreadWorker workPay = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workPay.setWork(SWTKey.WORK_PAYMENT_EDIT);
         workPay.addData("id", anID + "");
         prepareToken(workPay);
@@ -928,7 +950,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void getSchedule(int anID) {
 
-        SWThreadWorker workSched = new SWThreadWorker(this);
+        SWThreadWorker workSched = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workSched.setWork(SWTKey.WORK_SCHEDULE_EDIT);
         workSched.addData("id", anID + "");
         prepareToken(workSched);
@@ -938,7 +960,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void saveDocument() {
         showLoadingStatus();
-        SWThreadWorker workDocumentEntity = new SWThreadWorker(this);
+        SWThreadWorker workDocumentEntity = null;
+
+        if (docFile != null) {
+            workDocumentEntity = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workDocumentEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
+
+        }
 
         // check whether this is edit or new form?
         if (editMode) {
@@ -953,7 +982,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workDocumentEntity.addData("title", textfieldTitleDoc.getText());
         workDocumentEntity.addData("description", textareaDescriptionDoc.getText());
         workDocumentEntity.addData("username", comboboxUsernameDoc.getSelectedItem().toString());
-        workDocumentEntity.addData("url", textfieldUrlDoc.getText());
+
+        // we will insert the url only if the checkbox is turned off
+        // otherwise let the server create that part later on
+        if (!checkboxShortenURLDoc.isSelected()) {
+
+            workDocumentEntity.addData("url", textfieldUrlDoc.getText());
+
+        }
 
         if (docFile != null) {
             workDocumentEntity.addFile("document", docFile);
@@ -967,7 +1003,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void savePayment() {
 
         showLoadingStatus();
-        SWThreadWorker workPaymentEntity = new SWThreadWorker(this);
+        SWThreadWorker workPaymentEntity = null;
+
+        if (payFile != null) {
+            workPaymentEntity = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workPaymentEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
+        }
 
         // check whether this is edit or new form?
         if (editMode) {
@@ -997,7 +1039,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void saveBugsReported() {
 
         showLoadingStatus();
-        SWThreadWorker workBugsEntity = new SWThreadWorker(this);
+        SWThreadWorker workBugsEntity = null;
+
+        if (bugsFile != null) {
+            workBugsEntity = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workBugsEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
+        }
 
         // saving new data
         workBugsEntity.setWork(SWTKey.WORK_REPORT_BUGS_SAVE);
@@ -1020,7 +1068,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         showLoadingStatus();
 
-        SWThreadWorker workAttendanceEntity = new SWThreadWorker(this);
+        SWThreadWorker workAttendanceEntity = null;
+
+        if (signatureFile != null) {
+            workAttendanceEntity = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workAttendanceEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
+
+        }
 
         // check whether this is edit or new form?
         if (editMode) {
@@ -1051,7 +1106,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         showLoadingStatus();
 
-        SWThreadWorker workExamCategoryEntity = new SWThreadWorker(this);
+        SWThreadWorker workExamCategoryEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // check whether this is edit or new form?
         if (editMode) {
@@ -1089,7 +1144,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         showLoadingStatus();
 
-        SWThreadWorker workClassR = new SWThreadWorker(this);
+        SWThreadWorker workClassR = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // check whether this is edit or new form?
         if (editMode) {
@@ -1114,7 +1169,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         showLoadingStatus();
 
-        SWThreadWorker workCertStudent = new SWThreadWorker(this);
+        SWThreadWorker workCertStudent = null;
+
+        if (certificateStudentFile != null) {
+            workCertStudent = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workCertStudent = new SWThreadWorker(this, HttpCall.METHOD_POST);
+        }
 
         // check whether this is edit or new form?
         if (editMode) {
@@ -1161,7 +1222,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         showLoadingStatus();
 
-        SWThreadWorker workExamSA = new SWThreadWorker(this);
+        SWThreadWorker workExamSA = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // check whether this is edit or new form?
         if (editMode) {
@@ -1195,13 +1256,32 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void saveUser() {
         showLoadingStatus();
-        SWThreadWorker workUserEntity = new SWThreadWorker(this);
+        SWThreadWorker workUserEntity = null;
+        if (propicFile != null) {
+            workUserEntity = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workUserEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
+        }
 
+        // 0 is no_problem status
+        int statusWarning = 0;
+        
+        if(radioUserAttendanceProblem.isSelected()){
+            statusWarning = 1;
+        }else if(radioUserExerciseProblem.isSelected()){
+            statusWarning = 3;
+        }else if(radioUserPaymentProblem.isSelected()){
+            statusWarning = 2;
+        }
+        
         // check whether this is edit or new form?
         if (editMode) {
             // updating data
             workUserEntity.setWork(SWTKey.WORK_USER_UPDATE);
             workUserEntity.addData("id", idForm + "");
+            
+            // we also give the value of warning status
+            workUserEntity.addData("warning_status", String.valueOf(statusWarning));
         } else {
             // saving new data
             workUserEntity.setWork(SWTKey.WORK_USER_SAVE);
@@ -1212,9 +1292,12 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         workUserEntity.addData("email", textfieldEmail.getText());
         workUserEntity.addData("address", textareaAddress.getText());
         workUserEntity.addData("mobile", textfieldMobile.getText());
+        
+       
 
         // for propic we will post the data here
         if (propicFile != null) {
+
             workUserEntity.addFile("propic", propicFile);
         }
 
@@ -1225,8 +1308,13 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void saveExamQuestion() {
         showLoadingStatus();
-        SWThreadWorker workExamQAEntity = new SWThreadWorker(this);
-
+        SWThreadWorker workExamQAEntity = null;
+        
+            if (examPreviewFile != null) {
+            workExamQAEntity = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+            } else { 
+            workExamQAEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
+            }
         // check whether this is edit or new form?
         if (editMode) {
             // updating data
@@ -1283,7 +1371,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         // for file exam preview
         if (examPreviewFile != null) {
             workExamQAEntity.addFile("preview", examPreviewFile);
-        }
+        } 
 
         prepareToken(workExamQAEntity);
         executorService.schedule(workExamQAEntity, 2, TimeUnit.SECONDS);
@@ -1312,7 +1400,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         showLoadingStatus();
 
-        SWThreadWorker workScheduleEntity = new SWThreadWorker(this);
+        SWThreadWorker workScheduleEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         // check whether this is edit or new form?
         if (editMode) {
@@ -1343,7 +1431,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void deleteUser(ArrayList<String> dataIn) {
 
         for (String d : dataIn) {
-            SWThreadWorker workUser = new SWThreadWorker(this);
+            SWThreadWorker workUser = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workUser.addData("username", d);
             workUser.setWork(SWTKey.WORK_USER_DELETE);
             prepareToken(workUser);
@@ -1356,7 +1444,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for document usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workAttendance = new SWThreadWorker(this);
+            SWThreadWorker workAttendance = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workAttendance.addData("id", d);
             workAttendance.setWork(SWTKey.WORK_ATTENDANCE_DELETE);
             prepareToken(workAttendance);
@@ -1369,7 +1457,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for exam category usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workExamQ = new SWThreadWorker(this);
+            SWThreadWorker workExamQ = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workExamQ.addData("id", d);
             workExamQ.setWork(SWTKey.WORK_EXAM_QUESTION_DELETE);
             prepareToken(workExamQ);
@@ -1382,7 +1470,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for exam category usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workExamCat = new SWThreadWorker(this);
+            SWThreadWorker workExamCat = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workExamCat.addData("id", d);
             workExamCat.setWork(SWTKey.WORK_EXAM_CATEGORY_DELETE);
             prepareToken(workExamCat);
@@ -1395,7 +1483,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for exam category usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workClassR = new SWThreadWorker(this);
+            SWThreadWorker workClassR = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workClassR.addData("id", d);
             workClassR.setWork(SWTKey.WORK_CLASSROOM_DELETE);
             prepareToken(workClassR);
@@ -1408,7 +1496,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for exam category usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workCertificateStudent = new SWThreadWorker(this);
+            SWThreadWorker workCertificateStudent = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workCertificateStudent.addData("id", d);
             workCertificateStudent.setWork(SWTKey.WORK_CERTIFICATE_STUDENT_DELETE);
             prepareToken(workCertificateStudent);
@@ -1421,7 +1509,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for exam category usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workExamStudentAns = new SWThreadWorker(this);
+            SWThreadWorker workExamStudentAns = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workExamStudentAns.addData("id", d);
             workExamStudentAns.setWork(SWTKey.WORK_EXAM_STUDENT_ANS_DELETE);
             prepareToken(workExamStudentAns);
@@ -1433,7 +1521,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void deleteExamSubCategory(int anID) {
 
         // for exam sub category usage the d is actually a number (Integer)
-        SWThreadWorker workExamSubCat = new SWThreadWorker(this);
+        SWThreadWorker workExamSubCat = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExamSubCat.addData("id", "" + anID);
         workExamSubCat.setWork(SWTKey.WORK_EXAM_SUBCATEGORY_DELETE);
         prepareToken(workExamSubCat);
@@ -1445,7 +1533,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for payment usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workPay = new SWThreadWorker(this);
+            SWThreadWorker workPay = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workPay.addData("id", d);
             workPay.setWork(SWTKey.WORK_PAYMENT_DELETE);
             prepareToken(workPay);
@@ -1458,7 +1546,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for bugsreported usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workBugs = new SWThreadWorker(this);
+            SWThreadWorker workBugs = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workBugs.addData("id", d);
             workBugs.setWork(SWTKey.WORK_REPORT_BUGS_DELETE);
             prepareToken(workBugs);
@@ -1471,7 +1559,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for document usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workDoc = new SWThreadWorker(this);
+            SWThreadWorker workDoc = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workDoc.addData("id", d);
             workDoc.setWork(SWTKey.WORK_DOCUMENT_DELETE);
             prepareToken(workDoc);
@@ -1484,7 +1572,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         // for schedule usage the d is actually a number (Integer)
         for (String d : dataIn) {
-            SWThreadWorker workSched = new SWThreadWorker(this);
+            SWThreadWorker workSched = new SWThreadWorker(this, HttpCall.METHOD_POST);
             workSched.addData("id", d);
             workSched.setWork(SWTKey.WORK_SCHEDULE_DELETE);
             prepareToken(workSched);
@@ -1505,6 +1593,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         fileChooser = new javax.swing.JFileChooser();
         radioButtonGroupTypeExamQuestion = new javax.swing.ButtonGroup();
         radioButtonGroupStatusCertificate = new javax.swing.ButtonGroup();
+        radioButtonGroupWarningStatusUser = new javax.swing.ButtonGroup();
         panelHeader = new javax.swing.JPanel();
         labelClose = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -1549,6 +1638,11 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         buttonSaveUserForm = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         labelPreviewPicture = new javax.swing.JLabel();
+        panelUserWarningStatus = new javax.swing.JPanel();
+        radioUserAttendanceProblem = new javax.swing.JRadioButton();
+        radioUserPaymentProblem = new javax.swing.JRadioButton();
+        radioUserExerciseProblem = new javax.swing.JRadioButton();
+        radioUserNoProblem = new javax.swing.JRadioButton();
         panelDocument = new javax.swing.JPanel();
         panelDocumentManagement = new javax.swing.JPanel();
         panelDocumentControl = new javax.swing.JPanel();
@@ -1575,6 +1669,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelLinkChangeFileDoc = new javax.swing.JLabel();
         buttonSaveDocumentForm = new javax.swing.JButton();
         comboboxUsernameDoc = new javax.swing.JComboBox<>();
+        checkboxShortenURLDoc = new javax.swing.JCheckBox();
         panelSchedule = new javax.swing.JPanel();
         panelScheduleManagement = new javax.swing.JPanel();
         panelScheduleControl = new javax.swing.JPanel();
@@ -2198,6 +2293,28 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         panelUserForm.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 170, 120, 120));
 
+        panelUserWarningStatus.setBorder(javax.swing.BorderFactory.createTitledBorder("Warning Status"));
+        panelUserWarningStatus.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        radioButtonGroupWarningStatusUser.add(radioUserAttendanceProblem);
+        radioUserAttendanceProblem.setText("Attendance Problem");
+        panelUserWarningStatus.add(radioUserAttendanceProblem);
+
+        radioButtonGroupWarningStatusUser.add(radioUserPaymentProblem);
+        radioUserPaymentProblem.setText("Payment Problem");
+        panelUserWarningStatus.add(radioUserPaymentProblem);
+
+        radioButtonGroupWarningStatusUser.add(radioUserExerciseProblem);
+        radioUserExerciseProblem.setText("Exercise Problem");
+        panelUserWarningStatus.add(radioUserExerciseProblem);
+
+        radioButtonGroupWarningStatusUser.add(radioUserNoProblem);
+        radioUserNoProblem.setSelected(true);
+        radioUserNoProblem.setText("No Problem");
+        panelUserWarningStatus.add(radioUserNoProblem);
+
+        panelUserForm.add(panelUserWarningStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 40, 150, 140));
+
         panelUser.add(panelUserForm, "panelUserForm");
 
         panelInnerCenter.add(panelUser, "panelUser");
@@ -2351,6 +2468,15 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         comboboxUsernameDoc.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         panelDocumentForm.add(comboboxUsernameDoc, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 200, 200, -1));
+
+        checkboxShortenURLDoc.setText("Shorten URL");
+        checkboxShortenURLDoc.setToolTipText("this will help the server creating the tinyUrl.com shorten link server on the fly!");
+        checkboxShortenURLDoc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkboxShortenURLDocActionPerformed(evt);
+            }
+        });
+        panelDocumentForm.add(checkboxShortenURLDoc, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, -1, -1));
 
         panelDocument.add(panelDocumentForm, "panelDocumentForm");
 
@@ -4350,6 +4476,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
             // show the loading bar
             showLoadingStatus();
+            
+           
         } else {
             UIEffect.popup("please select 1 single data only!", this);
         }
@@ -4542,7 +4670,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
 
     private void comboboxDaySchedItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_comboboxDaySchedItemStateChanged
-      
+
     }//GEN-LAST:event_comboboxDaySchedItemStateChanged
 
     private void buttonAddAttendanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddAttendanceActionPerformed
@@ -5774,24 +5902,22 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         // get the category name
         if (comboboxCategoryExamQuestion.getItemCount() > 0) {
             Object catName = comboboxCategoryExamQuestion.getSelectedItem();
-            
-            if(catName!=null){
-                 // and then convert it to an ID
-            // based on data stored locally in the jtable
-            String anIDChosen = tabRender.getValueWithText(tableExamCategoryData, ""+catName, 2, 1);
 
-            // used for later submission
-            examQCatID = Integer.parseInt(anIDChosen);
+            if (catName != null) {
+                // and then convert it to an ID
+                // based on data stored locally in the jtable
+                String anIDChosen = tabRender.getValueWithText(tableExamCategoryData, "" + catName, 2, 1);
 
-            // pass that ID to the Server to obtain the remaining sub category name listing
-            getAllExamSubCategory(anIDChosen);
+                // used for later submission
+                examQCatID = Integer.parseInt(anIDChosen);
 
-            // clearup the sub combobox because later will be updated by the async call from server callback
-            comboboxSubCategoryExamQuestion.removeAllItems();
-            comboboxSubCategoryExamQuestion.setEnabled(false);
+                // pass that ID to the Server to obtain the remaining sub category name listing
+                getAllExamSubCategory(anIDChosen);
+
+                // clearup the sub combobox because later will be updated by the async call from server callback
+                comboboxSubCategoryExamQuestion.removeAllItems();
+                comboboxSubCategoryExamQuestion.setEnabled(false);
             }
-
-           
 
         }
     }//GEN-LAST:event_comboboxCategoryExamQuestionActionPerformed
@@ -6086,7 +6212,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void comboboxDaySchedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboboxDaySchedActionPerformed
 
-          showLoadingStatus();
+        showLoadingStatus();
 
         // when the item selected changed
         // we check the registered class of that day
@@ -6098,8 +6224,14 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             listAnotherClassSched.setModel(new DefaultListModel());
             showLoadingStatus();
         }
-        
+
     }//GEN-LAST:event_comboboxDaySchedActionPerformed
+
+    private void checkboxShortenURLDocActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkboxShortenURLDocActionPerformed
+
+        textfieldUrlDoc.setEnabled(!checkboxShortenURLDoc.isSelected());
+
+    }//GEN-LAST:event_checkboxShortenURLDocActionPerformed
 
     private void getExamQuestionDetail() {
 
@@ -6148,6 +6280,8 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 if (!propicFile.getAbsolutePath().contains(userEdited.getPropic())) {
                     changes = true;
                 }
+            }else if(radioButtonGroupWarningStatusUser.getSelection()!=null){
+                changes = true;
             }
 
             buttonSaveUserForm.setEnabled(changes);
@@ -6284,6 +6418,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JButton buttonViewBugsReported;
     private javax.swing.JButton buttonXXX;
     private javax.swing.JButton buttonXXXX;
+    private javax.swing.JCheckBox checkboxShortenURLDoc;
     private javax.swing.JComboBox<String> comboboxAppNameBugsReported;
     private javax.swing.JComboBox<String> comboboxCategoryExamQuestion;
     private javax.swing.JComboBox<String> comboboxCertificateStudentCategory;
@@ -6496,10 +6631,16 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private javax.swing.JPanel panelUserForm;
     private javax.swing.JPanel panelUserManagement;
     private javax.swing.JPanel panelUserTable;
+    private javax.swing.JPanel panelUserWarningStatus;
     private javax.swing.JRadioButton radioButtonCertificateStudentReleased;
     private javax.swing.JRadioButton radioButtonCertificateStudentWaiting;
     private javax.swing.ButtonGroup radioButtonGroupStatusCertificate;
     private javax.swing.ButtonGroup radioButtonGroupTypeExamQuestion;
+    private javax.swing.ButtonGroup radioButtonGroupWarningStatusUser;
+    private javax.swing.JRadioButton radioUserAttendanceProblem;
+    private javax.swing.JRadioButton radioUserExerciseProblem;
+    private javax.swing.JRadioButton radioUserNoProblem;
+    private javax.swing.JRadioButton radioUserPaymentProblem;
     private javax.swing.JRadioButton radiobuttonEssayExamQuestion;
     private javax.swing.JRadioButton radiobuttonMultipleChoiceExamQuestion;
     private javax.swing.JSpinner spinnerHourSched;
@@ -6829,6 +6970,10 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
             lockUserForm(editMode);
             showLoadingStatus();
+            
+  
+            // show the warning status
+            panelUserWarningStatus.setVisible(true);
         }
 
         // protect the form from hijack saving
@@ -6975,24 +7120,24 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void fillComboboxExamCategoryName(ExamCategory[] entries) {
 
         // into dropdown combobox under every form related
-       fillComboboxExamCategoryNameData(comboboxCategoryExamQuestion, entries);
-       fillComboboxExamCategoryNameData(comboboxCertificateStudentCategory, entries);
-       fillComboboxExamCategoryNameData(comboboxExamCategorySched, entries);
-        
+        fillComboboxExamCategoryNameData(comboboxCategoryExamQuestion, entries);
+        fillComboboxExamCategoryNameData(comboboxCertificateStudentCategory, entries);
+        fillComboboxExamCategoryNameData(comboboxExamCategorySched, entries);
+
     }
-    
-    private void fillComboboxExamCategoryNameData(JComboBox cmb, ExamCategory [] entries){
-        
-         cmb.removeAllItems();
+
+    private void fillComboboxExamCategoryNameData(JComboBox cmb, ExamCategory[] entries) {
+
+        cmb.removeAllItems();
 
         for (ExamCategory es : entries) {
             cmb.addItem(es.getTitle());
-          
+
         }
 
         cmb.setEnabled(true);
         cmb.setSelectedIndex(-1);
-        
+
     }
 
     private void fillComboboxExamSubCategoryName(ExamSubCategory[] entries) {
@@ -7502,7 +7647,7 @@ public class AdminFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             if (urlTarget.equalsIgnoreCase(WebReference.ALL_SCHEDULE_BY_DAY)) {
                 // we clear up the list
                 listAnotherClassSched.setModel(new DefaultListModel());
-                  hideLoadingStatus();
+                hideLoadingStatus();
             } else if (urlTarget.equalsIgnoreCase(WebReference.UPDATE_ATTENDANCE)
                     || urlTarget.equalsIgnoreCase(WebReference.UPDATE_DOCUMENT)
                     || urlTarget.equalsIgnoreCase(WebReference.UPDATE_SCHEDULE)

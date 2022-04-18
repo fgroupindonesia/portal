@@ -7,10 +7,13 @@ package helper;
 import beans.ExamMultipleChoice;
 import frames.ClientFrame;
 import helper.language.LanguageSwitcher;
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -71,6 +74,11 @@ public class UIEffect {
         return "<html><u>" + text + "</u></html>";
     }
 
+    public static String decodeSafeDouble(String val){
+        String en = decodeSafe(val);
+        return en.replaceAll("\\+", " ");
+    }
+    
     // this is for UTF-8 decoder
     public static String decodeSafe(String val) {
         String en = null;
@@ -82,15 +90,15 @@ public class UIEffect {
 
         return en;
     }
-    
-    public static String encode(String val){
+
+    public static String encode(String val) {
         String n = null;
         try {
             n = URLEncoder.encode(val, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            
+        } catch (Exception ex) {
+
         }
-        
+
         return n;
     }
 
@@ -308,6 +316,7 @@ public class UIEffect {
         return mes;
 
     }
+
     public static ExamMultipleChoice popupMultipleChoiceDialog(JFrame ref, String opsUsed) {
 
         ExamMultipleChoice mes = new ExamMultipleChoiceDialog(ref, true, opsUsed).showFrame();
@@ -315,8 +324,8 @@ public class UIEffect {
         return mes;
 
     }
-    
-    public static ExamMultipleChoice popupMultipleChoiceDialog(JFrame ref, String  opsUsed, String defaultValue) {
+
+    public static ExamMultipleChoice popupMultipleChoiceDialog(JFrame ref, String opsUsed, String defaultValue) {
 
         ExamMultipleChoice mes = new ExamMultipleChoiceDialog(ref, true, opsUsed, defaultValue).showFrame();
 
@@ -381,6 +390,54 @@ public class UIEffect {
     public static void iconChanger(JFrame frame) {
         ImageIcon img = new ImageIcon(PathReference.LogoPath);
         frame.setIconImage(img.getImage());
+    }
+
+    private static void applyQualityRenderingHints(Graphics2D g2d) {
+
+        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
+    }
+
+    public static void iconChangerCircular(JLabel el, String aPath) {
+
+        try {
+            BufferedImage master = ImageIO.read(new File(aPath));
+
+            int diameter = Math.min(master.getWidth(), master.getHeight());
+            BufferedImage mask = new BufferedImage(master.getWidth(), master.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D g2d = mask.createGraphics();
+            applyQualityRenderingHints(g2d);
+            g2d.fillOval(0, 0, diameter - 1, diameter - 1);
+            g2d.dispose();
+
+            BufferedImage masked = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+            g2d = masked.createGraphics();
+            applyQualityRenderingHints(g2d);
+            int x = (diameter - master.getWidth()) / 2;
+            int y = (diameter - master.getHeight()) / 2;
+            g2d.drawImage(master, x, y, null);
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN));
+            g2d.drawImage(mask, 0, 0, null);
+            g2d.dispose();
+
+             Image dimg = masked.getScaledInstance(el.getWidth(), el.getHeight(),
+                Image.SCALE_SMOOTH);
+
+            
+            el.setIcon(new ImageIcon(dimg));
+        } catch (Exception ex) {
+            System.err.println("Error while making cirular image");
+        }
+        
+        
     }
 
     public static void iconChanger(JLabel el, String aPath) {

@@ -1,6 +1,6 @@
-git remote set-url origin https://github.com/fgroupindonesia/portal.git
+
 git add .
-git commit -m "updating Client Frame with Uploading Exam answer correctly!"
+git commit -m "fixing Typing Game now is available inside JFrame for client."
 git push origin main
 git gc --prune
 git pull

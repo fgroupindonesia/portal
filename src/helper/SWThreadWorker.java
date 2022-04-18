@@ -50,6 +50,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
             case SWTKey.WORK_REMOTE_LOGIN_CHECK:
                 name = "remote_login_check";
                 break;
+            case SWTKey.WORK_REMOTE_LOGIN_DISCONNECT:
+                name = "remote_login_disconnect";
+                break;
             case SWTKey.WORK_REMOTE_LOGIN_VERIFY:
                 name = "remote_login_verify";
                 break;
@@ -317,6 +320,9 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
                 break;
             case SWTKey.WORK_REMOTE_LOGIN_CHECK:
                 remoteLoginCheck();
+                break;
+            case SWTKey.WORK_REMOTE_LOGIN_DISCONNECT:
+                remoteLoginDisconnect();
                 break;
             case SWTKey.WORK_REMOTE_LOGIN_VERIFY:
                 remoteLoginVerify();
@@ -590,21 +596,33 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     private LoginFrame loginFrame;
     HttpCall urlExecutor;
 
+    public SWThreadWorker(ClientFrame mfx, int mode) {
+        setMainFrame(mfx);
+        urlExecutor = new HttpCall(mainClientFrame, mode);
+    }
+    
+    
     public SWThreadWorker(ClientFrame mfx) {
         setMainFrame(mfx);
-        urlExecutor = new HttpCall(mainClientFrame);
+        // this is non get nor post request
+        urlExecutor = new HttpCall(mainClientFrame,  HttpCall.METHOD_EMPTY);
     }
 
-    public SWThreadWorker(AdminFrame mdx) {
+    public SWThreadWorker(AdminFrame mdx, int mode) {
         setMainFrame(mdx);
-        urlExecutor = new HttpCall(mainAdminFrame);
+        urlExecutor = new HttpCall(mainAdminFrame, mode);
     }
 
-    public SWThreadWorker(LoginFrame mfx) {
+    public SWThreadWorker(LoginFrame mfx, int mode) {
         setLoginFrame(mfx);
-        urlExecutor = new HttpCall(loginFrame);
+        urlExecutor = new HttpCall(loginFrame, mode);
     }
-
+    
+    public void setMode(int mode){
+        //either post or get
+        urlExecutor.setModeCall(mode);
+    }
+    
     public void setMainFrame(ClientFrame mf) {
         mainClientFrame = mf;
     }
@@ -643,12 +661,16 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void remoteLoginActivate() {
-        urlExecutor.start(WebReference.REMOTE_LOGIN_ACTIVATE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.REMOTE_LOGIN_ACTIVATE);
     }
 
     private void remoteLoginCheck() {
-        urlExecutor.start(WebReference.REMOTE_LOGIN_CHECK, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.REMOTE_LOGIN_CHECK);
         // in progress
+    }
+    
+    private void remoteLoginDisconnect(){
+        urlExecutor.start(WebReference.REMOTE_LOGIN_DISCONNECT);       
     }
 
     private void remoteLoginVerify() {
@@ -657,47 +679,42 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void userLogin() {
-        urlExecutor.start(WebReference.LOGIN_USER, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.LOGIN_USER);
     }
 
     private void examQuestionBySchedule() {
-        urlExecutor.start(WebReference.ALL_EXAM_QUESTION_BY_SCHEDULE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_EXAM_QUESTION_BY_SCHEDULE);
     }
 
     private void userSave() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.REGISTER_USER, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.REGISTER_USER, HttpCall.METHOD_POST);
-        }
+            urlExecutor.start(WebReference.REGISTER_USER);
+       
     }
 
     private void userUpdate() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.UPDATE_USER, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.UPDATE_USER, HttpCall.METHOD_POST);
-        }
+      
+            urlExecutor.start(WebReference.UPDATE_USER);
+       
     }
 
     private void userDelete() {
-        urlExecutor.start(WebReference.DELETE_USER, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_USER);
     }
 
     private void documentDelete() {
-        urlExecutor.start(WebReference.DELETE_DOCUMENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_DOCUMENT);
     }
 
     private void documentDownload() {
         String urlManual = UIEffect.decodeSafe(urlExecutor.getData("url"));
-        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        urlExecutor.start(urlManual);
     }
 
     private void examPreviewDownload() {
 
         // the url is manually defined here
         String urlManual = WebReference.PREVIEW_EXAM + "?preview=" + urlExecutor.getData("preview");
-        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        urlExecutor.start(urlManual);
 
     }
 
@@ -705,28 +722,24 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
 
         // the url is manually defined here
         String urlManual = WebReference.PICTURE_CERTIFICATE_STUDENT + "?filename=" + urlExecutor.getData("filename");
-        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        urlExecutor.start(urlManual);
 
     }
 
     private void documentSave() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.ADD_DOCUMENT, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.ADD_DOCUMENT, HttpCall.METHOD_POST);
-        }
+      
+            urlExecutor.start(WebReference.ADD_DOCUMENT);
+        
     }
 
     private void documentEdit() {
-        urlExecutor.start(WebReference.DETAIL_DOCUMENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_DOCUMENT);
     }
 
     private void documentUpdate() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.UPDATE_DOCUMENT, HttpCall.METHOD_POST);
-        }
+      
+            urlExecutor.start(WebReference.UPDATE_DOCUMENT);
+       
     }
 
     private boolean hasFile() {
@@ -734,349 +747,324 @@ public class SWThreadWorker extends SwingWorker<Object, Object> {
     }
 
     private void reportBugsDelete() {
-        urlExecutor.start(WebReference.DELETE_REPORT_BUGS, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_REPORT_BUGS);
     }
 
     private void paymentDelete() {
-        urlExecutor.start(WebReference.DELETE_PAYMENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_PAYMENT);
     }
 
     // this is for user picture
     private void pictureDelete() {
-        urlExecutor.start(WebReference.DELETE_PICTURE_USER, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_PICTURE_USER);
     }
 
     private void certificatePictureDelete() {
-        urlExecutor.start(WebReference.DELETE_PICTURE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_PICTURE_CERTIFICATE_STUDENT);
     }
 
     // this is for exam preview 
     private void examPreviewDelete() {
-        urlExecutor.start(WebReference.DELETE_PREVIEW_EXAM, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_PREVIEW_EXAM);
     }
 
     // this is for payment picture
     private void screenshotDelete() {
-        urlExecutor.start(WebReference.DELETE_SCREENSHOT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_SCREENSHOT);
     }
 
     // this is for attendance picture
     private void signatureDelete() {
-        urlExecutor.start(WebReference.DELETE_SIGNATURE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_SIGNATURE);
     }
 
     private void historySave() {
-        urlExecutor.start(WebReference.ADD_HISTORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ADD_HISTORY);
 
     }
 
     private void paymentSave() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.ADD_PAYMENT, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.ADD_PAYMENT, HttpCall.METHOD_POST);
-        }
+        
+            urlExecutor.start(WebReference.ADD_PAYMENT);
     }
 
     private void paymentEdit() {
-        urlExecutor.start(WebReference.DETAIL_PAYMENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_PAYMENT);
     }
 
     private void paymentUpdate() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.UPDATE_PAYMENT, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.UPDATE_PAYMENT, HttpCall.METHOD_POST);
-        }
+        
+            urlExecutor.start(WebReference.UPDATE_PAYMENT);
+        
     }
 
     private void reportBugsSave() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.ADD_REPORT_BUGS, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.ADD_REPORT_BUGS, HttpCall.METHOD_POST);
-        }
+         urlExecutor.start(WebReference.ADD_REPORT_BUGS);
+        
     }
 
     private void reportBugsEdit() {
-        urlExecutor.start(WebReference.DETAIL_REPORT_BUGS, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_REPORT_BUGS);
     }
 
     private void reportBugsUpdate() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.UPDATE_REPORT_BUGS, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.UPDATE_REPORT_BUGS, HttpCall.METHOD_POST);
-        }
+        
+            urlExecutor.start(WebReference.UPDATE_REPORT_BUGS);
+        
     }
 
     private void attendanceDelete() {
-        urlExecutor.start(WebReference.DELETE_ATTENDANCE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_ATTENDANCE);
     }
 
     private void attendanceSave() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.ADD_ATTENDANCE, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.ADD_ATTENDANCE, HttpCall.METHOD_POST);
-        }
+        urlExecutor.start(WebReference.ADD_ATTENDANCE);
+        
     }
 
     private void attendanceEdit() {
-        urlExecutor.start(WebReference.DETAIL_ATTENDANCE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_ATTENDANCE);
     }
 
     private void attendanceUpdate() {
-        urlExecutor.start(WebReference.UPDATE_ATTENDANCE, HttpCall.METHOD_POST_FILE);
+        urlExecutor.start(WebReference.UPDATE_ATTENDANCE);
     }
 
     private void scheduleDelete() {
-        urlExecutor.start(WebReference.DELETE_SCHEDULE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_SCHEDULE);
     }
 
     private void scheduleSave() {
-        urlExecutor.start(WebReference.ADD_SCHEDULE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ADD_SCHEDULE);
     }
 
     private void scheduleEdit() {
-        urlExecutor.start(WebReference.DETAIL_SCHEDULE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_SCHEDULE);
     }
 
     private void scheduleUpdate() {
-        urlExecutor.start(WebReference.UPDATE_SCHEDULE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.UPDATE_SCHEDULE);
     }
 
     private void examQuestionDelete() {
-        urlExecutor.start(WebReference.DELETE_EXAM_QUESTION, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_EXAM_QUESTION);
     }
 
     private void examStudentAnswerDelete() {
-        urlExecutor.start(WebReference.DELETE_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_EXAM_STUDENT_ANSWER);
     }
 
     private void certificateStudentDelete() {
-        urlExecutor.start(WebReference.DELETE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_CERTIFICATE_STUDENT);
     }
 
     private void classRoomDelete() {
-        urlExecutor.start(WebReference.DELETE_CLASSROOM, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_CLASSROOM);
     }
 
     private void examCategoryDelete() {
-        urlExecutor.start(WebReference.DELETE_EXAM_CATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_EXAM_CATEGORY);
     }
 
     private void examSubCategoryDelete() {
-        urlExecutor.start(WebReference.DELETE_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DELETE_EXAM_SUBCATEGORY);
     }
 
     private void examSubCategorySave() {
-        urlExecutor.start(WebReference.ADD_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ADD_EXAM_SUBCATEGORY);
     }
 
     private void examSubCategoryUpdate() {
-        urlExecutor.start(WebReference.UPDATE_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.UPDATE_EXAM_SUBCATEGORY);
     }
 
     private void examSubCategoryEdit() {
-        urlExecutor.start(WebReference.DETAIL_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_EXAM_SUBCATEGORY);
     }
 
     private void examCategorySave() {
-        urlExecutor.start(WebReference.ADD_EXAM_CATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ADD_EXAM_CATEGORY);
     }
 
     private void classRoomSave() {
-        urlExecutor.start(WebReference.ADD_CLASSROOM, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ADD_CLASSROOM);
     }
 
     private void certificateStudentSave() {
 
-        if (hasFile()) {
-            urlExecutor.start(WebReference.ADD_CERTIFICATE_STUDENT, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.ADD_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
-        }
+         urlExecutor.start(WebReference.ADD_CERTIFICATE_STUDENT);
+        
 
     }
 
     private void examStudentAnswerSave() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.ADD_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.ADD_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
-        }
+       
+            urlExecutor.start(WebReference.ADD_EXAM_STUDENT_ANSWER);
+       
     }
 
     private void examQuestionSave() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.ADD_EXAM_QUESTION, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.ADD_EXAM_QUESTION, HttpCall.METHOD_POST);
-        }
+     
+            urlExecutor.start(WebReference.ADD_EXAM_QUESTION);
+       
 
     }
 
     private void examStudentAnswerEdit() {
-        urlExecutor.start(WebReference.DETAIL_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_EXAM_STUDENT_ANSWER);
     }
 
     private void classRoomEdit() {
-        urlExecutor.start(WebReference.DETAIL_CLASSROOM, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_CLASSROOM);
     }
 
     private void examCategoryEdit() {
-        urlExecutor.start(WebReference.DETAIL_EXAM_CATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_EXAM_CATEGORY);
     }
 
     private void certificateStudentEdit() {
-        urlExecutor.start(WebReference.DETAIL_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_CERTIFICATE_STUDENT);
     }
 
     private void examQuestionEdit() {
-        urlExecutor.start(WebReference.DETAIL_EXAM_QUESTION, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.DETAIL_EXAM_QUESTION);
     }
 
     private void examStudentAnswerUpdate() {
-        if (hasFile()) {
-            urlExecutor.start(WebReference.UPDATE_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.UPDATE_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
-        }
+       
+            urlExecutor.start(WebReference.UPDATE_EXAM_STUDENT_ANSWER);
+     
          
     }
 
     private void examCategoryUpdate() {
-        urlExecutor.start(WebReference.UPDATE_EXAM_CATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.UPDATE_EXAM_CATEGORY);
     }
 
     private void classRoomUpdate() {
-        urlExecutor.start(WebReference.UPDATE_CLASSROOM, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.UPDATE_CLASSROOM);
     }
 
     private void certificateStudentUpdate() {
 
-        if (hasFile()) {
-            urlExecutor.start(WebReference.UPDATE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.UPDATE_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
-        }
+            urlExecutor.start(WebReference.UPDATE_CERTIFICATE_STUDENT);
+      
     }
 
     private void examQuestionUpdate() {
 
-        if (hasFile()) {
-            urlExecutor.start(WebReference.UPDATE_EXAM_QUESTION, HttpCall.METHOD_POST_FILE);
-        } else {
-            urlExecutor.start(WebReference.UPDATE_EXAM_QUESTION, HttpCall.METHOD_POST);
-        }
+            urlExecutor.start(WebReference.UPDATE_EXAM_QUESTION);
+        
     }
 
     private void refreshHistoryData() {
 
-        urlExecutor.start(WebReference.LAST_HISTORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.LAST_HISTORY);
     }
 
     private void refreshProfileData() {
-        urlExecutor.start(WebReference.PROFILE_USER, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.PROFILE_USER);
     }
 
     private void refreshPictureData() {
 
         // the url is manually defined here
         String urlManual = WebReference.PICTURE_USER + "?propic=" + urlExecutor.getData("propic");
-        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        urlExecutor.start(urlManual);
+        
+        System.out.println("eksekusi " + urlManual);
+        
     }
 
     private void checkTools() {
-        urlExecutor.start(WebReference.CHECK_TOOLS, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.CHECK_TOOLS);
     }
 
     private void downloadTools() {
 
         // the url is manually defined here
         String urlManual = WebReference.DOWNLOAD_TOOLS + "?app_name=" + urlExecutor.getData("app_name");
-        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        urlExecutor.start(urlManual);
     }
 
     private void refreshScreenshotReportBugsData() {
 
         // the url is manually defined here
         String urlManual = WebReference.SCREENSHOT_REPORT_BUGS + "?screenshot=" + urlExecutor.getData("screenshot");
-        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        urlExecutor.start(urlManual);
     }
 
     private void refreshScreenshotPaymentData() {
 
         // the url is manually defined here
         String urlManual = WebReference.SCREENSHOT_PAYMENT + "?screenshot=" + urlExecutor.getData("screenshot");
-        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        urlExecutor.start(urlManual);
     }
 
     private void refreshSignatureData() {
 
         // the url is manually defined here
         String urlManual = WebReference.SIGNATURE_ATTENDANCE + "?signature=" + urlExecutor.getData("signature");
-        urlExecutor.start(urlManual, HttpCall.METHOD_GET);
+        urlExecutor.start(urlManual);
     }
 
     private void refreshUserData() {
 
-        urlExecutor.start(WebReference.ALL_USER, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_USER);
     }
 
     private void refreshClassRoomData() {
 
-        urlExecutor.start(WebReference.ALL_CLASSROOM, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_CLASSROOM);
     }
 
     private void refreshScheduleDataByDay() {
 
-        urlExecutor.start(WebReference.ALL_SCHEDULE_BY_DAY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_SCHEDULE_BY_DAY);
     }
 
     private void refreshReportBugsData() {
-        urlExecutor.start(WebReference.ALL_REPORT_BUGS, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_REPORT_BUGS);
     }
 
     private void refreshDocumentData() {
 
-        urlExecutor.start(WebReference.ALL_DOCUMENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_DOCUMENT);
     }
 
     private void refreshExamQuestionData() {
-        urlExecutor.start(WebReference.ALL_EXAM_QUESTION, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_EXAM_QUESTION);
     }
 
     private void refreshExamStudentAnswer() {
-        urlExecutor.start(WebReference.ALL_EXAM_STUDENT_ANSWER, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_EXAM_STUDENT_ANSWER);
     }
 
     private void refreshExamCategoryData() {
-        urlExecutor.start(WebReference.ALL_EXAM_CATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_EXAM_CATEGORY);
     }
 
     private void refreshCertificateStudent() {
-        urlExecutor.start(WebReference.ALL_CERTIFICATE_STUDENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_CERTIFICATE_STUDENT);
     }
 
     private void refreshExamSubCategoryData() {
-        urlExecutor.start(WebReference.ALL_EXAM_SUBCATEGORY, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_EXAM_SUBCATEGORY);
     }
 
     private void refreshScheduleData() {
 
-        urlExecutor.start(WebReference.ALL_SCHEDULE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_SCHEDULE);
     }
 
     private void refreshAttendanceData() {
 
-        urlExecutor.start(WebReference.ALL_ATTENDANCE, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_ATTENDANCE);
     }
 
     private void refreshPaymentData() {
 
-        urlExecutor.start(WebReference.ALL_PAYMENT, HttpCall.METHOD_POST);
+        urlExecutor.start(WebReference.ALL_PAYMENT);
     }
 
     private void prepareBrowser() {

@@ -55,15 +55,14 @@ public class BarcodeGenerator {
         File file = new File(PathReference.DirName);
 
         // true if the directory was created, false otherwise
-        if (file.isDirectory() && !file.exists()) {
-
+        
             if (file.mkdirs()) {
                 System.out.println("Directory is created!");
             } else {
                 System.out.println("Directory for barcode is ready!");
             }
 
-        }
+       
 
         // Encoding charset
         String charset = "UTF-8";

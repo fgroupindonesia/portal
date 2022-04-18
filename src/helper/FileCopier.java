@@ -107,10 +107,12 @@ public class FileCopier {
 
         if (innerLabelBar != null) {
             innerLabelBar.setVisible(true);
+            if(innerProgressBar!=null)
             innerProgressBar.setVisible(true);
 
         }
 
+        if(labelLoading!=null)
         labelLoading.setVisible(true);
 
         System.out.println("Downloading " + urlCome);
@@ -149,7 +151,11 @@ public class FileCopier {
                 }
             }
         });
-        FileOutputStream fos = new FileOutputStream(new File(savedPath));
+        
+        File fileObject = new File(savedPath);
+        fileObject.createNewFile();
+        
+        FileOutputStream fos = new FileOutputStream(fileObject);
         fos.getChannel().transferFrom(rcbc, 0, Long.MAX_VALUE);
 
         // manual for releasing memory

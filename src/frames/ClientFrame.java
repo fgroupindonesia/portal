@@ -2,7 +2,6 @@
  *  This is a Portal Access for Client & Admin Usage
  *  (c) FGroupIndonesia, 2020.
  */
-
 package frames;
 
 import beans.Attendance;
@@ -59,6 +58,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -76,7 +76,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
      * Creates new form MainFrame
      */
     FileCopier fcp = new FileCopier();
-    
+
     LoginFrame loginFrame;
     CardLayout cardLayouterMain, cardLayouterAttendance, cardLayoutHistory,
             cardLayoutExam, cardLayoutExamType;
@@ -94,13 +94,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     int manyExamQuestions, currentIndexExamQuestion = -1,
             currentIndexFilePraktekExamQ = 0;
     ExamQuestion[] userCurrentExamQ;
-    ExamStudentAnswer [] allExamStudentAnswer;
-    
+    ExamStudentAnswer[] allExamStudentAnswer;
+
     File propicFile;
     File screenshotFile;
     File screenshotBrowserFile;
     File praktekFiles[];
-    
+
     String oldDay;
     String textChangeHover = "change -";
 
@@ -117,6 +117,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     ImageIcon excelImage = new ImageIcon(getClass().getResource("/images/excel72.png"));
     ImageIcon ppointImage = new ImageIcon(getClass().getResource("/images/ppoint72.png"));
     ImageIcon pdfImage = new ImageIcon(getClass().getResource("/images/pdf72.png"));
+    ImageIcon restoreImage = new ImageIcon(getClass().getResource("/images/restore.png"));
+    ImageIcon maximizeImage = new ImageIcon(getClass().getResource("/images/maximize.png"));
+    boolean normalState = true;
 
     User personLogged;
 
@@ -127,8 +130,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     public ClientFrame() {
+        // dummy person
+        personLogged = new User("udin", "123");
         processNicely();
-       
+
     }
 
     // this functionallity is under consideration 2020-dec-08
@@ -137,25 +142,24 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         radioNotifSessionAtLeast1Settings.setVisible(false);
         radioNotifSessionLessThan3Settings.setVisible(false);
     }
-    
 
     private void processNicely() {
         initComponents();
 
-        
-        
         // hiding screenshot, typing, and browse for the first time
         // from Exam UI
         labelScreenshot.setVisible(false);
         labelTyping.setVisible(false);
         panelBrowseUpload.setVisible(false);
-        
+
         // showing the username
-        labelUsernameText.setText(personLogged.getUsername());
-        
+        if (personLogged != null) {
+            labelUsernameText.setText(personLogged.getUsername());
+        }
+
         // hide time interval for first time
         labelTimeIntervalSchedule.setVisible(false);
-        
+
         // hide the functions that are still under consideration
         hideNotifLimitReach();
 
@@ -209,7 +213,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         prepareBrowserNow();
 
         saveHistory("logging in successfuly");
-         configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, "0");
+        configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, "0");
     }
 
     SWThreadWorker prepbrowser = new SWThreadWorker(this);
@@ -232,17 +236,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         obSW.addData("token", this.getTokenLocally());
     }
 
-    private void prepareFileCopier(){
+    private void prepareFileCopier() {
         fcp.resetProgressBar();
         fcp.setProgressBar(progressBarDownload);
         fcp.setProgressLabel(labelPercentage, labelLoadingStatus);
     }
-    
+
     private void downloadFile(String target, String fname) {
 
-       prepareFileCopier();
-        
-        SWThreadWorker workDownload = new SWThreadWorker(this);
+        prepareFileCopier();
+
+        SWThreadWorker workDownload = new SWThreadWorker(this, HttpCall.METHOD_GET);
         workDownload.setFileCopierHelper(fcp);
         workDownload.setWork(SWTKey.WORK_DOCUMENT_DOWNLOAD);
         workDownload.writeMode(true);
@@ -251,17 +255,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         workDownload.addData("username", personLogged.getUsername());
         prepareToken(workDownload);
 
-        
-       
-
         showLoadingStatus("Download");
 
         // executorService.submit(workSched);
         executorService.schedule(workDownload, 2, TimeUnit.SECONDS);
 
     }
-    
-    
 
     private void refreshHistory() {
 
@@ -273,7 +272,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // showing the loading part of history
         cardLayoutHistory.show(panelHistory, "panelHistoryFound");
 
-        SWThreadWorker workHist = new SWThreadWorker(this);
+        SWThreadWorker workHist = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workHist.setWork(SWTKey.WORK_REFRESH_HISTORY);
         workHist.addData("username", personLogged.getUsername());
         workHist.addData("limit", "5");
@@ -286,6 +285,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshUserPicture(String filename) {
 
+        prepareFileCopier();
+
         // set the path temporarily 
         // for later usage in locally
         PathReference.setPropicFileName(filename);
@@ -293,22 +294,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         configuration.setValue(Keys.USER_PROPIC, dest.getAbsolutePath());
 
-        SWThreadWorker workPicture = new SWThreadWorker(this);
+        SWThreadWorker workPicture = new SWThreadWorker(this, HttpCall.METHOD_GET);
         // execute the download picture process
         workPicture.setWork(SWTKey.WORK_REFRESH_PICTURE);
         workPicture.writeMode(true);
         workPicture.addData("propic", filename);
 
+        workPicture.setFileCopierHelper(fcp);
         // executorService.submit(workSched);
         executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
 
     }
-    
+
     private void refreshExamQuestionPicture(String filename) {
 
         // showing the download progress
-       showLoadingDownload(true);
-        
+        showLoadingDownload(true);
+
         // set the path temporarily 
         // for later usage in locally
         PathReference.setExamQuestionPreviewFileName(filename);
@@ -316,16 +318,16 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         configuration.setValue(Keys.EXAM_QUESTION_PREVIEW, dest.getAbsolutePath());
 
-        SWThreadWorker workPicture = new SWThreadWorker(this);
+        SWThreadWorker workPicture = new SWThreadWorker(this, HttpCall.METHOD_GET);
         // execute the download picture process
         workPicture.setWork(SWTKey.WORK_REFRESH_EXAM_QUESTION_PREVIEW);
         workPicture.writeMode(true);
         workPicture.addData("preview", filename);
 
         // optional for showing the effect
-       prepareFileCopier();
-       workPicture.setFileCopierHelper(fcp);
-        
+        prepareFileCopier();
+        workPicture.setFileCopierHelper(fcp);
+
         // executorService.submit(workSched);
         executorService.schedule(workPicture, 2, TimeUnit.SECONDS);
 
@@ -333,7 +335,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshProfile() {
 
-        SWThreadWorker workProfile = new SWThreadWorker(this);
+        SWThreadWorker workProfile = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workProfile.setWork(SWTKey.WORK_REFRESH_PROFILE);
         // executorService.submit(workSched);
         workProfile.addData("username", personLogged.getUsername());
@@ -342,52 +344,58 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         executorService.schedule(workProfile, 3, TimeUnit.SECONDS);
 
     }
-    
+
     private void submitAllExamAnswers() {
 
         showLoadingUpload(true);
-        
+
         executorServiceSingle = Executors.newSingleThreadExecutor();
 
-        int mIndex=0;
-        for(ExamStudentAnswer jawabanUser: allExamStudentAnswer){
-        //ExamStudentAnswer jawabanUser = allExamStudentAnswer[0];
-        SWThreadWorker workQA = new SWThreadWorker(this);
-        
-        workQA.setWork(SWTKey.WORK_EXAM_STUDENT_ANS_SAVE);
-        
-        workQA.addData("username", personLogged.getUsername());
-        workQA.addData("exam_qa_id", jawabanUser.getExam_qa_id()+"");
-        workQA.addData("answer", jawabanUser.getAnswer());
-        workQA.addData("score_earned", jawabanUser.getScore_earned()+"");
-        workQA.addData("status", jawabanUser.getStatus());
-        
-        prepareFileCopier();
-        workQA.setFileCopierHelper(fcp);
-        
-        if(jawabanUser.getFileupload()!=null){
-            System.out.println("--------- menambahkan " + praktekFiles[mIndex].getName() + " success!");
-            
-            workQA.addFile("fileupload", praktekFiles[mIndex]);
-            mIndex++;
-            
-        }
-        
-        prepareToken(workQA);
-        
-       try{
-        executorServiceSingle.submit(workQA).get();
-           
-       } catch (Exception ex){
-           UIEffect.popup("error while submitting answers....", this);
-       }
-        
+        int mIndex = 0;
+        for (ExamStudentAnswer jawabanUser : allExamStudentAnswer) {
+            //ExamStudentAnswer jawabanUser = allExamStudentAnswer[0];
+            SWThreadWorker workQA = null;
+
+            if (jawabanUser.getFileupload() != null) {
+                workQA = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+            } else {
+                workQA = new SWThreadWorker(this, HttpCall.METHOD_POST);
+            }
+
+            workQA.setWork(SWTKey.WORK_EXAM_STUDENT_ANS_SAVE);
+
+            workQA.addData("username", personLogged.getUsername());
+            workQA.addData("exam_qa_id", jawabanUser.getExam_qa_id() + "");
+            workQA.addData("answer", jawabanUser.getAnswer());
+            workQA.addData("score_earned", jawabanUser.getScore_earned() + "");
+            workQA.addData("status", jawabanUser.getStatus());
+
+            prepareFileCopier();
+            workQA.setFileCopierHelper(fcp);
+
+            if (jawabanUser.getFileupload() != null) {
+                System.out.println("--------- menambahkan " + praktekFiles[mIndex].getName() + " success!");
+
+                workQA.addFile("fileupload", praktekFiles[mIndex]);
+                mIndex++;
+
+            }
+
+            prepareToken(workQA);
+
+            try {
+                executorServiceSingle.submit(workQA).get();
+
+            } catch (Exception ex) {
+                UIEffect.popup("error while submitting answers....", this);
+            }
+
         }
     }
 
     private void refreshSchedule() {
 
-        SWThreadWorker workSched = new SWThreadWorker(this);
+        SWThreadWorker workSched = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workSched.setWork(SWTKey.WORK_REFRESH_SCHEDULE);
         workSched.addData("username", personLogged.getUsername());
         prepareToken(workSched);
@@ -399,7 +407,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshAttendance() {
 
-        SWThreadWorker workAtt = new SWThreadWorker(this);
+        SWThreadWorker workAtt = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workAtt.setWork(SWTKey.WORK_REFRESH_ATTENDANCE);
         workAtt.addData("username", personLogged.getUsername());
         prepareToken(workAtt);
@@ -411,7 +419,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshPayment() {
 
-        SWThreadWorker workPay = new SWThreadWorker(this);
+        SWThreadWorker workPay = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workPay.setWork(SWTKey.WORK_REFRESH_PAYMENT);
         workPay.addData("username", personLogged.getUsername());
         prepareToken(workPay);
@@ -422,7 +430,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void refreshDocument() {
 
-        SWThreadWorker workDoc = new SWThreadWorker(this);
+        SWThreadWorker workDoc = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workDoc.setWork(SWTKey.WORK_REFRESH_DOCUMENT);
         workDoc.addData("username", personLogged.getUsername());
         prepareToken(workDoc);
@@ -473,23 +481,23 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         pack();
 
     }
-    
-    private boolean isTodayMonthYear(String dataIn){
+
+    private boolean isTodayMonthYear(String dataIn) {
         // format DataIn is = dd/MM/yyyy
         String tglSkarang = todaysDate();
-        
-        String tglData [] = dataIn.split("/");
-        String tglSkarangArray [] = tglSkarang.split("/");
-        
+
+        String tglData[] = dataIn.split("/");
+        String tglSkarangArray[] = tglSkarang.split("/");
+
         boolean yeah = false;
-        
+
         // month year comparison
-        if(tglData[1].equalsIgnoreCase(tglSkarangArray[1]) && tglData[2].equalsIgnoreCase(tglSkarangArray[2])){
+        if (tglData[1].equalsIgnoreCase(tglSkarangArray[1]) && tglData[2].equalsIgnoreCase(tglSkarangArray[2])) {
             yeah = true;
         }
-        
+
         return yeah;
-        
+
     }
 
     /**
@@ -507,11 +515,14 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         radioButtonGroupMultipleChoiceExam = new javax.swing.ButtonGroup();
         panelBase = new javax.swing.JPanel();
         panelHeader = new javax.swing.JPanel();
-        labelClose = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        panelHeaderLeft = new javax.swing.JPanel();
+        labelAppsName = new javax.swing.JLabel();
+        labelTimeIntervalSchedule = new javax.swing.JLabel();
+        panelHeaderRight = new javax.swing.JPanel();
         labelTime = new javax.swing.JLabel();
         labelMinimize = new javax.swing.JLabel();
-        labelTimeIntervalSchedule = new javax.swing.JLabel();
+        labelClose = new javax.swing.JLabel();
+        labelMaxiimize = new javax.swing.JLabel();
         panelContent = new javax.swing.JPanel();
         panelMenu = new javax.swing.JPanel();
         labelPropicUser = new javax.swing.JLabel();
@@ -674,6 +685,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         setTitle("Portal Access - FGroupIndonesia");
         setUndecorated(true);
         setPreferredSize(new java.awt.Dimension(800, 500));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         panelBase.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         panelBase.setPreferredSize(new java.awt.Dimension(750, 439));
@@ -694,26 +710,30 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         panelHeader.setBackground(new java.awt.Color(255, 0, 0));
         panelHeader.setPreferredSize(new java.awt.Dimension(653, 50));
-        panelHeader.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        panelHeader.setLayout(new java.awt.BorderLayout());
 
-        labelClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close24.png"))); // NOI18N
-        labelClose.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        labelClose.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                labelCloseMouseClicked(evt);
-            }
-        });
-        panelHeader.add(labelClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 10, -1, 28));
+        panelHeaderLeft.setBackground(new java.awt.Color(255, 0, 0));
+        panelHeaderLeft.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel3.setText("Portal Access");
-        panelHeader.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(18, 11, 208, -1));
+        labelAppsName.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        labelAppsName.setForeground(new java.awt.Color(255, 255, 255));
+        labelAppsName.setText("Portal Access");
+        panelHeaderLeft.add(labelAppsName, new org.netbeans.lib.awtextra.AbsoluteConstraints(18, 11, 208, -1));
+
+        labelTimeIntervalSchedule.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
+        labelTimeIntervalSchedule.setForeground(new java.awt.Color(255, 255, 255));
+        labelTimeIntervalSchedule.setText("time is here");
+        panelHeaderLeft.add(labelTimeIntervalSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(166, 20, 340, -1));
+
+        panelHeader.add(panelHeaderLeft, java.awt.BorderLayout.WEST);
+
+        panelHeaderRight.setBackground(new java.awt.Color(255, 0, 0));
+        panelHeaderRight.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         labelTime.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
         labelTime.setForeground(new java.awt.Color(255, 255, 255));
         labelTime.setText("time is here");
-        panelHeader.add(labelTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 20, 170, -1));
+        panelHeaderRight.add(labelTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 20, 170, -1));
 
         labelMinimize.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/minimize.png"))); // NOI18N
         labelMinimize.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -722,12 +742,27 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelMinimizeMouseClicked(evt);
             }
         });
-        panelHeader.add(labelMinimize, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 10, -1, 28));
+        panelHeaderRight.add(labelMinimize, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 10, -1, 28));
 
-        labelTimeIntervalSchedule.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
-        labelTimeIntervalSchedule.setForeground(new java.awt.Color(255, 255, 255));
-        labelTimeIntervalSchedule.setText("time is here");
-        panelHeader.add(labelTimeIntervalSchedule, new org.netbeans.lib.awtextra.AbsoluteConstraints(166, 20, 340, -1));
+        labelClose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/close24.png"))); // NOI18N
+        labelClose.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelClose.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelCloseMouseClicked(evt);
+            }
+        });
+        panelHeaderRight.add(labelClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 10, -1, 28));
+
+        labelMaxiimize.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/maximize.png"))); // NOI18N
+        labelMaxiimize.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        labelMaxiimize.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                labelMaxiimizeMouseClicked(evt);
+            }
+        });
+        panelHeaderRight.add(labelMaxiimize, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 10, -1, 28));
+
+        panelHeader.add(panelHeaderRight, java.awt.BorderLayout.EAST);
 
         panelBase.add(panelHeader, java.awt.BorderLayout.PAGE_START);
 
@@ -1595,15 +1630,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 tableDocumentDataMouseClicked(evt);
             }
         });
-        // we hide the checklist
-        tableDocumentData.getColumnModel().getColumn(0).setPreferredWidth(0);
-        tableDocumentData.getColumnModel().getColumn(0).setMinWidth(0);
-        tableDocumentData.getColumnModel().getColumn(0).setMaxWidth(0);
-
-        // we hide the id as well
-        tableDocumentData.getColumnModel().getColumn(1).setPreferredWidth(0);
-        tableDocumentData.getColumnModel().getColumn(1).setMinWidth(0);
-        tableDocumentData.getColumnModel().getColumn(1).setMaxWidth(0);
         jScrollPane4.setViewportView(tableDocumentData);
 
         panelDocumentContent.add(jScrollPane4, java.awt.BorderLayout.CENTER);
@@ -2003,7 +2029,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 prepareFileCopier();
                 //workPicture.setFileCopierHelper(fcp);
                 fcp.copyTo(propicFile, dest);
-                UIEffect.iconChanger(labelPropicUser, dest.getAbsolutePath());
+                UIEffect.iconChangerCircular(labelPropicUser, dest.getAbsolutePath());
 
                 // store the settings for next time usage
                 configuration.setValue(Keys.USER_PROPIC, dest.getAbsolutePath());
@@ -2040,6 +2066,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         configuration.setValue(Keys.SYSTEM_LANGUAGE, comboboxSystemLanguage.getSelectedItem().toString().toLowerCase());
 
+        if (loginFrame != null) {
+            loginFrame.setVisible(true);
+        }
+
+        // no disposed yet
+        this.setVisible(false);
 
     }//GEN-LAST:event_buttonSaveSettingsActionPerformed
 
@@ -2073,7 +2105,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void checkAutoUpdateTools() {
 
-        SWThreadWorker workCheck = new SWThreadWorker(this);
+        SWThreadWorker workCheck = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workCheck.setWork(SWTKey.WORK_CHECK_TOOLS);
         workCheck.addData("app_name", "teamviewer");
 
@@ -2082,26 +2114,25 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         executorService.schedule(workCheck, 2, TimeUnit.SECONDS);
 
     }
+
     private void getExamDataBySchedule(int number) {
 
-        SWThreadWorker workExQA = new SWThreadWorker(this);
+        SWThreadWorker workExQA = new SWThreadWorker(this, HttpCall.METHOD_POST);
         workExQA.setWork(SWTKey.WORK_EXAM_QUESTION_BY_SCHEDULE);
-        workExQA.addData("schedule_id", number+"");
+        workExQA.addData("schedule_id", number + "");
 
         prepareToken(workExQA);
         //executorService.submit(workPay);
         executorService.schedule(workExQA, 2, TimeUnit.SECONDS);
 
     }
-    
-    
 
     private void downloadTools() {
 
         // rename first the old one
         CMDExecutor.backupOldTeamviewer();
 
-        SWThreadWorker workCheck = new SWThreadWorker(this);
+        SWThreadWorker workCheck = new SWThreadWorker(this, HttpCall.METHOD_GET);
         workCheck.setWork(SWTKey.WORK_DOWNLOAD_TOOLS);
         workCheck.writeMode(true);
         workCheck.addData("app_name", "teamviewer");
@@ -2109,9 +2140,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         prepareToken(workCheck);
 
         // optional for showing the effect
-            prepareFileCopier();
-            workCheck.setFileCopierHelper(fcp);
-        
+        prepareFileCopier();
+        workCheck.setFileCopierHelper(fcp);
 
         showLoadingStatus("Download");
 
@@ -2232,7 +2262,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
             }
         }
-    
+
     }//GEN-LAST:event_labelOpenDocumentMouseClicked
 
     private void labelOpenDocumentMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelOpenDocumentMouseEntered
@@ -2264,10 +2294,9 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
             // passing url only
             if (!progressBarDownload.isVisible()) {
-                
-                
+
                 showLoadingDownload(true);
-                
+
                 // download only the 1 one
                 downloadFile(dataDoc.get(0).toString(), dataDoc2.get(0).toString());
             } else {
@@ -2279,31 +2308,37 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     }//GEN-LAST:event_labelDownloadDocumentMouseClicked
 
-    private void showLoadingDownload(boolean b){
-                progressBarDownload.setVisible(b);
-                labelPercentage.setVisible(b);
-                if(b){
-                    showLoadingStatus("Downloading");
-                }else{
-                    hideLoadingStatus();
-                }
+    private void showLoadingDownload(boolean b) {
+        progressBarDownload.setVisible(b);
+        labelPercentage.setVisible(b);
+        if (b) {
+            showLoadingStatus("Downloading");
+        } else {
+            hideLoadingStatus();
+        }
     }
-    
-    private void showLoadingUpload(boolean b){
-                
-                
-                progressBarDownload.setVisible(b);
-                labelPercentage.setVisible(b);
-                if(b){
-                    showLoadingStatus("Uploading");
-                }else{
-                    hideLoadingStatus();
-                }
+
+    private void showLoadingUpload(boolean b) {
+
+        progressBarDownload.setVisible(b);
+        labelPercentage.setVisible(b);
+        if (b) {
+            showLoadingStatus("Uploading");
+        } else {
+            hideLoadingStatus();
+        }
     }
-    
+
     private void savePayment() {
         showLoadingStatus();
-        SWThreadWorker workPayment = new SWThreadWorker(this);
+        SWThreadWorker workPayment = null;
+
+        if (screenshotFile != null) {
+            workPayment = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workPayment = new SWThreadWorker(this, HttpCall.METHOD_POST);
+
+        }
 
         workPayment.setWork(SWTKey.WORK_PAYMENT_SAVE);
 
@@ -2315,7 +2350,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         if (screenshotFile != null) {
             workPayment.addFile("screenshot", screenshotFile);
         }
-
         prepareToken(workPayment);
         executorService.schedule(workPayment, 1, TimeUnit.SECONDS);
 
@@ -2325,7 +2359,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void saveHistory(String message) {
 
         // some history are tracked from client request
-        SWThreadWorker workHistory = new SWThreadWorker(this);
+        SWThreadWorker workHistory = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         workHistory.setWork(SWTKey.WORK_HISTORY_SAVE);
 
@@ -2339,7 +2373,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void saveReportBugs() {
         //showLoadingStatus();
-        SWThreadWorker workReport = new SWThreadWorker(this);
+        SWThreadWorker workReport = null;
+
+        if (screenshotFile != null) {
+            workReport = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workReport = new SWThreadWorker(this, HttpCall.METHOD_POST);
+        }
 
         workReport.setWork(SWTKey.WORK_REPORT_BUGS_SAVE);
 
@@ -2350,6 +2390,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         // for screenshot we will post the data here
         if (screenshotFile != null) {
+
             workReport.addFile("screenshot", screenshotFile);
         }
 
@@ -2398,44 +2439,43 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         }
     }
 
-    private void visitURL(String targetCompleteURL, String historyMessage){
+    private void visitURL(String targetCompleteURL, String historyMessage) {
         browser.loadURL(targetCompleteURL);
 
         // animate the showing panel after 4-6 seconds
         showBrowserPanel();
-       
-        
+
         saveHistory(historyMessage);
     }
-    
-     private void displayPDF(String targetCompleteURI){
+
+    private void displayPDF(String targetCompleteURI) {
         browser.loadURL(targetCompleteURI);
 
         // animate the showing panel after 4-6 seconds
         showBrowserPanel();
-       
+
     }
-    
-    private void showBrowserPanel(){
-        new java.util.Timer().schedule( 
-        new java.util.TimerTask() {
+
+    private void showBrowserPanel() {
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
             @Override
             public void run() {
-              labelScreenshot.setVisible(true);
-              cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
+                labelScreenshot.setVisible(true);
+                cardLayouterMain.show(panelContentCenter, "panelInnerBrowser");
             }
-        }, 
-        3000 
-);
+        },
+                3000
+        );
     }
-    
+
     private void buttonVisitChromeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitChromeActionPerformed
-                
+
         visitURL("http://bing.com", "opening embedded browser");
     }//GEN-LAST:event_buttonVisitChromeActionPerformed
 
     private void buttonVisitWhatsappActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitWhatsappActionPerformed
-      
+
         visitURL("http://web.whatsapp.com", "opening embedded whatsapp");
     }//GEN-LAST:event_buttonVisitWhatsappActionPerformed
 
@@ -2763,143 +2803,137 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private void buttonVisitGoogleMeetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonVisitGoogleMeetActionPerformed
 
         visitURL("http://meet.google.com", "opening embedded googlemeet");
-        
+
     }//GEN-LAST:event_buttonVisitGoogleMeetActionPerformed
 
-    private String todaysDate(){
+    private String todaysDate() {
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Date date = new Date();
         String tgl = dateFormat.format(date);
-        
+
         return tgl;
-        
+
     }
-    private String todaysDateCombined(){
+
+    private String todaysDateCombined() {
         DateFormat dateFormat = new SimpleDateFormat("ddMMyyyyhhmmss");
         Date date = new Date();
         String tgl = dateFormat.format(date);
-        
+
         return tgl;
-        
+
     }
-    
+
     private void buttonContinueExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonContinueExamActionPerformed
         // start opening the exam questions
-        if(currentIndexExamQuestion==-1){
-        cardLayoutExam = (CardLayout) panelExamInner.getLayout();
-        cardLayoutExam.show(panelExamInner, "panelQuestionExam");
-        
-        cardLayoutExamType = (CardLayout) panelInnerQuestionExam.getLayout();
-        } else if(buttonContinueExam.getText().equalsIgnoreCase("save")){
-            
+        if (currentIndexExamQuestion == -1) {
+            cardLayoutExam = (CardLayout) panelExamInner.getLayout();
+            cardLayoutExam.show(panelExamInner, "panelQuestionExam");
+
+            cardLayoutExamType = (CardLayout) panelInnerQuestionExam.getLayout();
+        } else if (buttonContinueExam.getText().equalsIgnoreCase("save")) {
+
             saveExamAnswer();
-            
+
             buttonContinueExam.setEnabled(false);
             buttonContinueExam.setText("-");
-            
-           cardLayoutExam.show(panelExamInner, "panelWelcomeExam");
-           
-           labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeWaitingExam"));
-           labelYouRegisteredTitleExam.setText(languageHelper.getData("labelYouRegisteredTitleExamDone").replace("xxx", dataSchedExam.getClass_registered()));
-           
-           buttonExam.setEnabled(false);
-           labelExamLogo.setIcon(loadingBookImage);
-           
-           // submitting all data to Web Server API
-           submitAllExamAnswers();
-           
-           // saving the local track record
-           configuration.setValue(Keys.LAST_EXAM_COMPLETED_DATE, todaysDate());
-           String totalEx = configuration.getStringValue(Keys.TOTAL_EXAM_COMPLETED);
-           
-           int totExamCompleted = 0;
-           
-           if(totalEx!=null){
-               
-               if(!totalEx.equalsIgnoreCase("0") || totalEx.length()!=0){    
-                   totExamCompleted = Integer.parseInt(totalEx);
-               }
-               
+
+            cardLayoutExam.show(panelExamInner, "panelWelcomeExam");
+
+            labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeWaitingExam"));
+            labelYouRegisteredTitleExam.setText(languageHelper.getData("labelYouRegisteredTitleExamDone").replace("xxx", dataSchedExam.getClass_registered()));
+
+            buttonExam.setEnabled(false);
+            labelExamLogo.setIcon(loadingBookImage);
+
+            // submitting all data to Web Server API
+            submitAllExamAnswers();
+
+            // saving the local track record
+            configuration.setValue(Keys.LAST_EXAM_COMPLETED_DATE, todaysDate());
+            String totalEx = configuration.getStringValue(Keys.TOTAL_EXAM_COMPLETED);
+
+            int totExamCompleted = 0;
+
+            if (totalEx != null) {
+
+                if (!totalEx.equalsIgnoreCase("0") || totalEx.length() != 0) {
+                    totExamCompleted = Integer.parseInt(totalEx);
+                }
+
                 totExamCompleted++;
-                configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, totExamCompleted+"");
-                
-                
-           }
-           
+                configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, totExamCompleted + "");
+
+            }
+
             System.out.println("-------- DATA ------- tersimpan " + totExamCompleted + " untuk " + todaysDate());
-           
+
         }
-        
-         
-        
-        if(!buttonContinueExam.getText().equalsIgnoreCase("save") && currentIndexExamQuestion+1<manyExamQuestions){
-            
-            if(currentIndexExamQuestion>=0){
+
+        if (!buttonContinueExam.getText().equalsIgnoreCase("save") && currentIndexExamQuestion + 1 < manyExamQuestions) {
+
+            if (currentIndexExamQuestion >= 0) {
                 saveExamAnswer();
             }
-            
+
             currentIndexExamQuestion++;
-            
-            showExamQuestion(); 
+
+            showExamQuestion();
         }
-        
-        if(currentIndexExamQuestion+1==manyExamQuestions){
+
+        if (currentIndexExamQuestion + 1 == manyExamQuestions) {
             buttonContinueExam.setText("save");
-            
+
         }
-        
+
     }//GEN-LAST:event_buttonContinueExamActionPerformed
 
-    private void saveExamAnswer(){
-                ExamStudentAnswer jawabanOrang = new ExamStudentAnswer();
-                jawabanOrang.setStatus("WAITING");
-                jawabanOrang.setScore_earned(0);
-                
-                // we save the name first here for later usage of uploading
-                
-                if(praktekFiles[currentIndexFilePraktekExamQ]!=null){
-                jawabanOrang.setFileupload(praktekFiles[currentIndexFilePraktekExamQ].getName());
-                 currentIndexFilePraktekExamQ++;
-                }
-                int jenisSoal = userCurrentExamQ[currentIndexExamQuestion].getJenis();
-                if(jenisSoal==2){
-                jawabanOrang.setAnswer(textareaExamQuestionAnswerEssay.getText());    
-                }else{
-                    // if it is not essay
-                    // thus it must be a multiple choices
-                    if(radioButtonChoiceAMultipleChoice.isSelected()){
-                        jawabanOrang.setAnswer("A");
-                    } else
-                    if(radioButtonChoiceBMultipleChoice.isSelected()){
-                        jawabanOrang.setAnswer("B");
-                    }else 
-                    if(radioButtonChoiceCMultipleChoice.isSelected()){
-                        jawabanOrang.setAnswer("C");
-                    }else 
-                    if(radioButtonChoiceDMultipleChoice.isSelected()){
-                        jawabanOrang.setAnswer("D");
-                    }
-                }
-                
-                jawabanOrang.setExam_qa_id(userCurrentExamQ[currentIndexExamQuestion].getId());
-                
-                System.out.println("--------Ada exam no.id na " + jawabanOrang.getExam_qa_id());
-                
-                // put it together
-                allExamStudentAnswer[currentIndexExamQuestion] = jawabanOrang;
-               
+    private void saveExamAnswer() {
+        ExamStudentAnswer jawabanOrang = new ExamStudentAnswer();
+        jawabanOrang.setStatus("WAITING");
+        jawabanOrang.setScore_earned(0);
+
+        // we save the name first here for later usage of uploading
+        if (praktekFiles[currentIndexFilePraktekExamQ] != null) {
+            jawabanOrang.setFileupload(praktekFiles[currentIndexFilePraktekExamQ].getName());
+            currentIndexFilePraktekExamQ++;
+        }
+        int jenisSoal = userCurrentExamQ[currentIndexExamQuestion].getJenis();
+        if (jenisSoal == 2) {
+            jawabanOrang.setAnswer(textareaExamQuestionAnswerEssay.getText());
+        } else {
+            // if it is not essay
+            // thus it must be a multiple choices
+            if (radioButtonChoiceAMultipleChoice.isSelected()) {
+                jawabanOrang.setAnswer("A");
+            } else if (radioButtonChoiceBMultipleChoice.isSelected()) {
+                jawabanOrang.setAnswer("B");
+            } else if (radioButtonChoiceCMultipleChoice.isSelected()) {
+                jawabanOrang.setAnswer("C");
+            } else if (radioButtonChoiceDMultipleChoice.isSelected()) {
+                jawabanOrang.setAnswer("D");
+            }
+        }
+
+        jawabanOrang.setExam_qa_id(userCurrentExamQ[currentIndexExamQuestion].getId());
+
+        System.out.println("--------Ada exam no.id na " + jawabanOrang.getExam_qa_id());
+
+        // put it together
+        allExamStudentAnswer[currentIndexExamQuestion] = jawabanOrang;
+
     }
-    
-    private void showExamQuestionPreviewWhenAvailable(){
-        if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("default")){
-                panelExamQuestionPreview.setVisible(false);
-        }else{
-                panelExamQuestionPreview.setVisible(true);
+
+    private void showExamQuestionPreviewWhenAvailable() {
+        if (userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("default")) {
+            panelExamQuestionPreview.setVisible(false);
+        } else {
+            panelExamQuestionPreview.setVisible(true);
         }
     }
-    
-    private void showExamQuestion(){
-        
+
+    private void showExamQuestion() {
+
         // jenis 1 : abcd
         // jenis 2 : essay
         // jenis 3 : ab only
@@ -2907,90 +2941,87 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // jenis 5 : praktek (submit file)
         labelExamQuestion.setIcon(null);
         buttonBrowseFileExam.setIcon(null);
-        
-        labelExamQuestion.setText("No." + (currentIndexExamQuestion+1) + " : " + userCurrentExamQ[currentIndexExamQuestion].getQuestion());
-        
+
+        labelExamQuestion.setText("No." + (currentIndexExamQuestion + 1) + " : " + userCurrentExamQ[currentIndexExamQuestion].getQuestion());
+
         // if the preview 
-        if(userCurrentExamQ[currentIndexExamQuestion].getPreview().contains("default")){
+        if (userCurrentExamQ[currentIndexExamQuestion].getPreview().contains("default")) {
             labelExamQuestionPreview.setText("-");
             labelExamQuestionPreview.setIcon(null);
-        }else{
+        } else {
             // we download the image from server
             labelExamQuestionPreview.setText("loading...");
-            
+
             refreshExamQuestionPicture(userCurrentExamQ[currentIndexExamQuestion].getPreview());
-            
-                if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("pdf")){
-                labelExamQuestionPreview.setIcon(pdfImage);    
-                } else
-                if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("doc")){
-                labelExamQuestionPreview.setIcon(wordImage);    
-                } else 
-                if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("xls")){
-                labelExamQuestionPreview.setIcon(excelImage);    
-                } else 
-                if(userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("ppt")){
-                labelExamQuestionPreview.setIcon(ppointImage);    
-                }
-            
+
+            if (userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("pdf")) {
+                labelExamQuestionPreview.setIcon(pdfImage);
+            } else if (userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("doc")) {
+                labelExamQuestionPreview.setIcon(wordImage);
+            } else if (userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("xls")) {
+                labelExamQuestionPreview.setIcon(excelImage);
+            } else if (userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains("ppt")) {
+                labelExamQuestionPreview.setIcon(ppointImage);
+            }
+
         }
-        
-        switch(userCurrentExamQ[currentIndexExamQuestion].getJenis()){
+
+        switch (userCurrentExamQ[currentIndexExamQuestion].getJenis()) {
             case 1:
-            labelTyping.setVisible(false);
-            panelBrowseUpload.setVisible(false);
-            showExamQuestionPreviewWhenAvailable();
-                
-            radioButtonChoiceAMultipleChoice.setVisible(true);
-            radioButtonChoiceBMultipleChoice.setVisible(true);
-            radioButtonChoiceCMultipleChoice.setVisible(true);
-            radioButtonChoiceDMultipleChoice.setVisible(true);
-            
-            radioButtonChoiceAMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_a());
-            radioButtonChoiceBMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_b());
-            radioButtonChoiceCMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_c());
-            radioButtonChoiceDMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_d());
-            
-            cardLayoutExamType.show(panelInnerQuestionExam, "panelMultipleChoice");   
-            break;
+                labelTyping.setVisible(false);
+                panelBrowseUpload.setVisible(false);
+                showExamQuestionPreviewWhenAvailable();
+
+                radioButtonChoiceAMultipleChoice.setVisible(true);
+                radioButtonChoiceBMultipleChoice.setVisible(true);
+                radioButtonChoiceCMultipleChoice.setVisible(true);
+                radioButtonChoiceDMultipleChoice.setVisible(true);
+
+                radioButtonChoiceAMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_a());
+                radioButtonChoiceBMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_b());
+                radioButtonChoiceCMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_c());
+                radioButtonChoiceDMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_d());
+
+                cardLayoutExamType.show(panelInnerQuestionExam, "panelMultipleChoice");
+                break;
             case 3:
-            labelTyping.setVisible(false);
-            panelBrowseUpload.setVisible(false);
-            showExamQuestionPreviewWhenAvailable();
-            
-            radioButtonChoiceAMultipleChoice.setVisible(true);
-            radioButtonChoiceBMultipleChoice.setVisible(true);
-            radioButtonChoiceCMultipleChoice.setVisible(false);
-            radioButtonChoiceDMultipleChoice.setVisible(false);
-            
-            radioButtonChoiceAMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_a());
-            radioButtonChoiceBMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_b());
-            
-            cardLayoutExamType.show(panelInnerQuestionExam, "panelMultipleChoice");   
-            break;
+                labelTyping.setVisible(false);
+                panelBrowseUpload.setVisible(false);
+                showExamQuestionPreviewWhenAvailable();
+
+                radioButtonChoiceAMultipleChoice.setVisible(true);
+                radioButtonChoiceBMultipleChoice.setVisible(true);
+                radioButtonChoiceCMultipleChoice.setVisible(false);
+                radioButtonChoiceDMultipleChoice.setVisible(false);
+
+                radioButtonChoiceAMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_a());
+                radioButtonChoiceBMultipleChoice.setText(userCurrentExamQ[currentIndexExamQuestion].getOption_b());
+
+                cardLayoutExamType.show(panelInnerQuestionExam, "panelMultipleChoice");
+                break;
             case 2:
                 labelTyping.setVisible(false);
                 panelBrowseUpload.setVisible(false);
                 showExamQuestionPreviewWhenAvailable();
-                
+
                 textareaExamQuestionAnswerEssay.setText("tulis jawaban disini...");
                 textareaExamQuestionAnswerEssay.setOpaque(true);
-                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay");   
+                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay");
                 break;
             case 4:
                 labelTyping.setVisible(true);
                 panelBrowseUpload.setVisible(false);
                 showExamQuestionPreviewWhenAvailable();
-                
-                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay"); 
-                textareaExamQuestionAnswerEssay.setText("tunggu hingga aplikasi typing terbuka\n"+
-                      "kini mulailah mengetik kata-kata yang bermunculan.\n"+
-                      "lakukan pengetikan selama 1 menit.\n"+
-                      "jika sudah mengetik, kemudian tekan Screenshot.\n"+
-                      "pastikan score terlihat baik di layar.\n"+
-                      "dan lanjutkan ke soalan berikutnya.");
+
+                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay");
+                textareaExamQuestionAnswerEssay.setText("tunggu hingga aplikasi typing terbuka\n"
+                        + "kini mulailah mengetik kata-kata yang bermunculan.\n"
+                        + "lakukan pengetikan selama 1 menit.\n"
+                        + "jika sudah mengetik, kemudian tekan Screenshot.\n"
+                        + "pastikan score terlihat baik di layar.\n"
+                        + "dan lanjutkan ke soalan berikutnya.");
                 textareaExamQuestionAnswerEssay.setOpaque(false);
-            
+
                 break;
             case 5:
             case 6:
@@ -3000,20 +3031,20 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelTyping.setVisible(false);
                 panelBrowseUpload.setVisible(true);
                 showExamQuestionPreviewWhenAvailable();
-                
-                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay"); 
+
+                cardLayoutExamType.show(panelInnerQuestionExam, "panelEssay");
                 textareaExamQuestionAnswerEssay.setText(
-                      "Klik pada gambar disamping untuk\n"+
-                      "melihat dokumen yg harus di\n"+
-                      "ketik (dibuat) kembali.\n"+
-                      "pastikan konten & pengaturan lainnya\n"+
-                      "telah sesuai lalu, save dan upload...");
+                        "Klik pada gambar disamping untuk\n"
+                        + "melihat dokumen yg harus di\n"
+                        + "ketik (dibuat) kembali.\n"
+                        + "pastikan konten & pengaturan lainnya\n"
+                        + "telah sesuai lalu, save dan upload...");
                 textareaExamQuestionAnswerEssay.setOpaque(false);
-                
+
                 break;
         }
     }
-    
+
     private void buttonExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonExamActionPerformed
         //labelPanelViewName.setText("<< Attendance");
         languageHelper.apply(labelPanelViewName, "labelPanelViewNameExam", Comp.LABEL);
@@ -3025,17 +3056,17 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         visitURL("https://fastfingers.net/typingtest/indonesian", "opening embedded typing");
     }//GEN-LAST:event_labelTypingMouseClicked
 
-    private String createImageFileName(){
-        return todaysDateCombined()+"_screenshot.png";
-        
+    private String createImageFileName() {
+        return todaysDateCombined() + "_screenshot.png";
+
     }
-    
+
     private void labelScreenshotMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelScreenshotMouseClicked
 
         labelScreenshot.setIcon(loadingImage);
         //return back the image display
         labelTyping.setIcon(typingImage);
-        
+
         try {
             screenshotBrowserFile = new File(PathReference.getScreenshotPath(createImageFileName()));
             BufferedImage image = new Robot().createScreenCapture(new Rectangle(panelBase.getLocationOnScreen().x, panelBase.getLocationOnScreen().y, panelBase.getWidth(), panelBase.getHeight()));
@@ -3043,11 +3074,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         } catch (Exception ex) {
             System.err.println("error while screenshot panel");
         }
-        
+
         setBackScreenshotIcon();
-        
-       
-        
+
+
     }//GEN-LAST:event_labelScreenshotMouseClicked
 
     private void labelUsernameTextMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelUsernameTextMouseClicked
@@ -3058,43 +3088,41 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         // TODO add your handling code here:
     }//GEN-LAST:event_labelUsernameTextMouseEntered
 
-  
-    
+
     private void buttonBrowseFileExamActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonBrowseFileExamActionPerformed
-        
+
         fileChooser = new JFileChooser();
         //fileChooser.setAcceptAllFileFilterUsed(false);
 
-                // jenis is 
-		// 1 for abcd
-		// 2 for essay
-		// 3 for ab only (true false)
-		// 4 for typing
-		// 5 for praktek (submit upload) - word
-		// 6 for praktek (submit upload) - excel
-		// 7 for praktek (submit upload) - ppoint
-		// 8 for praktek (submit upload) - pdf
-		// 9 for praktek (submit upload) - all-files
-                
+        // jenis is 
+        // 1 for abcd
+        // 2 for essay
+        // 3 for ab only (true false)
+        // 4 for typing
+        // 5 for praktek (submit upload) - word
+        // 6 for praktek (submit upload) - excel
+        // 7 for praktek (submit upload) - ppoint
+        // 8 for praktek (submit upload) - pdf
+        // 9 for praktek (submit upload) - all-files
         System.out.println("------------ saat ini soalan di index ke " + currentIndexExamQuestion + " id ke " + userCurrentExamQ[currentIndexExamQuestion].getId());
         System.out.println("------------ saat ini soalan berjenis " + userCurrentExamQ[currentIndexExamQuestion].getJenis());
-        
+
         switch (userCurrentExamQ[currentIndexExamQuestion].getJenis()) {
             case 5:
                 //fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Ms.Word file", "doc", "docx"));
-                  fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.Word file", "doc", "docx"));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.Word file", "doc", "docx"));
                 break;
             case 6:
                 //fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Ms.Excel file", "xls", "xlsx"));
-                  fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.Excel file", "xls", "xlsx"));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.Excel file", "xls", "xlsx"));
                 break;
             case 7:
                 //fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Ms.P.Point file",  "ppt", "pptx"));
-                  fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.P.Point file",  "ppt", "pptx"));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Ms.P.Point file", "ppt", "pptx"));
                 break;
             case 8:
                 //fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF file",  "pdf"));
-                  fileChooser.setFileFilter(new FileNameExtensionFilter("PDF file",  "pdf"));
+                fileChooser.setFileFilter(new FileNameExtensionFilter("PDF file", "pdf"));
                 break;
             case 9:
                 //fileChooser.setAcceptAllFileFilterUsed(true);
@@ -3104,7 +3132,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             default:
                 break;
         }
-        
 
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             // change accordingly
@@ -3112,74 +3139,95 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             // use it to Jlabel Propic
             praktekFiles[currentIndexFilePraktekExamQ] = fileChooser.getSelectedFile();
 
-            buttonBrowseFileExam.setIcon(okImage);    
+            buttonBrowseFileExam.setIcon(okImage);
 
-            
         } else {
-                buttonBrowseFileExam.setIcon(null);
-                praktekFiles[currentIndexFilePraktekExamQ] = null;
+            buttonBrowseFileExam.setIcon(null);
+            praktekFiles[currentIndexFilePraktekExamQ] = null;
         }
-        
+
     }//GEN-LAST:event_buttonBrowseFileExamActionPerformed
 
     private void labelExamQuestionPreviewMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelExamQuestionPreviewMouseClicked
-        
+
         // opening file locally
         // but not for typing mode
-        if(userCurrentExamQ[currentIndexExamQuestion].getJenis()==4){
+        if (userCurrentExamQ[currentIndexExamQuestion].getJenis() == 4) {
             UIEffect.popup("Please continue the exam", this);
-        }else{
-        
-        try { 
-            // file path to  open
-            String fileExamPreview = configuration.getStringValue(Keys.EXAM_QUESTION_PREVIEW);
+        } else {
 
-            File u = new File(fileExamPreview);
-            if(u.exists()){
-                Desktop d = Desktop.getDesktop(); 
-                d.open(u); 
-            }else{
-                 UIEffect.popup("File preview is not downloaded yet! Please wait...", this);
+            try {
+                // file path to  open
+                String fileExamPreview = configuration.getStringValue(Keys.EXAM_QUESTION_PREVIEW);
+
+                File u = new File(fileExamPreview);
+                if (u.exists()) {
+                    Desktop d = Desktop.getDesktop();
+                    d.open(u);
+                } else {
+                    UIEffect.popup("File preview is not downloaded yet! Please wait...", this);
+                }
+
+            } catch (Exception eevt) {
+                UIEffect.popup("File not found! Please report a bug to administrator.", this);
             }
-            
-        } catch (Exception eevt) { 
-            UIEffect.popup("File not found! Please report a bug to administrator.", this);
-        } 
-        
+
         }
     }//GEN-LAST:event_labelExamQuestionPreviewMouseClicked
 
-    private void setBackScreenshotIcon(){
-        
-        new java.util.Timer().schedule( 
-        new java.util.TimerTask() {
+    private void labelMaxiimizeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelMaxiimizeMouseClicked
+
+        if (normalState) {
+            this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            labelMaxiimize.setIcon(restoreImage);
+        } else {
+            this.setState(JFrame.NORMAL);
+            setPreferredSize(new java.awt.Dimension(800, 500));
+
+            labelMaxiimize.setIcon(maximizeImage);
+        }
+
+        normalState = !normalState;
+
+    }//GEN-LAST:event_labelMaxiimizeMouseClicked
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+
+        remoteLoggingFinish();
+
+    }//GEN-LAST:event_formWindowClosing
+
+    private void setBackScreenshotIcon() {
+
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
             @Override
             public void run() {
-               labelScreenshot.setIcon(screenshotImage);
-               
-                if(userCurrentExamQ != null){
-                    if(userCurrentExamQ[currentIndexExamQuestion].getJenis()==4){
+                labelScreenshot.setIcon(screenshotImage);
+
+                if (userCurrentExamQ != null) {
+                    if (userCurrentExamQ[currentIndexExamQuestion].getJenis() == 4) {
                         // return back to exam page UI
                         cardLayouterMain.show(panelContentCenter, "panelExam");
                         labelTyping.setVisible(false);
                         labelScreenshot.setVisible(false);
                         panelExamQuestionPreview.setVisible(true);
-                        
+
                         // render the screenshot taken
                         UIEffect.iconChanger(labelExamQuestionPreview, screenshotBrowserFile.getAbsolutePath());
-                        
+
                         labelExamQuestion.setIcon(okImage);
                         labelExamQuestion.setText("Mengetik (Typing) telah usai. Silahkan melanjutkan soalan berikutnya...");
                         textareaExamQuestionAnswerEssay.setText("-");
                     }
                 }
             }
-        }, 
-        3000 
-);
-        
+        },
+                3000
+        );
+
     }
-    
+
     private void showChangeSchedule() {
 
         String days[] = languageHelper.getDaysData("labelMonday",
@@ -3259,7 +3307,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void saveUserProfile() {
         showLoadingStatus();
-        SWThreadWorker workUserEntity = new SWThreadWorker(this);
+        SWThreadWorker workUserEntity = null;
+
+        if (propicFile != null) {
+            workUserEntity = new SWThreadWorker(this, HttpCall.METHOD_POST_FILE);
+        } else {
+            workUserEntity = new SWThreadWorker(this, HttpCall.METHOD_POST);
+        }
 
         workUserEntity.setWork(SWTKey.WORK_USER_UPDATE);
         workUserEntity.addData("id", personLogged.getId() + "");
@@ -3275,6 +3329,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         // for propic we will post the data here
         if (propicFile != null) {
+
             workUserEntity.addFile("propic", propicFile);
         }
 
@@ -3292,30 +3347,30 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         if (!propic.contains("default") && propic.length() > 0) {
             // set the propic
-            UIEffect.iconChanger(labelPropicUser, (propic));
+            UIEffect.iconChangerCircular(labelPropicUser, (propic));
 
         }
 
         hideLoadingStatus();
     }
-    
-    private boolean isExamQuestionPreview(String ... ext){
-        
+
+    private boolean isExamQuestionPreview(String... ext) {
+
         boolean statMatched = false;
-        
-        for(String n:ext){
-            
-                statMatched = userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains(n);
-                if(statMatched){
-                    break;
-                }
-            
+
+        for (String n : ext) {
+
+            statMatched = userCurrentExamQ[currentIndexExamQuestion].getPreview().toLowerCase().contains(n);
+            if (statMatched) {
+                break;
+            }
+
         }
-        
+
         return statMatched;
-        
+
     }
-    
+
     private void loadExamQuestionPreviewLocally() {
 
         String propic = configuration.getStringValue(Keys.EXAM_QUESTION_PREVIEW);
@@ -3324,12 +3379,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         if (!propic.contains("default") && propic.length() > 0) {
             // set the propic only if the question preview is image
-            if(isExamQuestionPreview("png", "jpg", "jpeg")){
-            UIEffect.iconChanger(labelExamQuestionPreview, (propic));    
-            }else{
+            if (isExamQuestionPreview("png", "jpg", "jpeg")) {
+                UIEffect.iconChanger(labelExamQuestionPreview, (propic));
+            } else {
                 // let the icon changed by the showExamQuestion() method
             }
-            
+
             // clearing any text remains...
             labelExamQuestionPreview.setText("");
         }
@@ -3342,8 +3397,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         loadUserPictureLocally();
         //System.out.println(propic);
 
+        String bhsa = configuration.getStringValue(Keys.SYSTEM_LANGUAGE);
+
+        System.out.println("Bahasa System ialah " + bhsa);
+
         checkboxAutoupdateToolsSettings.setSelected(configuration.getBooleanValue(Keys.AUTO_UPDATE_TOOLS));
-        comboboxSystemLanguage.setSelectedItem(configuration.getStringValue(Keys.SYSTEM_LANGUAGE));
+        comboboxSystemLanguage.setSelectedItem(bhsa);
 
         if (configuration.getStringValue(Keys.NOTIF_CLASS_START).equalsIgnoreCase(Keys.DEFAULT_NOTIF_CLASS_START)) {
             radioNotifClass1HourSettings.setSelected(true);
@@ -3361,8 +3420,21 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
     private void logout() {
         UIEffect.stopTimeEffect();
-        loginFrame.setVisible(true);
-        this.dispose();
+
+        // call the update status of remote logout
+        if (this.getMachineID() != null) {
+            System.out.println("======== I'm leaving from remote login access.... ========");
+            remoteLoggingFinish();
+        } else {
+            // if no machine id found
+            // directly shut them off
+            System.out.println("======== I'm leaving from normal access .... ========");
+
+            loginFrame.setVisible(true);
+            this.dispose();
+        }
+
+        // you're about to logout
     }
 
     /**
@@ -3423,7 +3495,6 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -3435,6 +3506,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelAddPayment;
     private javax.swing.JLabel labelAddressProfile;
     private javax.swing.JLabel labelAmountPaymentForm;
+    private javax.swing.JLabel labelAppsName;
     private javax.swing.JLabel labelBrowseScreenshotPaymentForm;
     private javax.swing.JLabel labelBrowseScreenshotReportBugsForm;
     private javax.swing.JLabel labelCaseReportBugsForm;
@@ -3455,6 +3527,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JLabel labelHistoryLast5;
     private javax.swing.JLabel labelLastPayment;
     private javax.swing.JLabel labelLoadingStatus;
+    private javax.swing.JLabel labelMaxiimize;
     private javax.swing.JLabel labelMethodPaymentForm;
     private javax.swing.JLabel labelMinimize;
     private javax.swing.JLabel labelNavHome;
@@ -3516,6 +3589,8 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JPanel panelExamQuestionPreview;
     private javax.swing.JPanel panelHeader;
     private javax.swing.JPanel panelHeaderCenter;
+    private javax.swing.JPanel panelHeaderLeft;
+    private javax.swing.JPanel panelHeaderRight;
     private javax.swing.JPanel panelHistory;
     private javax.swing.JPanel panelHistoryFound;
     private javax.swing.JPanel panelHistoryNone;
@@ -3565,33 +3640,33 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     private javax.swing.JTextField textfieldWhatsappProfile;
     // End of variables declaration//GEN-END:variables
 
-    private boolean isScheduledForExam(Schedule [] dataIn){
-        
+    private boolean isScheduledForExam(Schedule[] dataIn) {
+
         boolean foundExam = false;
-        
-        for(Schedule singleOne : dataIn){
-            if(singleOne.isExam()){
+
+        for (Schedule singleOne : dataIn) {
+            if (singleOne.isExam()) {
                 foundExam = true;
                 break;
             }
         }
-        
+
         return foundExam;
-        
+
     }
-    
-    private Schedule getExamOnly(Schedule [] dataIn){
-        Schedule dataObtained = null; 
-        for(Schedule singleOne : dataIn){
-            if(singleOne.isExam()){
+
+    private Schedule getExamOnly(Schedule[] dataIn) {
+        Schedule dataObtained = null;
+        for (Schedule singleOne : dataIn) {
+            if (singleOne.isExam()) {
                 dataObtained = singleOne;
                 break;
             }
         }
-        
+
         return dataObtained;
     }
-    
+
     private void hideScheduleLabels() {
         //labelScheduleDay1.setVisible(false);
         labelScheduleDay2.setVisible(false);
@@ -3606,44 +3681,44 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelHistoryLast5.setVisible(false);
     }
 
-    private boolean isExamLimitReached(){
-        
+    private boolean isExamLimitReached() {
+
         // checking this month date
         String tglTerakhir = configuration.getStringValue(Keys.LAST_EXAM_COMPLETED_DATE);
         int jumlahUjianBulanIni = Integer.parseInt(configuration.getStringValue(Keys.TOTAL_EXAM_COMPLETED));
-        
+
         System.out.println("Data --------" + tglTerakhir + " and " + jumlahUjianBulanIni);
-        
+
         boolean limited = true;
-        
-        if(tglTerakhir!=null){
-            if(!tglTerakhir.equalsIgnoreCase("none") || tglTerakhir.length()!=0){
-            
-            if(isTodayMonthYear(tglTerakhir) && jumlahUjianBulanIni<2){
-            
-            // limit bulan ini harus only below 2
-            limited = false;
-            
-            }else if(!isTodayMonthYear(tglTerakhir)){
-                // maybe several months passed by
-                // thus we can reset the limit back to 0
+
+        if (tglTerakhir != null) {
+            if (!tglTerakhir.equalsIgnoreCase("none") || tglTerakhir.length() != 0) {
+
+                if (isTodayMonthYear(tglTerakhir) && jumlahUjianBulanIni < 2) {
+
+                    // limit bulan ini harus only below 2
+                    limited = false;
+
+                } else if (!isTodayMonthYear(tglTerakhir)) {
+                    // maybe several months passed by
+                    // thus we can reset the limit back to 0
+                    limited = false;
+                    configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, "0");
+                }
+
+            } else {
+                // when it is none
                 limited = false;
-                configuration.setValue(Keys.TOTAL_EXAM_COMPLETED, "0");
             }
-            
-        }else{
-            // when it is none
+        } else {
             limited = false;
         }
-        }else{
-             limited = false;
-        }
-        
-        
-        
+
+        System.out.println("Limit exam tercapai... Baru " + jumlahUjianBulanIni);
+
         return limited;
     }
-    
+
     private boolean checkDiffVersion(String ver1, String ver2) {
 
         System.out.println("First ver " + ver1 + " and Second ver " + ver2);
@@ -3661,24 +3736,30 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     @Override
-        public void checkResponse(String resp, String callingFromURL) {
+    public void checkResponse(String resp, String callingFromURL) {
         Gson objectG = new Gson();
 
         System.out.println(callingFromURL + " have " + resp);
         JSONChecker jchecker = new JSONChecker();
 
+        ImageIcon okIcon = new ImageIcon(getClass().getResource("/images/ok16.png"));
+        ImageIcon coinIcon = new ImageIcon(getClass().getResource("/images/coin.png"));
+        ImageIcon sessionIcon = new ImageIcon(getClass().getResource("/images/note16.png"));
+
         if (jchecker.isValid(resp)) {
 
             boolean b = callingFromURL.contains(WebReference.PICTURE_USER);
 
-            ImageIcon okIcon = new ImageIcon(getClass().getResource("/images/ok16.png"));
-            ImageIcon coinIcon = new ImageIcon(getClass().getResource("/images/coin.png"));
-            ImageIcon sessionIcon = new ImageIcon(getClass().getResource("/images/note16.png"));
-
             String innerData = jchecker.getValueAsString("multi_data");
 
             //System.out.println(callingFromURL + " is valid " + b);
-            if (callingFromURL.equalsIgnoreCase(WebReference.ADD_HISTORY)) {
+            if (callingFromURL.equalsIgnoreCase(WebReference.REMOTE_LOGIN_DISCONNECT)) {
+
+                // if the call of logging out remote is valid
+                loginFrame.setVisible(true);
+                this.dispose();
+
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ADD_HISTORY)) {
                 refreshHistory();
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ADD_REPORT_BUGS)) {
                 refreshHistory();
@@ -3695,17 +3776,13 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 refreshHistory();
                 hideLoadingStatus();
 
-            
-
-} else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_DOCUMENT)) {
                 Document[] dataIn = objectG.fromJson(innerData, Document[].class);
                 tabRender.render(tableDocumentData, dataIn);
 
                 labelRefreshDocument.setIcon(refreshImage);
 
-            
-
-} else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_ATTENDANCE)) {
                 Attendance[] dataIn = objectG.fromJson(innerData, Attendance[].class);
                 tabRender.render(tableAttendanceData, dataIn);
 
@@ -3713,9 +3790,11 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
                 labelTotalSessionCompleted.setText(languageHelper.getData("labelTotalSession") + dataIn.length);
                 labelTotalSessionCompleted.setIcon(sessionIcon);
-            
 
-} else if (callingFromURL.equalsIgnoreCase(WebReference.CHECK_TOOLS)) {
+                progressBarTotalSession.setValue(dataIn.length);
+                progressBarTotalSession.setMaximum(8);
+
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.CHECK_TOOLS)) {
 
                 Tool dataIn = objectG.fromJson(innerData, Tool.class);
 
@@ -3741,12 +3820,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
                 loadExamQuestionPreviewLocally();
 
-            }  else if (callingFromURL.contains(WebReference.PICTURE_USER)) {
+            } else if (callingFromURL.contains(WebReference.PICTURE_USER)) {
 
                 System.out.println("Obtaining Picture from web is success...\nNow applying it locally.");
                 loadUserPictureLocally();
 
-} else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
                 Payment[] dataIn = objectG.fromJson(innerData, Payment[].class);
                 tabRender.render(tablePaymentData, dataIn);
 
@@ -3754,7 +3833,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 labelLastPayment.setIcon(coinIcon);
 
                 labelRefreshPayment.setIcon(refreshImage);
-} else if (callingFromURL.equalsIgnoreCase(WebReference.PROFILE_USER)) {
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.PROFILE_USER)) {
 
                 System.out.println("Obtaining Profile User data...");
 
@@ -3776,9 +3855,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
                 System.out.println("Complete User Profile data was obtained!");
 
-            
-
-} else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.LAST_HISTORY)) {
                 History[] dataIn = objectG.fromJson(innerData, History[].class);
 
                 if (dataIn.length > 0) {
@@ -3809,49 +3886,61 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                         labelHistoryLast4.setVisible(false);
                         labelHistoryLast5.setVisible(false);
 
-            } 
+                }
 
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
 
-        }   else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
+                System.out.println("Data found for all schedule!");
+
                 Schedule[] dataIn = objectG.fromJson(innerData, Schedule[].class);
 
-                if(isScheduledForExam(dataIn) ){
+                System.out.println("Ada schedule sebanyak " + dataIn.length);
+
+                if (isScheduledForExam(dataIn)) {
                     // activate the Button Menu & the text welcome (exam)
+                    System.out.println("Ada Data untuk exam.");
+
                     dataSchedExam = getExamOnly(dataIn);
-                    
-                    if(!isExamLimitReached()){
-                        
-                          buttonExam.setEnabled(true);
-                    
-                    labelCongratulationUserExam.setText(languageHelper.getData("labelCongratulationUserExam").replace("xxx",personLogged.getUsername()));
-                    labelYouRegisteredTitleExam.setText(languageHelper.getData("labelYouRegisteredTitleExam").replace("xxx", dataSchedExam.getClass_registered()));
-                    
-                    if(configuration.getStringValue(Keys.SYSTEM_LANGUAGE).equalsIgnoreCase("bahasa indonesia")){
-                        ScheduleObserver sched = new ScheduleObserver();
-                        String hari = sched.getDay(dataSchedExam.getDay_schedule(), "id");
-                        labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeExam").replace("xxx",  hari + ", " + dataSchedExam.getTime_schedule()));
-                    }else{
-                        labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeExam").replace("xxx", dataSchedExam.getDay_schedule() + ", " + dataSchedExam.getTime_schedule()));
+
+                    if (!isExamLimitReached()) {
+
+                        buttonExam.setEnabled(true);
+
+                        labelCongratulationUserExam.setText(languageHelper.getData("labelCongratulationUserExam").replace("xxx", personLogged.getUsername()));
+                        labelYouRegisteredTitleExam.setText(languageHelper.getData("labelYouRegisteredTitleExam").replace("xxx", dataSchedExam.getClass_registered()));
+
+                        if (configuration.getStringValue(Keys.SYSTEM_LANGUAGE).equalsIgnoreCase("bahasa indonesia")) {
+                            ScheduleObserver sched = new ScheduleObserver();
+                            String hari = sched.getDay(dataSchedExam.getDay_schedule(), "id");
+                            labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeExam").replace("xxx", hari + ", " + dataSchedExam.getTime_schedule()));
+                        } else {
+                            labelYouRegisteredTimeExam.setText(languageHelper.getData("labelYouRegisteredTimeExam").replace("xxx", dataSchedExam.getDay_schedule() + ", " + dataSchedExam.getTime_schedule()));
+                        }
+
+                        // call another WEB API Request for Exam QA
+                        System.out.println("Calling for exam " + dataSchedExam.getId());
+                        getExamDataBySchedule(dataSchedExam.getId());
+
                     }
-                    
-                    // call another WEB API Request for Exam QA
-                    System.out.println("Calling for exam " + dataSchedExam.getId());
-                    getExamDataBySchedule(dataSchedExam.getId());
-                        
-                    }
-                    
-                  
-                    
-                }else{
+
+                    System.out.println("exam belum tercapai limit!");
+
+                } else {
                     // lock that submission
                     buttonExam.setEnabled(false);
+                    System.out.println("Bukan exam.");
                 }
-                
+
+                System.out.println("Lanjut...!");
+
                 ImageIcon calendarIcon = new ImageIcon(getClass().getResource("/images/calendar16.png"));
                 ImageIcon classIcon = new ImageIcon(getClass().getResource("/images/class.png"));
 
                 // change the title accordingly
                 String className = dataIn[0].getClass_registered();
+
+                System.out.println("Data found untuk kelas " + className);
+
                 panelSchedule.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule : " + className));
                 labelClassRegistered.setText(languageHelper.getData("labelClassRegistered") + className);
                 labelClassRegistered.setIcon(classIcon);
@@ -3862,7 +3951,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 schedObs.setDate(schedText);
 
                 UIEffect.setFrameRef(this);
-                
+
                 // showing the label text
                 labelTimeIntervalSchedule.setVisible(true);
                 UIEffect.playIntervalTimeEffect(labelTimeIntervalSchedule, schedObs.getDate());
@@ -3885,20 +3974,20 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 }
 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_EXAM_QUESTION_BY_SCHEDULE)) {
-            
-                    userCurrentExamQ = objectG.fromJson(innerData, ExamQuestion[].class);
-                    
-                    manyExamQuestions = userCurrentExamQ.length;
-                    
-                    // for submitting later
-                    allExamStudentAnswer = new ExamStudentAnswer[manyExamQuestions];
-                    
-                    // for creating a prepared file object for practically purposes
-                    praktekFiles = preparedFileObjectFromExamQ(userCurrentExamQ);
-                    
-                 // we make the appearance randomly
-                 Collections.shuffle(Arrays.asList(userCurrentExamQ));
-                 buttonContinueExam.setEnabled(true);
+
+                userCurrentExamQ = objectG.fromJson(innerData, ExamQuestion[].class);
+
+                manyExamQuestions = userCurrentExamQ.length;
+
+                // for submitting later
+                allExamStudentAnswer = new ExamStudentAnswer[manyExamQuestions];
+
+                // for creating a prepared file object for practically purposes
+                praktekFiles = preparedFileObjectFromExamQ(userCurrentExamQ);
+
+                // we make the appearance randomly
+                Collections.shuffle(Arrays.asList(userCurrentExamQ));
+                buttonContinueExam.setEnabled(true);
             }
 
         } else {
@@ -3910,6 +3999,10 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
                 hidePaymentData();
             } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_SCHEDULE)) {
                 hideScheduleData();
+            } else if (callingFromURL.equalsIgnoreCase(WebReference.ALL_PAYMENT)) {
+
+                labelLastPayment.setIcon(coinIcon);
+
             }
 
             System.out.println(callingFromURL + " catched");
@@ -3921,33 +4014,31 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         labelHistoryLast1.setVisible(false);
         showHistoryPanel(false);
     }
-    
-    private File[] preparedFileObjectFromExamQ(ExamQuestion [] arr){
-        File manyFiles [] = null;
-        int ditemukan=0;
-        
-                // jenis is 
-		// 1 for abcd
-		// 2 for essay
-		// 3 for ab only (true false)
-		// 4 for typing (submit upload) - png
-		// 5 for praktek (submit upload) - word
-		// 6 for praktek (submit upload) - excel
-		// 7 for praktek (submit upload) - ppoint
-		// 8 for praktek (submit upload) - pdf
-		// 9 for praktek (submit upload) - all-files
-		
-        
-        for(ExamQuestion single: arr){
-            if(single.getJenis()>=4 || single.getJenis()<=9){
+
+    private File[] preparedFileObjectFromExamQ(ExamQuestion[] arr) {
+        File manyFiles[] = null;
+        int ditemukan = 0;
+
+        // jenis is 
+        // 1 for abcd
+        // 2 for essay
+        // 3 for ab only (true false)
+        // 4 for typing (submit upload) - png
+        // 5 for praktek (submit upload) - word
+        // 6 for praktek (submit upload) - excel
+        // 7 for praktek (submit upload) - ppoint
+        // 8 for praktek (submit upload) - pdf
+        // 9 for praktek (submit upload) - all-files
+        for (ExamQuestion single : arr) {
+            if (single.getJenis() >= 4 || single.getJenis() <= 9) {
                 ditemukan++;
             }
         }
-        
-        if(ditemukan!=0){
+
+        if (ditemukan != 0) {
             manyFiles = new File[ditemukan];
         }
-        
+
         return manyFiles;
     }
 
@@ -3997,12 +4088,12 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
 
         // for the schedule hover
         textChangeHover = languageHelper.getData("labelChangeSchedule");
-        
+
         // for exam UI 
         languageHelper.apply(labelScreenshot, "labelScreenshot", Comp.LABEL);
         languageHelper.apply(labelTyping, "labelTyping", Comp.LABEL);
         languageHelper.apply(buttonBrowseFileExam, "buttonBrowseFileExam", Comp.BUTTON);
-        
+
         // page of @reportbugs
         languageHelper.apply(labelCaseReportBugsForm, "labelCaseReportBugsForm", Comp.LABEL);
         languageHelper.apply(labelDescReportBugsForm, "labelDescReportBugsForm", Comp.LABEL);
@@ -4083,7 +4174,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
         languageHelper.apply(labelYouRegisteredTitleExam, "labelYouRegisteredTitleExam", Comp.LABEL);
         languageHelper.apply(labelYouRegisteredTimeExam, "labelYouRegisteredTimeExam", Comp.LABEL);
         languageHelper.apply(buttonContinueExam, "buttonContinueExam", Comp.BUTTON);
-        
+
         // table for @payment
         // column order are:
         // id, username, amount, method, screenshot, date created
@@ -4096,7 +4187,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     @Override
-        public void actionNo() {
+    public void actionNo() {
         // this is when popup say NO
         if (UIEffect.ACTION == UIEffect.ACTION_AUTO_UPDATE) {
             String mes = languageHelper.getData("labelDownloadCancelled");
@@ -4107,7 +4198,7 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
     }
 
     @Override
-        public void actionYes() {
+    public void actionYes() {
         // this is when popup say YES
         //UIEffect.popup("yes we do!", this);
         if (UIEffect.ACTION == UIEffect.ACTION_AUTO_UPDATE) {
@@ -4119,6 +4210,33 @@ public class ClientFrame extends javax.swing.JFrame implements HttpCall.HttpProc
             saveHistory("changing schedule [" + oldDay + "] to [" + UIEffect.selectedItem + "]");
         }
 
+    }
+
+    private void remoteLoggingFinish() {
+
+        // we do remote logout for the stored mach id
+        // otherwise no need to call this process
+        if (this.getMachineID() != null) {
+            SWThreadWorker workLogging = new SWThreadWorker(this, HttpCall.METHOD_POST);
+
+            workLogging.setWork(SWTKey.WORK_REMOTE_LOGIN_DISCONNECT);
+            workLogging.addData("machine_unique", this.getMachineID());
+            workLogging.addData("username", personLogged.getUsername());
+            
+            prepareToken(workLogging);
+            
+            executorService.schedule(workLogging, 2, TimeUnit.SECONDS);
+        }
+    }
+
+    public String getMachineID() {
+        return mac;
+    }
+
+    String mac;
+
+    public void setMachineID(String v) {
+        mac = v;
     }
 
 }

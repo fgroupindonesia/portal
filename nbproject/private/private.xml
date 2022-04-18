@@ -5,7 +5,7 @@
             <url>src/frames/ClientFrame.java</url>
             <bookmark id="26">
                 <name/>
-                <line>2677</line>
+                <line>2681</line>
                 <key/>
             </bookmark>
         </file>
@@ -18,7 +18,7 @@
             </bookmark>
             <bookmark id="22">
                 <name/>
-                <line>659</line>
+                <line>671</line>
                 <key/>
             </bookmark>
         </file>
@@ -26,12 +26,12 @@
             <url>src/frames/AdminFrame.java</url>
             <bookmark id="16">
                 <name/>
-                <line>4141</line>
+                <line>4354</line>
                 <key/>
             </bookmark>
             <bookmark id="21">
                 <name/>
-                <line>6738</line>
+                <line>6833</line>
                 <key/>
             </bookmark>
         </file>
@@ -45,9 +45,6 @@
         </file>
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/D:/java/desktop/Portal/src/helper/HttpCall.java</file>
-            <file>file:/D:/java/desktop/Portal/src/frames/ClientFrame.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

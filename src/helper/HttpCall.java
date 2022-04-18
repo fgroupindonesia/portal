@@ -6,7 +6,6 @@ package helper;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,9 +15,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
@@ -34,8 +31,9 @@ public class HttpCall {
         fcopier = fcp;
     }
 
-    public HttpCall(HttpProcess hpro) {
+    public HttpCall(HttpProcess hpro, int md) {
         listener = hpro;
+        this.modeCall = md;
     }
 
     /**
@@ -72,11 +70,19 @@ public class HttpCall {
         this.mainData = mainData;
     }
 
+    public void setModeCall(int modeNa){
+        modeCall = modeNa;
+    }
+    
+    private int modeCall; // either GET or POST
     private ArrayList<FormData> mainData = new ArrayList<FormData>();
     private ArrayList<FormFile> fileData = new ArrayList<FormFile>();
     public static final int METHOD_POST = 1;
     public static final int METHOD_GET = 2;
     public static final int METHOD_POST_FILE = 3;
+    // not GET nor POST request
+    public static final int METHOD_EMPTY = -1;
+    
     private static final String BOUNDARY = "******";
     private static final String CRLF = "\r\n";
     private static final String TWO_HYPENS = "--";
@@ -101,7 +107,7 @@ public class HttpCall {
 
     public void addData(String aKey, String aVal) {
         try {
-            FormData entry = new FormData(aKey, aVal);
+            FormData entry = new FormData(aKey, aVal, modeCall);
             mainData.add(entry);
         } catch (Exception error) {
 
@@ -197,7 +203,7 @@ public class HttpCall {
 
     }
 
-    public void start(String urlTarget, int modeCall) {
+    public void start(String urlTarget) {
 
         try {
 
@@ -214,7 +220,12 @@ public class HttpCall {
                 conn.setReadTimeout(5000);
                 conn.setConnectTimeout(5000);
 
-                if (modeCall == METHOD_POST) {
+                if ( this.modeCall == METHOD_POST) {
+                    
+                    
+                    System.out.println("\nCalling POST METHOD.... \n"); 
+
+                    
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                     conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
@@ -233,10 +244,12 @@ public class HttpCall {
                     wr.close();
 
                     int responseCode = conn.getResponseCode();
-                    System.out.println("---------------- HTTP Call response code is " + responseCode);
+                    System.out.println( urlTarget + "\n---------------- HTTP Call response code is " + responseCode);
                     //conn.getOutputStream().write(postDataBytes);
 
-                } else if (modeCall == METHOD_POST_FILE) {
+                } else if (this.modeCall == METHOD_POST_FILE) {
+                    
+                    System.out.println("\nCalling POST_FILE METHOD.... \n"); 
 
                     int bytesRead, bytesAvailable, bufferSize;
                     byte[] buffer;
@@ -325,18 +338,19 @@ public class HttpCall {
                     outputStream.close();
 
                     int responseCode = conn.getResponseCode();
-                    System.out.println("---------------- HTTP Call response code is " + responseCode);
+                    System.out.println(urlTarget +"\n---------------- HTTP Call response code is " + responseCode);
 
-                } else if (modeCall == METHOD_GET) {
+                } else if (this.modeCall == METHOD_GET) {
                     conn.setRequestMethod("GET");
                     conn.setRequestProperty("User-Agent", USER_AGENT);
                     int responseCode = conn.getResponseCode();
-
+                    System.out.println("\nCalling GET METHOD.... \n");    
                 }
 
             }
 
             if (isWriteToDisk()) {
+               
                 System.out.println("----- We got file to be downloaded! -----");
 
                 // set the complete path locally
@@ -366,6 +380,7 @@ public class HttpCall {
                 }
 
                 // download here
+                System.out.println("Start downloading... " + fileName + "\nfrom " + urlTarget);
                 fcopier.downloadFromURL(url, fileName);
 
                 // manually defining success json
@@ -406,7 +421,7 @@ public class HttpCall {
 
     }
 
-    public void start(String url) {
+   /* public void start(String url) {
 
         ByteArrayOutputStream responseBodyBaos = null;
         Scanner httpResponseBodyScanner = null;
@@ -448,7 +463,7 @@ public class HttpCall {
             }
         }
 
-    }
+    } */
 
     /**
      * @return the endResult

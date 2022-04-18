@@ -13,18 +13,37 @@ import java.util.prefs.Preferences;
  */
 public class SettingPreference {
 
-    Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+    Preferences prefs ;
     boolean nodeExist;
 
+    public void commit(){
+        try{
+        prefs.flush();
+    
+        } catch (Exception ex){
+            System.err.println("Error while saving SettingPreference");
+        }
+    }
+    
     public SettingPreference() {
         // checking existance
         try {
-            nodeExist = Preferences.userRoot().nodeExists(this.getClass().getName());
+             prefs = Preferences.userNodeForPackage(this.getClass());
+          
+              //nodeExist = Preferences.userRoot().nodeExists(this.getClass().getName());
+           
+              // check either one of the settings is already defined
+              if(this.getStringValue(Keys.USER_PROPIC).length()==0){
+                  nodeExist = false;
+              }else {
+                  nodeExist = true;
+              }
+              
         } catch (Exception e) {
 
         }
 
-        //System.out.println("Node exist " + nodeExist);
+        System.out.println("Node SettingPreference existance status is " + nodeExist);
 
         if (!nodeExist) {
 
@@ -40,15 +59,21 @@ public class SettingPreference {
             this.setValue(Keys.LAST_EXAM_COMPLETED_DATE, "none");
 
         }
+        
+        this.commit();
 
     }
 
     public void setValue(String key, String newValue) {
         prefs.put(key, newValue);
+        
+        this.commit();
     }
 
     public void setValue(String key, boolean newValue) {
         prefs.putBoolean(key, newValue);
+        
+        this.commit();
     }
 
     public String getStringValue(String key) {

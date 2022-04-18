@@ -16,10 +16,19 @@ public class FormData {
     private String key;
     private String value;
 
-    public FormData(String k, String v) throws Exception {
+    
+    
+    public FormData(String k, String v, int mode) throws Exception {
+        
+        if(mode == HttpCall.METHOD_GET){
         this.setKey(URLEncoder.encode(k, "UTF-8"));
         this.setValue(URLEncoder.encode(v, "UTF-8"));
-
+        } else {
+        this.setKey(k);
+        this.setValue(v);
+            
+        }
+        
     }
 
     /**

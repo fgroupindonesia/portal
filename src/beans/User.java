@@ -11,9 +11,23 @@ import javax.swing.JTextField;
  * @author ASUS
  */
 public class User {
+
+    /**
+     * @return the warning_status
+     */
+    public int getWarning_status() {
+        return warning_status;
+    }
+
+    /**
+     * @param warning_status the warning_status to set
+     */
+    public void setWarning_status(int warning_status) {
+        this.warning_status = warning_status;
+    }
     
     private int id;
-    private int access_level;
+    private int access_level, warning_status;
     private String username;
     private String pass;
     private String email;

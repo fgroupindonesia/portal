@@ -2,7 +2,6 @@
  *  This is a Portal Access for Client & Admin Usage
  *  (c) FGroupIndonesia, 2020.
  */
-
 package frames;
 
 import beans.AccessToken;
@@ -50,6 +49,8 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     boolean internetExist, formCompleted;
     String macID;
     LanguageSwitcher languageHelper;
+    ClientFrame nextClientFrame;
+    AdminFrame nextAdminFrame;
 
     public LoginFrame() {
         initComponents();
@@ -62,12 +63,13 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         cardLayouter = (CardLayout) (panelBase.getLayout());
 
         applyLanguageUI();
+        testInternet();
     }
 
     @Override
     public void setVisible(boolean b) {
         applyLanguageUI();
-        currentlyLoggedIn = false;
+
         super.setVisible(b);
     }
 
@@ -82,6 +84,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         languageHelper.apply(labelLinkNewRegister, "labelLinkNewRegister", Comp.LABEL);
         languageHelper.apply(labelLinkNormalLogin, "labelLinkNormalLogin", Comp.LABEL);
         languageHelper.apply(labelCaptureQR, "labelCaptureQR", Comp.LABEL);
+        languageHelper.apply(labelLinkNewRegister, "labelLinkNewRegister", Comp.LABEL);
 
         languageHelper.apply(buttonLogin, "buttonLogin", Comp.BUTTON);
 
@@ -147,7 +150,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         labelUsernameLogin.setText("Username:");
         panelLogin.add(labelUsernameLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 70, 150, -1));
 
-        textfieldUsername.setText("admin");
+        textfieldUsername.setText("udin");
         textfieldUsername.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 textfieldUsernameFocusGained(evt);
@@ -178,6 +181,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         panelLogin.add(labelPasswordLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 130, 150, -1));
 
         buttonLogin.setText("Login");
+        buttonLogin.setEnabled(false);
         buttonLogin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonLoginActionPerformed(evt);
@@ -238,7 +242,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock64.png"))); // NOI18N
         panelLogin.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 70, 80, 110));
 
-        textfieldPass.setText("admin");
+        textfieldPass.setText("123");
         textfieldPass.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 textfieldPassFocusGained(evt);
@@ -337,6 +341,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
         // it will be rendered as qrcode locally
         obtainIPAddress();
 
+        currentlyLoggedIn = false;
 
     }//GEN-LAST:event_labelLinkLoginPhoneMouseClicked
 
@@ -377,13 +382,20 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
     private void proceedTestLoggingIn() {
 
-        showMessageLoading(true, "loading...");
-        buttonLogin.setEnabled(false);
+        // we will not make the call for 2nd time in the same moments...
+        if (!labelLoading.isVisible()) {
 
-        if (!internetExist) {
-            testInternet();
-        } else {
-            apiLogging();
+            showMessageLoading(true, "loading...");
+            buttonLogin.setEnabled(false);
+
+            if (!internetExist) {
+                System.out.println("No internet found!");
+
+            } else {
+                System.out.println("API logging in...");
+                apiLogging();
+            }
+
         }
 
     }
@@ -391,7 +403,8 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
 
     private void testInternet() {
-        SWThreadWorker workTestInternet = new SWThreadWorker(this);
+        System.out.println("Testing internet connection...");
+        SWThreadWorker workTestInternet = new SWThreadWorker(this, HttpCall.METHOD_GET);
         workTestInternet.setWork(SWTKey.WORK_TEST_INTERNET);
         executorService.schedule(workTestInternet, 4, TimeUnit.SECONDS);
 
@@ -399,7 +412,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }
 
     private void apiLogging() {
-        SWThreadWorker workLogging = new SWThreadWorker(this);
+        SWThreadWorker workLogging = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         workLogging.setWork(SWTKey.WORK_LOGIN);
         workLogging.addData("username", textfieldUsername.getText());
@@ -410,7 +423,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }
 
     private void remoteLoggingCheck() {
-        SWThreadWorker workLogging = new SWThreadWorker(this);
+        SWThreadWorker workLogging = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         workLogging.setWork(SWTKey.WORK_REMOTE_LOGIN_CHECK);
         workLogging.addData("machine_unique", macID);
@@ -423,7 +436,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
 
         macID = CMDExecutor.getMachineUniqueID();
 
-        SWThreadWorker workObtain = new SWThreadWorker(this);
+        SWThreadWorker workObtain = new SWThreadWorker(this, HttpCall.METHOD_POST);
 
         workObtain.setWork(SWTKey.WORK_REMOTE_LOGIN_ACTIVATE);
         workObtain.addData("machine_unique", macID);
@@ -521,11 +534,11 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     }//GEN-LAST:event_panelBaseMouseReleased
 
     private void labelLinkNewRegisterMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_labelLinkNewRegisterMouseClicked
-         try {
-             Desktop.getDesktop().browse(new URL("http://fgroupindonesia.com/pendaftaran").toURI());
-         } catch (Exception ex){
-             
-         }
+        try {
+            Desktop.getDesktop().browse(new URL("http://fgroupindonesia.com/pendaftaran").toURI());
+        } catch (Exception ex) {
+
+        }
     }//GEN-LAST:event_labelLinkNewRegisterMouseClicked
 
     /**
@@ -597,8 +610,10 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
             if (callingFromURL == null) {
 
                 // continue executing
+                // to ensure there is a valid internet connection here
+                // and let the user proceed with the login button
                 internetExist = true;
-                apiLogging();
+                buttonLogin.setEnabled(true);
 
             } else if (callingFromURL.equalsIgnoreCase(WebReference.LOGIN_USER)) {
                 // now this is the usual process of logging in
@@ -615,13 +630,29 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                 configuration.setValue(Keys.DATE_EXPIRED_TOKEN, dataIn.getExpired_date());
 
                 if (textfieldUsername.getText().equalsIgnoreCase("admin")) {
-                    AdminFrame nextFrame = new AdminFrame(this);
-                    nextFrame.setVisible(true);
+                    if (nextAdminFrame == null) {
+
+                        if (nextAdminFrame != null) {
+                            nextAdminFrame.dispose();
+
+                        }
+
+                        nextAdminFrame = new AdminFrame(this);
+                        nextAdminFrame.setVisible(true);
+
+                    }
                 } else {
 
                     User person = new User(textfieldUsername, textfieldPass);
-                    ClientFrame nextFrame = new ClientFrame(this, person);
-                    nextFrame.setVisible(true);
+
+                    if (nextClientFrame != null) {
+                        nextClientFrame.dispose();
+                    }
+
+                    nextClientFrame = new ClientFrame(this, person);
+
+                    nextClientFrame.setVisible(true);
+
                 }
 
                 // dont let the button leave alone
@@ -686,14 +717,18 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
                         configuration.setValue(Keys.TOKEN_API, tokenDataCheck.getToken());
                         configuration.setValue(Keys.DATE_EXPIRED_TOKEN, tokenDataCheck.getExpired_date());
 
+                        System.out.println("data " + dataIn.getUsername());
                         // and proceed to the next UI frames
                         if (dataIn.getUsername().equalsIgnoreCase("admin")) {
                             AdminFrame nextFrame = new AdminFrame(this);
                             nextFrame.setVisible(true);
                         } else {
+                            System.out.println("this is client login...");
                             // password we make it empty
                             User person = new User(dataIn.getUsername(), "");
                             ClientFrame nextFrame = new ClientFrame(this, person);
+                            System.out.println("+++++++++++ " + macID + " ++++++++++");
+                            nextFrame.setMachineID(macID);
                             nextFrame.setVisible(true);
                         }
 
@@ -750,7 +785,7 @@ public class LoginFrame extends javax.swing.JFrame implements HttpCall.HttpProce
     private void iterateRemoteLoginCheck() {
 
         // by 10 seconds to wait
-        int sec = 10;
+        int sec = 5;
         int timeWait = 1000 * sec;
 
         remoteLoginCheckWork = new Timer(timeWait, new ActionListener() {
